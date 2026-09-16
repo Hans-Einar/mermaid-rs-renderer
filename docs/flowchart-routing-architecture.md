@@ -180,3 +180,10 @@ The current guarantee is practical layout correctness for the supported renderer
 5. Keep diagnostics and visual fixtures in the repository so new regressions are observable.
 
 With the current fixture corpus, strict validation reports zero hard violations and zero geometry debt across the flowchart fixtures.
+
+## Fork experiment: bounded shortcuts
+
+The fork's [routing shortcut review](routing-shortcuts-review.md) describes an
+experimental extension of rectangle simplification, its endpoint/subgraph
+constraints, final-pass placement, reproducible fixtures and quality tradeoffs.
+It reuses the current router and does not replace port assignment or node layout.
