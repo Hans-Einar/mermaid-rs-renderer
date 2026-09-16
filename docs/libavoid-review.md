@@ -6,12 +6,12 @@ Artefaktene er laget 2026-09-16 med standardtema, samme tekstmål og Current-nod
 
 | Graf / modus | Lengde gammel → ny | Svinger | Kryssinger | Parallelle overlapp | Tekstkontakter | Tid layout gammel → ny (ms) |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| traceability / fixed | 5119.5 → 4864.8 | 36 → 34 | 5 → 7 | 0 → 0 | 13 → 0 | 13591.7 → 220.3 |
-| traceability / end-to-end | 5119.5 → 4864.8 | 36 → 34 | 5 → 7 | 0 → 0 | 13 → 0 | 14859.5 → 209.6 |
-| service-map / fixed | 1997.0 → 2289.8 | 12 → 6 | 0 → 0 | 0 → 0 | 8 → 0 | 3888.9 → 28.5 |
-| service-map / end-to-end | 1997.0 → 2289.8 | 12 → 6 | 0 → 0 | 0 → 0 | 8 → 0 | 2903.9 → 25.1 |
+| traceability / fixed | 5119.5 → 4864.8 | 36 → 34 | 5 → 7 | 0 → 0 | 13 → 0 | 10609.6 → 207.2 |
+| traceability / end-to-end | 5119.5 → 4864.8 | 36 → 34 | 5 → 7 | 0 → 0 | 13 → 0 | 10654.1 → 167.4 |
+| service-map / fixed | 1997.0 → 2289.8 | 12 → 6 | 0 → 0 | 0 → 0 | 8 → 0 | 2594.8 → 18.0 |
+| service-map / end-to-end | 1997.0 → 2289.8 | 12 → 6 | 0 → 0 | 0 → 0 | 8 → 0 | 2065.0 → 18.4 |
 | layer-delivery / fixed | NoSpace, se diagnostikk | — | — | — | — | — |
-| layer-delivery / end-to-end | 5000.4 → 7028.0 | 10 → 6 | 0 → 0 | 1 → 0 | 11 → 0 | 6467.1 → 139.8 |
+| layer-delivery / end-to-end | 5000.4 → 7028.0 | 10 → 6 | 0 → 0 | 1 → 0 | 11 → 0 | 3333.4 → 66.4 |
 
 Tider er én debug-kjøring på delt arbeidsmaskin, ikke en statistisk benchmark. JSON-filer inkluderer native rutetid separat. Ved avstandsretry inkluderer totaltiden det mislykkede forsøket; native rutetid viser transaksjonene i den vellykkede plasseringen.
 
@@ -83,3 +83,7 @@ av virtuelle ShapeConnectionPin-endepunkter. 50 separate gjentakelser bestod;
 regresjonen gjentar nå transaksjonen 32 ganger i selve testen.
 
 Etter rettelsene bestod 12 libavoid- og 3 måleseam-tester, inkludert Ubuntu-data.
+
+Etter `6ff5a54` ble alle seks sammenligninger kjørt på nytt. SVG, rutepunkter
+og kvalitetsmål var uendret; bare tidsmålingene ble oppdatert. Ubuntu-fixturen
+dekker et annet, eksplisitt målesett enn standardtemaets frosne A/B-eksempler.

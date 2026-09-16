@@ -1,6 +1,6 @@
 {
   "diagnostics": [
-    "libavoid transaction 1: 17.960449ms"
+    "libavoid transaction 1: 14.161306ms"
   ],
   "legacy": {
     "bends": 12,
@@ -11,8 +11,8 @@
     "node_traversals": 0,
     "parallel_overlaps": 0
   },
-  "legacy_route_ms": 3079.373,
-  "legacy_total_ms": 3888.90589,
+  "legacy_route_ms": 2053.446,
+  "legacy_total_ms": 2594.768197,
   "libavoid": {
     "bends": 6,
     "close_parallel_segments": 0,
@@ -22,7 +22,7 @@
     "node_traversals": 0,
     "parallel_overlaps": 0
   },
-  "libavoid_route_ms": 17.960449,
-  "libavoid_total_ms": 28.541376,
+  "libavoid_route_ms": 14.161306,
+  "libavoid_total_ms": 18.039207,
   "mode": "fixed positions and text"
 }

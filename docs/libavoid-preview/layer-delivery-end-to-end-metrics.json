@@ -1,7 +1,7 @@
 {
   "diagnostics": [
-    "one spacing retry after ambiguous label on edge 6: own distance 38.0, other Some((9, 13.162471771240234)); failed routing/labels attempt 84.759384ms, included in total time",
-    "libavoid transaction 1: 16.363909ms"
+    "one spacing retry after ambiguous label on edge 6: own distance 38.0, other Some((9, 13.162471771240234)); failed routing/labels attempt 40.74165ms, included in total time",
+    "libavoid transaction 1: 9.053112ms"
   ],
   "legacy": {
     "bends": 10,
@@ -12,8 +12,8 @@
     "node_traversals": 0,
     "parallel_overlaps": 1
   },
-  "legacy_route_ms": 5528.853,
-  "legacy_total_ms": 6467.102655,
+  "legacy_route_ms": 2846.614,
+  "legacy_total_ms": 3333.353391,
   "libavoid": {
     "bends": 6,
     "close_parallel_segments": 0,
@@ -23,7 +23,7 @@
     "node_traversals": 0,
     "parallel_overlaps": 0
   },
-  "libavoid_route_ms": 16.363909,
-  "libavoid_total_ms": 139.829891,
+  "libavoid_route_ms": 9.053112,
+  "libavoid_total_ms": 66.363533,
   "mode": "end to end"
 }
