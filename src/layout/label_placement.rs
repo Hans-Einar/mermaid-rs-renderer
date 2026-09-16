@@ -197,7 +197,13 @@ pub fn resolve_all_label_positions(
         config,
     );
     if layout.kind == DiagramKind::Flowchart {
-        move_flowchart_labels_off_own_edges(&mut layout.edges);
+        move_flowchart_labels_off_own_edges(
+            &mut layout.edges,
+            &layout.nodes,
+            &layout.subgraphs,
+            theme,
+            config,
+        );
     }
 
     // Step 2: Resolve endpoint labels (start_label_anchor, end_label_anchor).
@@ -212,8 +218,41 @@ pub fn resolve_all_label_positions(
     );
 }
 
-fn move_flowchart_labels_off_own_edges(edges: &mut [EdgeLayout]) {
-    for edge in edges {
+fn move_flowchart_labels_off_own_edges(
+    edges: &mut [EdgeLayout],
+    nodes: &BTreeMap<String, NodeLayout>,
+    subgraphs: &[SubgraphLayout],
+    theme: &Theme,
+    config: &LayoutConfig,
+) {
+    let (pad_x, pad_y) = edge_label_padding(DiagramKind::Flowchart, config);
+    let obstacles = build_label_obstacles(
+        nodes,
+        subgraphs,
+        DiagramKind::Flowchart,
+        theme,
+        center_label_node_obstacle_pad(DiagramKind::Flowchart, theme, pad_x, pad_y),
+        (theme.font_size * 0.35).max(3.0),
+    );
+    for idx in 0..edges.len() {
+        let other_labels: Vec<Rect> = edges
+            .iter()
+            .enumerate()
+            .filter_map(|(other_idx, edge)| {
+                if other_idx == idx {
+                    return None;
+                }
+                let label = edge.label.as_ref()?;
+                let center = edge.label_anchor?;
+                Some((
+                    center.0 - label.width / 2.0 - pad_x,
+                    center.1 - label.height / 2.0 - pad_y,
+                    label.width + 2.0 * pad_x,
+                    label.height + 2.0 * pad_y,
+                ))
+            })
+            .collect();
+        let edge = &mut edges[idx];
         let (Some(label), Some(anchor)) = (&edge.label, edge.label_anchor) else {
             continue;
         };
@@ -223,7 +262,13 @@ fn move_flowchart_labels_off_own_edges(edges: &mut [EdgeLayout]) {
             label.width,
             label.height,
         );
-        if polyline_rect_distance(&edge.points, &rect) > 0.0 {
+        let obscures_content = |candidate: &Rect| {
+            obstacles
+                .iter()
+                .chain(other_labels.iter())
+                .any(|obstacle| overlap_area(candidate, obstacle) > LABEL_OVERLAP_WIDE_THRESHOLD)
+        };
+        if polyline_rect_distance(&edge.points, &rect) > 0.0 && !obscures_content(&rect) {
             continue;
         }
         let dy = label.height + 24.0;
@@ -244,7 +289,12 @@ fn move_flowchart_labels_off_own_edges(edges: &mut [EdgeLayout]) {
                 label.width,
                 label.height,
             );
-            if polyline_rect_distance(&edge.points, &candidate_rect) > 0.0 {
+            if polyline_rect_distance(&edge.points, &candidate_rect) > 0.0
+                && !obstacles
+                    .iter()
+                    .chain(other_labels.iter())
+                    .any(|rect| overlap_area(&candidate_rect, rect) > LABEL_OVERLAP_WIDE_THRESHOLD)
+            {
                 edge.label_anchor = Some(candidate);
                 break;
             }
@@ -733,7 +783,7 @@ fn resolve_center_labels(
         &fixed_center_indices,
     );
     if kind == DiagramKind::Flowchart {
-        nudge_flowchart_labels_clear_of_own_paths(edges, bounds);
+        nudge_flowchart_labels_clear_of_own_paths(edges, bounds, &occupied[..node_obstacle_count]);
         let before_score = center_label_overlap_score(edges, label_pad_x, label_pad_y);
         let mut candidate_edges = edges.to_vec();
         deoverlap_flowchart_center_labels(
@@ -753,7 +803,7 @@ fn resolve_center_labels(
         // The final de-overlap candidate can trade a little own-edge clearance
         // for lower inter-label overlap. Finish with the dedicated route-clearance
         // nudge so labels do not end up sitting on top of their carrying paths.
-        nudge_flowchart_labels_clear_of_own_paths(edges, bounds);
+        nudge_flowchart_labels_clear_of_own_paths(edges, bounds, &occupied[..node_obstacle_count]);
     }
 }
 
@@ -809,7 +859,11 @@ fn path_intersects_rect(points: &[(f32, f32)], rect: &Rect) -> bool {
         .any(|segment| segment_intersects_rect(segment[0], segment[1], rect))
 }
 
-fn nudge_flowchart_labels_clear_of_own_paths(edges: &mut [EdgeLayout], bounds: Option<(f32, f32)>) {
+fn nudge_flowchart_labels_clear_of_own_paths(
+    edges: &mut [EdgeLayout],
+    bounds: Option<(f32, f32)>,
+    node_obstacles: &[Rect],
+) {
     let mut label_rects: Vec<Option<Rect>> = edges
         .iter()
         .map(|edge| {
@@ -857,7 +911,11 @@ fn nudge_flowchart_labels_clear_of_own_paths(edges: &mut [EdgeLayout], bounds: O
                     );
                 }
                 let rect = label_core_rect(candidate, label);
-                if path_intersects_rect(&edges[idx].points, &rect) {
+                if path_intersects_rect(&edges[idx].points, &rect)
+                    || node_obstacles.iter().any(|obstacle| {
+                        overlap_area(&rect, obstacle) > LABEL_OVERLAP_WIDE_THRESHOLD
+                    })
+                {
                     continue;
                 }
                 let mut overlap = 0.0f32;
@@ -4126,6 +4184,71 @@ mod tests {
             own_edge_points,
             bounds: None,
         }
+    }
+
+    #[test]
+    fn final_label_move_does_not_cover_nodes_or_other_labels() {
+        let graph = crate::parse_mermaid_strict("flowchart LR\n A -->|label| B")
+            .unwrap()
+            .graph;
+        let theme = Theme::modern();
+        let config = LayoutConfig::default();
+        let mut layout = crate::compute_layout(&graph, &theme, &config);
+        let a = layout.nodes.get_mut("A").unwrap();
+        a.x = 80.0;
+        a.y = 50.0;
+        a.width = 40.0;
+        a.height = 30.0;
+        layout.nodes.get_mut("B").unwrap().x = 1000.0;
+        let edge = &mut layout.edges[0];
+        edge.points = vec![(0.0, 100.0), (200.0, 100.0)];
+        edge.label = Some(TextBlock {
+            lines: vec!["test".into()],
+            width: 20.0,
+            height: 10.0,
+        });
+        edge.label_anchor = Some((100.0, 100.0));
+        let mut other = edge.clone();
+        other.points = vec![(0.0, 200.0), (200.0, 200.0)];
+        other.label_anchor = Some((100.0, 134.0));
+        layout.edges.push(other);
+        super::move_flowchart_labels_off_own_edges(
+            &mut layout.edges,
+            &layout.nodes,
+            &[],
+            &theme,
+            &config,
+        );
+        let anchor = layout.edges[0].label_anchor.unwrap();
+        assert_ne!(anchor, (100.0, 66.0), "first choice would cover node A");
+        assert_ne!(
+            anchor,
+            (100.0, 134.0),
+            "second choice would cover another label"
+        );
+        assert_ne!(
+            anchor,
+            (100.0, 100.0),
+            "a safe diagonal candidate is available"
+        );
+        // Earlier placement may already obscure a node even when the label is
+        // clear of its own edge. The final pass must repair that case as well.
+        layout.edges.truncate(1);
+        layout.edges[0].label_anchor = Some((100.0, 66.0));
+        super::move_flowchart_labels_off_own_edges(
+            &mut layout.edges,
+            &layout.nodes,
+            &[],
+            &theme,
+            &config,
+        );
+        assert_ne!(layout.edges[0].label_anchor, Some((100.0, 66.0)));
+        layout.edges[0].label_anchor = Some((100.0, 100.0));
+        let obstacle = (80.0, 80.0, 40.0, 18.0);
+        super::nudge_flowchart_labels_clear_of_own_paths(&mut layout.edges, None, &[obstacle]);
+        let label = layout.edges[0].label.as_ref().unwrap();
+        let rect = super::label_core_rect(layout.edges[0].label_anchor.unwrap(), label);
+        assert_eq!(super::overlap_area(&rect, &obstacle), 0.0);
     }
 
     #[test]
