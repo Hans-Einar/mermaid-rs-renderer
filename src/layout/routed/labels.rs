@@ -110,7 +110,7 @@ pub(super) fn place(layout: &mut Layout) -> Result<(), RoutingError> {
                     } else {
                         (p.0, p.1 + shift * l.height)
                     };
-                    for gap in [10., 18., 26., 34., 42.] {
+                    for gap in [10., 18., 26., 34., 42., 46.] {
                         for sign in [-1., 1.] {
                             let a = if horizontal {
                                 (p.0, p.1 + sign * (l.height / 2. + gap))
@@ -214,8 +214,15 @@ pub(super) fn validate(layout: &Layout) -> Result<(), RoutingError> {
             .enumerate()
             .any(|(i, other)| i != idx && distance_to_rect(&other.points, r) + 3. < own)
         {
+            let other = layout
+                .edges
+                .iter()
+                .enumerate()
+                .filter(|(i, _)| *i != idx)
+                .map(|(i, e)| (i, distance_to_rect(&e.points, r)))
+                .min_by(|a, b| a.1.total_cmp(&b.1));
             return Err(RoutingError::NoSpace(format!(
-                "ambiguous label on edge {idx}"
+                "ambiguous label on edge {idx}: own distance {own:.1}, other {other:?}"
             )));
         }
         // The label must remain near its own route after routing around text.

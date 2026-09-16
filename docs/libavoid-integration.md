@@ -129,3 +129,19 @@ samme eksterne TextBlock-verdier og scoped, trådlokal deadline. Tilstand gjenop
 også ved nesting og unwind. Native libavoid-avbrudd returnerer Result; gamle
 Rust-checkpoints kan fortsatt unwinde til XFMDs etablerte panic-barriere.
 To egne tester dekker faktisk måleverdi i ny ruter og TLS-opprydding.
+
+## Etikettplass og stabile portvalg
+
+En vellykket rute må bestå både kollisjonskontroll og kontroll av avstand til
+riktig kant. Ved `NoSpace` prøver ende-til-ende-inngangen én større nodeavstand
+med auto-spacing slått av, innen samme frist. Dette rapporteres eksplisitt og
+brukes aldri av `route_positioned`. Et checkpoint-forsøk ble forkastet fordi
+native nudging kunne flytte ruten bort fra checkpointet; ingen slik binding
+inngår i den leverte kontrakten.
+
+Likeverdige porter får en liten, stabil `setConnectionCost` på 0,001 ganger
+portindeks. Dette bruker bibliotekets portvalg og unngår flere observerte
+allokeringsavhengige valg, uten å la svinger/kryssinger koste vilkårlig mye.
+Identiske påfølgende punkter fjernes ved FFI-kopiering før retning valideres.
+Libavoid har fortsatt pekerbaserte interne tie-breaks; portkostnaden er ikke
+et bevis på bitidentisk resultat på tvers av plattformer eller alle grafer.

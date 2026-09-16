@@ -82,17 +82,18 @@ extern "C" fn emit(raw: *mut c_void, id: u32, ptr: *const Pt, len: usize) -> u8 
         if ptr.is_null() || !(2..=65536).contains(&len) {
             return false;
         }
-        let points: Vec<_> = unsafe { std::slice::from_raw_parts(ptr, len) }
+        let mut points: Vec<_> = unsafe { std::slice::from_raw_parts(ptr, len) }
             .iter()
             .map(|p| (p.x, p.y))
             .collect();
-        if points.iter().any(|p| !valid_point(*p)) {
+        points.dedup();
+        if points.len() < 2 || points.iter().any(|p| !valid_point(*p)) {
             return false;
         }
         ctx.routes.push(Route {
             id,
             source_port: points[0],
-            target_port: points[len - 1],
+            target_port: *points.last().unwrap(),
             points,
         });
         true

@@ -61,6 +61,8 @@ extern "C" int mermaid_avoid_route(const Pt* points, const Pin* pins,
           auto* pin = new Avoid::ShapeConnectionPin(shape, mask,
               std::clamp(p.p.x - bounds.min.x, 0.0, bounds.max.x-bounds.min.x),
               std::clamp(p.p.y - bounds.min.y, 0.0, bounds.max.y-bounds.min.y), false, 0, p.dirs & mask);
+          // Tiny stable tie-break among geometrically equal candidate pins.
+          pin->setConnectionCost(0.001 * (j + 1));
           pin->setExclusive(true);
         }
       }

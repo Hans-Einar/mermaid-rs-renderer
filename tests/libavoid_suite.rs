@@ -297,3 +297,26 @@ fn fixed_positions_and_text_are_preserved_and_quality_is_measured() {
     assert_eq!(q.label_collisions, 0);
     assert!(q.length < quality::measure(&old, 8.).length);
 }
+
+#[test]
+fn labelled_review_graphs_complete_with_bounded_spacing_retry() {
+    use mermaid_rs_renderer::layout::routed::{Engine, compute, quality};
+    use mermaid_rs_renderer::{LayoutConfig, Theme, parse_mermaid_strict};
+    for source in [
+        include_str!("fixtures/flowchart/routing-review/service-map.mmd"),
+        include_str!("fixtures/flowchart/routing-review/layer-delivery.mmd"),
+    ] {
+        let graph = parse_mermaid_strict(source).unwrap().graph;
+        let result = compute(
+            &graph,
+            &Theme::modern(),
+            &LayoutConfig::default(),
+            Engine::Libavoid,
+            &control(),
+        )
+        .unwrap();
+        let q = quality::measure(&result.layout, 8.);
+        assert_eq!(q.node_traversals, 0);
+        assert_eq!(q.label_collisions, 0);
+    }
+}

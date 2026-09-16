@@ -52,7 +52,26 @@ pub fn compute(
     let graph = super::normalize_graph_for_layout(graph);
     let layout = super::compute_flowchart_layout(&graph, theme, config, None, false);
     control.check()?;
-    let mut result = route_positioned(&layout, control)?;
+    let attempt = Instant::now();
+    let mut result = match route_positioned(&layout, control) {
+        Ok(result) => result,
+        Err(RoutingError::NoSpace(reason)) => {
+            // One explicit placement retry for label space. Never applied to
+            // route_positioned, which guarantees frozen node geometry.
+            let failed = attempt.elapsed();
+            control.check()?;
+            let mut expanded = config.clone();
+            expanded.flowchart.auto_spacing.enabled = false;
+            expanded.node_spacing = config.node_spacing.max(50.) * 2. + 24.;
+            expanded.rank_spacing = config.rank_spacing.max(50.) * 2. + 24.;
+            let layout = super::compute_flowchart_layout(&graph, theme, &expanded, None, false);
+            control.check()?;
+            let mut r = route_positioned(&layout, control)?;
+            r.diagnostics.insert(0,format!("one spacing retry after {reason}; failed routing/labels attempt {failed:?}, included in total time"));
+            r
+        }
+        Err(error) => return Err(error),
+    };
     // Only uniform translation/bounds adjustment after routing; never Legacy
     // route repair, label nudge, coordinate scaling or aspect folding.
     super::finalize_graph_label_bounds(&mut result.layout, config);
