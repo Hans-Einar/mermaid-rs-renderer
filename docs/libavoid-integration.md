@@ -30,7 +30,8 @@ arkiveringsverktøy og Rust/Cargo trengs; valgfri Cargo-feature `libavoid`.
 
 Crates.io-søk ga ingen passende libavoid-binding i dette miljøet. En liten
 C-ABI velges for eksplisitt eierskap og liten integrasjonsflate. Routeren eier
-shapes/pins/connectors; resultatet eies separat og frigjøres via samme ABI.
+shapes/pins/connectors; ruter kopieres til Rust-eide verdier gjennom en synkron callback. Ingen native
+resultatpekere overlever kallet.
 Exceptions fanges i C++; callbacks får ikke unwinde over grensen. Én lokal
 router per kall, ingen delt muterbar router eller global livsløpstilstand.
 
@@ -68,3 +69,26 @@ sanntidsfrist. Delresultater etter avbrudd publiseres ikke som vellykket ruting.
 - https://www.adaptagrams.org/documentation/classAvoid_1_1ShapeConnectionPin.html
 - https://users.monash.edu/~mwybrow/papers/wybrow-gd-2009.pdf
 - https://users.monash.edu/~mwybrow/papers/marriott-diagrams-2014.pdf
+
+## Implementert milepæl 2
+
+`layout::routed::compute` velger ruter separat fra `LayoutConfig` sin plassering.
+`route_positioned` erstatter bare ruter/etikettankre i en klonet Layout. Legacy
+kjører fortsatt gammel kode. Libavoid kjøres etter nodeplassering og før kun
+uniform slutttranslasjon/bounds. Ingen Legacy-reparasjon følger etterpå.
+
+Portklasser gir libavoid flere tillatte tilkoblingspunkter. Eksklusive porter
+og nudging av mellomsegmenter skiller forbindelser. Sluttsegment-nudging er
+**deaktivert**: biblioteket kan ellers flytte endepunkter bort fra eksplisitte
+porter og fra den synlige kanten på ikke-rektangulære former. Self-loops bruker
+forskjellige sider (høyre/bunn), slik at nullruter ikke blir valgt.
+
+Etikettplassering reserverer målte bokser med klaring; maksimalt tre samlede
+rutetransaksjoner brukes. Valgte porter låses mellom passene. Kollisjon eller
+frakoblet etikett gir `NoSpace`, aldri skjult tekst. Ingen automatisk fallback.
+Gruppeendepunkter og endpoint labels er foreløpig eksplisitt avvist; forbindelser
+mellom gruppemedlemmer og omverdenen støttes.
+
+Verifikasjon: `cargo test --locked --no-default-features --features libavoid
+--test libavoid_suite` (6 tester), samt `python3 tools/verify_libavoid.py` (52
+kilder). Målinger og videre regresjonsdekning følger i neste milepæl.

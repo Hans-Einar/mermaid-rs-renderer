@@ -7,7 +7,7 @@ pub(super) fn compute_kanban_layout(
     stage_metrics: Option<&mut LayoutStageMetrics>,
 ) -> Layout {
     if !graph.edges.is_empty() {
-        return compute_flowchart_layout(graph, theme, config, stage_metrics);
+        return compute_flowchart_layout(graph, theme, config, stage_metrics, true);
     }
 
     let mut nodes = build_graph_node_layouts(graph, theme, config);

@@ -38,7 +38,7 @@ exclude = [
 ]
 
 [features]
-libavoid = []
+libavoid = ["dep:cc"]
 default = ["cli", "png"]
 # CLI support (adds clap dependency)
 cli = ["dep:clap"]
@@ -94,3 +94,6 @@ required-features = ["benchmark"]
 name = "mmdr"
 path = "src/main.rs"
 required-features = ["cli"]
+
+[build-dependencies]
+cc = { version = "1.2", optional = true }

@@ -213,7 +213,7 @@ pub fn compute_layout_with_metrics(
         | crate::ir::DiagramKind::Requirement
         | crate::ir::DiagramKind::Packet
         | crate::ir::DiagramKind::Flowchart => {
-            compute_flowchart_layout(graph, theme, config, Some(&mut stage_metrics))
+            compute_flowchart_layout(graph, theme, config, Some(&mut stage_metrics), true)
         }
     };
 
@@ -437,6 +437,7 @@ fn compute_flowchart_layout(
     theme: &Theme,
     config: &LayoutConfig,
     mut stage_metrics: Option<&mut LayoutStageMetrics>,
+    route_edges: bool,
 ) -> Layout {
     let mut effective_config = flowchart::policy::apply_initial_config_heuristics(graph, config);
     let tiny_graph = flowchart::policy::is_tiny_graph_layout(graph);
@@ -783,21 +784,33 @@ fn compute_flowchart_layout(
         flowchart::stage_validation::debug_assert_structural("node-placement", report);
     }
 
-    let edges = flowchart::edge_pipeline::build_routed_edges(
-        flowchart::edge_pipeline::RoutedEdgeBuildContext {
+    let edges = if route_edges {
+        flowchart::edge_pipeline::build_routed_edges(
+            flowchart::edge_pipeline::RoutedEdgeBuildContext {
+                graph,
+                nodes: &nodes,
+                subgraphs: &subgraphs,
+                config,
+                layout_node_count: layout_node_ids.len(),
+                edge_route_labels: &edge_route_labels,
+                edge_start_labels: &edge_start_labels,
+                edge_end_labels: &edge_end_labels,
+                label_dummy_ids: &label_dummy_ids,
+                tiny_graph,
+                stage_metrics,
+            },
+        )
+    } else {
+        flowchart::post_route::build_edge_layouts(
             graph,
-            nodes: &nodes,
-            subgraphs: &subgraphs,
+            &vec![vec![]; graph.edges.len()],
+            &edge_route_labels,
+            &edge_start_labels,
+            &edge_end_labels,
+            &vec![None; graph.edges.len()],
             config,
-            layout_node_count: layout_node_ids.len(),
-            edge_route_labels: &edge_route_labels,
-            edge_start_labels: &edge_start_labels,
-            edge_end_labels: &edge_end_labels,
-            label_dummy_ids: &label_dummy_ids,
-            tiny_graph,
-            stage_metrics,
-        },
-    );
+        )
+    };
 
     flowchart::finalize::finalize_graph_layout(graph, nodes, edges, subgraphs, theme, config)
 }
@@ -3094,3 +3107,5 @@ flowchart LR
         );
     }
 }
+
+pub mod routed;
