@@ -91,6 +91,14 @@ exploration used `CARGO_PROFILE_RELEASE_FAST_LTO=false` and
 `CARGO_PROFILE_RELEASE_FAST_OPT_LEVEL=1`. Timings from that profile are not release
 performance promises.
 
+## Visual comparison
+
+Traceability, rendered directly by the library:
+
+| Baseline | Fork experiment |
+| --- | --- |
+| [PNG](routing-shortcuts-preview/before.png) · [SVG](routing-shortcuts-preview/before.svg) | [PNG](routing-shortcuts-preview/after.png) · [SVG](routing-shortcuts-preview/after.svg) |
+
 ## Measured routing results
 
 Final code revision: `3fb81308a032d128aef4b54cdc7506bd4bd6342f`.
