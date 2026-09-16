@@ -1,0 +1,31 @@
+{
+  "diagnostics": [
+    "libavoid transaction 1: 33.880664ms",
+    "libavoid transaction 2: 22.848968ms",
+    "libavoid transaction 3: 21.476546ms",
+    "constrained parallel separation: Quality { length: 4864.804168701172, bends: 34, crossings: 7, parallel_overlaps: 0, close_parallel_segments: 3, node_traversals: 0, label_collisions: 0 }"
+  ],
+  "legacy": {
+    "bends": 36,
+    "close_parallel_segments": 2,
+    "crossings": 5,
+    "label_collisions": 13,
+    "length": 5119.45401763916,
+    "node_traversals": 0,
+    "parallel_overlaps": 0
+  },
+  "legacy_route_ms": 12430.239,
+  "legacy_total_ms": 14859.462075,
+  "libavoid": {
+    "bends": 34,
+    "close_parallel_segments": 3,
+    "crossings": 7,
+    "label_collisions": 0,
+    "length": 4864.804153442383,
+    "node_traversals": 0,
+    "parallel_overlaps": 0
+  },
+  "libavoid_route_ms": 78.206178,
+  "libavoid_total_ms": 209.635317,
+  "mode": "end to end"
+}

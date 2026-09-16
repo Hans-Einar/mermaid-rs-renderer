@@ -1,0 +1,786 @@
+{
+  "kind": "Flowchart",
+  "direction": "TopDown",
+  "width": 894.508,
+  "height": 828.46155,
+  "nodes": [
+    {
+      "id": "A",
+      "shape": "Rectangle",
+      "x": 463.6312,
+      "y": 384.73077,
+      "width": 207.03629,
+      "height": 51.0,
+      "label_width": 147.03629,
+      "label_height": 21.0,
+      "label_lines": [
+        "Activity / Subflow"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "CAP",
+      "shape": "Rectangle",
+      "x": 345.07654,
+      "y": 761.46155,
+      "width": 141.68683,
+      "height": 51.0,
+      "label_width": 81.68682,
+      "label_height": 21.0,
+      "label_lines": [
+        "Capability"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "CH",
+      "shape": "Rectangle",
+      "x": 237.38618,
+      "y": 384.73077,
+      "width": 117.18077,
+      "height": 51.0,
+      "label_width": 57.180775,
+      "label_height": 21.0,
+      "label_lines": [
+        "Channel"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "CODE",
+      "shape": "Rectangle",
+      "x": 532.5518,
+      "y": 761.46155,
+      "width": 174.36154,
+      "height": 51.0,
+      "label_width": 114.36155,
+      "label_height": 21.0,
+      "label_lines": [
+        "Implementation"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "CT",
+      "shape": "Rectangle",
+      "x": 101.70085,
+      "y": 573.0962,
+      "width": 125.34946,
+      "height": 51.0,
+      "label_width": 65.34946,
+      "label_height": 21.0,
+      "label_lines": [
+        "Contract"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "D",
+      "shape": "Rectangle",
+      "x": 485.85522,
+      "y": 8.0,
+      "width": 239.711,
+      "height": 51.0,
+      "label_width": 179.711,
+      "label_height": 21.0,
+      "label_lines": [
+        "Decision and rationale"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "F",
+      "shape": "Rectangle",
+      "x": 199.61603,
+      "y": 8.0,
+      "width": 117.18077,
+      "height": 51.0,
+      "label_width": 57.180775,
+      "label_height": 21.0,
+      "label_lines": [
+        "Feature"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "FN",
+      "shape": "Rectangle",
+      "x": 501.1605,
+      "y": 573.0962,
+      "width": 166.19287,
+      "height": 51.0,
+      "label_width": 106.19287,
+      "label_height": 21.0,
+      "label_lines": [
+        "Functionality"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "I",
+      "shape": "Rectangle",
+      "x": 314.43024,
+      "y": 573.0962,
+      "width": 133.51814,
+      "height": 51.0,
+      "label_width": 73.51814,
+      "label_height": 21.0,
+      "label_lines": [
+        "Interface"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "R",
+      "shape": "Rectangle",
+      "x": 33.500305,
+      "y": 384.73077,
+      "width": 149.8555,
+      "height": 51.0,
+      "label_width": 89.8555,
+      "label_height": 21.0,
+      "label_lines": [
+        "Requirement"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "S",
+      "shape": "Rectangle",
+      "x": 338.45987,
+      "y": 196.36539,
+      "width": 125.34946,
+      "height": 51.0,
+      "label_width": 65.34946,
+      "label_height": 21.0,
+      "label_lines": [
+        "Scenario"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "U",
+      "shape": "Rectangle",
+      "x": 509.59778,
+      "y": 196.36539,
+      "width": 190.69891,
+      "height": 51.0,
+      "label_width": 130.69891,
+      "label_height": 21.0,
+      "label_lines": [
+        "Unit / Container"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "UC",
+      "shape": "Rectangle",
+      "x": 41.93869,
+      "y": 196.36539,
+      "width": 125.34946,
+      "height": 51.0,
+      "label_width": 65.34946,
+      "label_height": 21.0,
+      "label_lines": [
+        "Use Case"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    }
+  ],
+  "edges": [
+    {
+      "from": "UC",
+      "to": "R",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          106.52074,
+          247.36539
+        ],
+        [
+          106.52074,
+          384.73077
+        ]
+      ],
+      "label_anchor": [
+        54.51037,
+        316.0481
+      ],
+      "label_width": 84.02074,
+      "label_height": 24.0,
+      "label_lines": [
+        "motivates"
+      ]
+    },
+    {
+      "from": "F",
+      "to": "UC",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          244.71565,
+          59.0
+        ],
+        [
+          244.71565,
+          207.86539
+        ],
+        [
+          167.28815,
+          207.86539
+        ]
+      ],
+      "label_anchor": [
+        248.01227,
+        229.86539
+      ],
+      "label_width": 84.02074,
+      "label_height": 24.0,
+      "label_lines": [
+        "addresses"
+      ]
+    },
+    {
+      "from": "F",
+      "to": "R",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          217.73412,
+          59.0
+        ],
+        [
+          217.73412,
+          136.4327
+        ],
+        [
+          184.64502,
+          136.4327
+        ],
+        [
+          184.64502,
+          268.88913
+        ],
+        [
+          127.828094,
+          268.88913
+        ],
+        [
+          127.828094,
+          371.34976
+        ],
+        [
+          187.3558,
+          371.34976
+        ],
+        [
+          187.3558,
+          396.23077
+        ],
+        [
+          183.3558,
+          396.23077
+        ]
+      ],
+      "label_anchor": [
+        191.84192,
+        341.96875
+      ],
+      "label_width": 112.02765,
+      "label_height": 24.0,
+      "label_lines": [
+        "must satisfy"
+      ]
+    },
+    {
+      "from": "F",
+      "to": "S",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          271.6972,
+          59.0
+        ],
+        [
+          271.6972,
+          207.86539
+        ],
+        [
+          338.45987,
+          207.86539
+        ]
+      ],
+      "label_anchor": [
+        389.057,
+        158.64905
+      ],
+      "label_width": 214.71965,
+      "label_height": 24.0,
+      "label_lines": [
+        "has acceptance examples"
+      ]
+    },
+    {
+      "from": "S",
+      "to": "A",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          415.7282,
+          247.36539
+        ],
+        [
+          415.7282,
+          396.23077
+        ],
+        [
+          463.6312,
+          396.23077
+        ]
+      ],
+      "label_anchor": [
+        458.40295,
+        284.58173
+      ],
+      "label_width": 65.34946,
+      "label_height": 24.0,
+      "label_lines": [
+        "follows"
+      ]
+    },
+    {
+      "from": "A",
+      "to": "CAP",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          541.67786,
+          435.73077
+        ],
+        [
+          541.67786,
+          467.95013
+        ],
+        [
+          490.956,
+          467.95013
+        ],
+        [
+          490.956,
+          772.96155
+        ],
+        [
+          486.76337,
+          772.96155
+        ]
+      ],
+      "label_anchor": [
+        517.8199,
+        516.1695
+      ],
+      "label_width": 37.34255,
+      "label_height": 24.0,
+      "label_lines": [
+        "uses"
+      ]
+    },
+    {
+      "from": "FN",
+      "to": "CAP",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          501.1605,
+          598.5962
+        ],
+        [
+          466.19467,
+          598.5962
+        ],
+        [
+          466.19467,
+          761.46155
+        ]
+      ],
+      "label_anchor": [
+        418.8521,
+        680.0289
+      ],
+      "label_width": 74.6851,
+      "label_height": 24.0,
+      "label_lines": [
+        "realizes"
+      ]
+    },
+    {
+      "from": "A",
+      "to": "FN",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          588.4389,
+          435.73077
+        ],
+        [
+          588.4389,
+          573.0962
+        ]
+      ],
+      "label_anchor": [
+        738.47345,
+        504.41348
+      ],
+      "label_width": 280.06912,
+      "label_height": 24.0,
+      "label_lines": [
+        "refines to local contributions"
+      ]
+    },
+    {
+      "from": "U",
+      "to": "FN",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          674.8268,
+          247.36539
+        ],
+        [
+          674.8268,
+          269.23843
+        ],
+        [
+          886.508,
+          269.23843
+        ],
+        [
+          886.508,
+          584.5962
+        ],
+        [
+          667.35333,
+          584.5962
+        ]
+      ],
+      "label_anchor": [
+        780.6674,
+        238.6214
+      ],
+      "label_width": 37.351562,
+      "label_height": 24.0,
+      "label_lines": [
+        "owns"
+      ]
+    },
+    {
+      "from": "U",
+      "to": "I",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          535.0676,
+          247.36539
+        ],
+        [
+          535.0676,
+          338.65625
+        ],
+        [
+          428.19656,
+          338.65625
+        ],
+        [
+          428.19656,
+          573.0962
+        ]
+      ],
+      "label_anchor": [
+        652.4274,
+        311.85547
+      ],
+      "label_width": 214.71965,
+      "label_height": 48.0,
+      "label_lines": [
+        "provides or requires at",
+        "its boundary"
+      ]
+    },
+    {
+      "from": "I",
+      "to": "CAP",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          365.5827,
+          624.0962
+        ],
+        [
+          365.5827,
+          761.46155
+        ]
+      ],
+      "label_anchor": [
+        276.2298,
+        692.7789
+      ],
+      "label_width": 158.70583,
+      "label_height": 24.0,
+      "label_lines": [
+        "exposes access to"
+      ]
+    },
+    {
+      "from": "CH",
+      "to": "I",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          295.97656,
+          435.73077
+        ],
+        [
+          295.97656,
+          584.5962
+        ],
+        [
+          314.43024,
+          584.5962
+        ]
+      ],
+      "label_anchor": [
+        192.6202,
+        510.16348
+      ],
+      "label_width": 186.71274,
+      "label_height": 48.0,
+      "label_lines": [
+        "connects participant",
+        "interfaces"
+      ]
+    },
+    {
+      "from": "CH",
+      "to": "CT",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          237.38618,
+          410.23077
+        ],
+        [
+          233.38618,
+          410.23077
+        ],
+        [
+          233.38618,
+          458.94714
+        ],
+        [
+          293.97656,
+          458.94714
+        ],
+        [
+          293.97656,
+          555.6298
+        ],
+        [
+          208.11536,
+          555.6298
+        ],
+        [
+          208.11536,
+          573.0962
+        ]
+      ],
+      "label_anchor": [
+        158.03673,
+        466.0755
+      ],
+      "label_width": 130.69891,
+      "label_height": 24.0,
+      "label_lines": [
+        "is governed by"
+      ]
+    },
+    {
+      "from": "S",
+      "to": "CH",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          386.55466,
+          247.36539
+        ],
+        [
+          386.55466,
+          268.88913
+        ],
+        [
+          411.72818,
+          268.88913
+        ],
+        [
+          411.72818,
+          403.73077
+        ],
+        [
+          354.56696,
+          403.73077
+        ]
+      ],
+      "label_anchor": [
+        282.3649,
+        306.41287
+      ],
+      "label_width": 242.72656,
+      "label_height": 24.0,
+      "label_lines": [
+        "uses boundary interactions"
+      ]
+    },
+    {
+      "from": "FN",
+      "to": "CODE",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          570.32245,
+          624.0962
+        ],
+        [
+          570.32245,
+          761.46155
+        ]
+      ],
+      "label_anchor": [
+        669.011,
+        692.7789
+      ],
+      "label_width": 177.3771,
+      "label_height": 24.0,
+      "label_lines": [
+        "has source bindings"
+      ]
+    },
+    {
+      "from": "D",
+      "to": "U",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          616.9756,
+          59.0
+        ],
+        [
+          616.9756,
+          196.36539
+        ]
+      ],
+      "label_anchor": [
+        574.30084,
+        127.68269
+      ],
+      "label_width": 65.34946,
+      "label_height": 24.0,
+      "label_lines": [
+        "governs"
+      ]
+    },
+    {
+      "from": "D",
+      "to": "CH",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          485.85522,
+          33.5
+        ],
+        [
+          481.85522,
+          33.5
+        ],
+        [
+          481.85522,
+          83.13864
+        ],
+        [
+          504.4168,
+          83.13864
+        ],
+        [
+          504.4168,
+          346.65625
+        ],
+        [
+          436.19656,
+          346.65625
+        ],
+        [
+          436.19656,
+          395.73077
+        ],
+        [
+          354.56696,
+          395.73077
+        ]
+      ],
+      "label_anchor": [
+        461.74207,
+        123.27729
+      ],
+      "label_width": 65.34946,
+      "label_height": 24.0,
+      "label_lines": [
+        "governs"
+      ]
+    }
+  ],
+  "subgraphs": []
+}
