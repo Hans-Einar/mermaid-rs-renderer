@@ -38,6 +38,7 @@ exclude = [
 ]
 
 [features]
+libavoid = []
 default = ["cli", "png"]
 # CLI support (adds clap dependency)
 cli = ["dep:clap"]
