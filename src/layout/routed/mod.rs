@@ -30,7 +30,7 @@ pub fn compute(
     control.check()?;
     let start = Instant::now();
     if engine == Engine::Legacy {
-        let layout = super::compute_layout(graph, theme, config);
+        let (layout, metrics) = super::compute_layout_with_metrics(graph, theme, config);
         control.check()?;
         return Ok(RoutedLayout {
             layout,
@@ -38,7 +38,9 @@ pub fn compute(
             diagnostics: vec![
                 "Legacy routing: cancellation checked before/after layout only".into(),
             ],
-            routing_time: start.elapsed(),
+            routing_time: std::time::Duration::from_micros(
+                (metrics.edge_routing_us + metrics.port_assignment_us) as u64,
+            ),
             total_time: start.elapsed(),
         });
     }

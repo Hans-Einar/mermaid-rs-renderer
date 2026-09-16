@@ -78,8 +78,8 @@ pub(super) fn routes(input: &RoutingInput, routes: &[Route]) -> Result<(), Routi
             )
         {
             return Err(RoutingError::Backend(format!(
-                "invalid selected port/direction: edge {} {:?} source={:?} target={:?}",
-                r.id, r.points, source.ports, target.ports
+                "invalid selected port/direction: edge {}",
+                r.id
             )));
         }
     }

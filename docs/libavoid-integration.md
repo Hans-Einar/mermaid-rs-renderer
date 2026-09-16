@@ -92,3 +92,19 @@ mellom gruppemedlemmer og omverdenen støttes.
 Verifikasjon: `cargo test --locked --no-default-features --features libavoid
 --test libavoid_suite` (6 tester), samt `python3 tools/verify_libavoid.py` (52
 kilder). Målinger og videre regresjonsdekning følger i neste milepæl.
+
+## Porter, validering og sammenligning (milepæl 3)
+
+Ti integrasjonstester dekker hindringer, smal korridor, avbrudd i callback,
+ugyldig input, parallelle/motsattrettede kanter, self-loops, fan-in/out, grupper,
+XFMDs fire former, alle tre plasseringsmotorer og den obligatoriske grafen.
+Frosne nodeposisjoner og tekstmål sammenlignes eksplisitt; ruter og etikettankre
+må gjentas deterministisk. Analytiske formtester supplerer rutelengde, svinger,
+kryssinger, parallelle overlapp/nærføringer og etikettkollisjoner i
+`layout::routed::quality::measure`. Kryssinger er ikke en hard feil.
+
+Rektangulære nodeomslag brukes konservativt som hindringer; porter ligger på
+den synlige formen. Runde hjørner behandles konservativt ved validering.
+Tilgjengelige porter er endelige (3–15 per side). Overbelastning av porter eller
+utilstrekkelig plass kan derfor gi eksplisitt feil. Nudging har en ønsket avstand,
+ikke en garanti i trange korridorer; resterende nærføringer rapporteres.

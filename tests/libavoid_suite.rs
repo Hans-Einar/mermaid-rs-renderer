@@ -192,3 +192,107 @@ fn traceability_labels_are_validated() {
     assert_eq!(r.layout.edges.len(), 17);
     assert!(r.layout.edges.iter().all(|e| e.label_anchor.is_some()));
 }
+
+#[test]
+fn cooperative_callback_abort_and_narrow_corridor() {
+    use std::cell::Cell;
+    let mut i = input();
+    i.obstacles[2] = box_at(3, 120., -40.);
+    i.obstacles.push(box_at(4, 120., 42.));
+    let route = Libavoid.route(&i, &control()).unwrap();
+    assert_eq!(route.routes.len(), 1);
+    let checks = Cell::new(0);
+    let cancelled = || {
+        checks.set(checks.get() + 1);
+        checks.get() > i.obstacles.len() + 3
+    };
+    let c = RoutingControl {
+        deadline: Instant::now() + Duration::from_secs(10),
+        cancelled: &cancelled,
+    };
+    assert!(matches!(
+        Libavoid.route(&i, &c),
+        Err(RoutingError::Cancelled)
+    ));
+    assert!(checks.get() > i.obstacles.len() + 3);
+}
+#[test]
+fn rejects_degenerate_polygons_and_impossible_ports() {
+    let mut i = input();
+    i.obstacles[0].polygon[2] = i.obstacles[0].polygon[0];
+    assert!(matches!(
+        Libavoid.route(&i, &control()),
+        Err(RoutingError::InvalidInput(_))
+    ));
+    let mut i = input();
+    i.connections[0].source_port = Some((1., 1.));
+    assert!(matches!(
+        Libavoid.route(&i, &control()),
+        Err(RoutingError::InvalidInput(_))
+    ));
+}
+#[test]
+fn placement_selection_is_independent_and_routes_repeat() {
+    use mermaid_rs_renderer::config::FlowchartLayoutEngine;
+    use mermaid_rs_renderer::layout::routed::{Engine, compute};
+    use mermaid_rs_renderer::{LayoutConfig, Theme, parse_mermaid_strict};
+    let graph = parse_mermaid_strict("flowchart LR\n A-->B\n A-->C\n B-->D\n C-->D")
+        .unwrap()
+        .graph;
+    for placement in [
+        FlowchartLayoutEngine::Current,
+        FlowchartLayoutEngine::Dagre,
+        FlowchartLayoutEngine::Auto,
+    ] {
+        let mut config = LayoutConfig::default();
+        config.flowchart.engine = placement;
+        let a = compute(
+            &graph,
+            &Theme::modern(),
+            &config,
+            Engine::Libavoid,
+            &control(),
+        )
+        .unwrap();
+        let b = compute(
+            &graph,
+            &Theme::modern(),
+            &config,
+            Engine::Libavoid,
+            &control(),
+        )
+        .unwrap();
+        for (a, b) in a.layout.edges.iter().zip(&b.layout.edges) {
+            assert_eq!(a.points, b.points);
+        }
+    }
+}
+#[test]
+fn fixed_positions_and_text_are_preserved_and_quality_is_measured() {
+    use mermaid_rs_renderer::layout::routed::{quality, route_positioned};
+    use mermaid_rs_renderer::{LayoutConfig, Theme, compute_layout, parse_mermaid_strict};
+    let graph = parse_mermaid_strict(include_str!(
+        "fixtures/flowchart/routing-review/traceability.mmd"
+    ))
+    .unwrap()
+    .graph;
+    let old = compute_layout(&graph, &Theme::modern(), &LayoutConfig::default());
+    let new = route_positioned(&old, &control()).unwrap().layout;
+    let again = route_positioned(&old, &control()).unwrap().layout;
+    for (id, n) in &old.nodes {
+        let m = &new.nodes[id];
+        assert_eq!((n.x, n.y, n.width, n.height), (m.x, m.y, m.width, m.height));
+    }
+    for ((a, b), c) in old.edges.iter().zip(&new.edges).zip(&again.edges) {
+        assert_eq!(
+            a.label.as_ref().map(|l| (l.width, l.height)),
+            b.label.as_ref().map(|l| (l.width, l.height))
+        );
+        assert_eq!(b.points, c.points);
+        assert_eq!(b.label_anchor, c.label_anchor);
+    }
+    let q = quality::measure(&new, 8.);
+    assert_eq!(q.node_traversals, 0);
+    assert_eq!(q.label_collisions, 0);
+    assert!(q.length < quality::measure(&old, 8.).length);
+}
