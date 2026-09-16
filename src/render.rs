@@ -1081,7 +1081,7 @@ fn render_svg_internal(
         };
         for (edge_idx, edge) in layout.edges.iter().enumerate() {
             let d = if let Some(path) = jump_paths.get(&edge_idx) {
-                path.clone()
+                path.path.clone()
             } else if layout.kind == crate::ir::DiagramKind::Flowchart && edge.points.len() > 2 {
                 rounded_polyline_path(&edge.points, 10.0)
             } else if layout.kind == crate::ir::DiagramKind::Mindmap && edge.points.len() > 2 {
@@ -1146,6 +1146,10 @@ fn render_svg_internal(
             }
             if let Some(dash_override) = &edge.override_style.dasharray {
                 dash = format!("stroke-dasharray=\"{}\"", dash_override);
+            }
+            if let Some(path) = jump_paths.get(&edge_idx) {
+                svg.push_str(&format!("<path class=\"crossingHalo\" d=\"{}\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\" stroke-linecap=\"round\"/>",
+                    path.halo, theme.background, stroke_width + 3.0));
             }
             svg.push_str(&format!(
                 "<path id=\"{edge_id}\" class=\"edgePath\" data-edge-id=\"{edge_id}\" d=\"{}\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\" {} {} {} stroke-linecap=\"round\" stroke-linejoin=\"round\" />",

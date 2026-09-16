@@ -145,3 +145,10 @@ allokeringsavhengige valg, uten å la svinger/kryssinger koste vilkårlig mye.
 Identiske påfølgende punkter fjernes ved FFI-kopiering før retning valideres.
 Libavoid har fortsatt pekerbaserte interne tie-breaks; portkostnaden er ikke
 et bevis på bitidentisk resultat på tvers av plattformer eller alle grafer.
+
+Kryssingsbuen har en smal bakgrunnsfarget understrek som skiller den visuelt
+fra linjen under. Denne tegnes bare rundt buen, før kantens synlige strek;
+logiske ruter er uendret. Bibliotekets bakgrunnsfarge følger temaet.
+
+Crate-manifestet oppgir MIT AND LGPL-2.1-or-later fordi den distribuerte
+kildepakken inkluderer LGPL-kilder; Rust-/adapterkoden er fortsatt MIT.

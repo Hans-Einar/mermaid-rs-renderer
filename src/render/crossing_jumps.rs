@@ -44,7 +44,12 @@ fn distance(p: Point, a: Point, b: Point) -> f32 {
 fn inside(p: Point, x: f32, y: f32, w: f32, h: f32, margin: f32) -> bool {
     p.0 > x - margin && p.0 < x + w + margin && p.1 > y - margin && p.1 < y + h + margin
 }
-pub(super) fn paths(layout: &Layout, options: CrossingJumps) -> BTreeMap<usize, String> {
+#[derive(Debug, PartialEq)]
+pub(super) struct JumpPath {
+    pub path: String,
+    pub halo: String,
+}
+pub(super) fn paths(layout: &Layout, options: CrossingJumps) -> BTreeMap<usize, JumpPath> {
     if layout.edges.iter().map(|e| e.points.len()).sum::<usize>() > 4096 {
         return BTreeMap::new();
     }
@@ -140,8 +145,9 @@ fn toward(a: Point, b: Point, d: f32) -> Point {
         (a.0 + (b.0 - a.0) * d / len, a.1 + (b.1 - a.1) * d / len)
     }
 }
-fn path(points: &[Point], jumps: &[Jump], radius: f32) -> String {
+fn path(points: &[Point], jumps: &[Jump], radius: f32) -> JumpPath {
     use std::fmt::Write;
+    let mut halo = String::new();
     let mut d = format!("M {} {}", points[0].0, points[0].1);
     for (idx, s) in points.windows(2).enumerate() {
         let mut js: Vec<_> = jumps.iter().filter(|j| j.segment == idx).collect();
@@ -163,6 +169,12 @@ fn path(points: &[Point], jumps: &[Jump], radius: f32) -> String {
                 before.0, before.1, c.0, c.1, after.0, after.1
             )
             .unwrap();
+            write!(
+                halo,
+                " M {} {} Q {} {} {} {}",
+                before.0, before.1, c.0, c.1, after.0, after.1
+            )
+            .unwrap();
         }
         if idx + 2 < points.len() {
             let next = points[idx + 2];
@@ -181,7 +193,7 @@ fn path(points: &[Point], jumps: &[Jump], radius: f32) -> String {
             write!(d, " L {} {}", s[1].0, s[1].1).unwrap();
         }
     }
-    d
+    JumpPath { path: d, halo }
 }
 #[cfg(test)]
 mod tests {
@@ -205,7 +217,8 @@ mod tests {
             }],
             4.,
         );
-        assert_eq!(d, "M 0 50 L 46 50 Q 50 42 54 50 L 100 50");
+        assert_eq!(d.path, "M 0 50 L 46 50 Q 50 42 54 50 L 100 50");
+        assert_eq!(d.halo, " M 46 50 Q 50 42 54 50");
     }
     #[test]
     fn deterministic_priority_and_third_segment_clearance() {
