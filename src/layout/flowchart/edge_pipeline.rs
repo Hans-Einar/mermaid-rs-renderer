@@ -3113,12 +3113,20 @@ pub(in crate::layout) fn build_routed_edges(ctx: RoutedEdgeBuildContext<'_>) -> 
     if graph.kind == DiagramKind::Flowchart {
         // Endpoint repairs can introduce detours. Simplify once more after those
         // repairs, with the same hard geometry checks and no later route mutation.
+        let before_shortcuts = routed_points.clone();
         path_cleanup::simplify_flowchart_detour_rectangles(
             graph,
             nodes,
             subgraphs,
             &mut routed_points,
         );
+        for (idx, previous) in before_shortcuts.iter().enumerate() {
+            if *previous != routed_points[idx] {
+                // A preferred center belongs to the old route. Let the final
+                // label placer derive a new anchor from the shortened path.
+                label_anchors[idx] = None;
+            }
+        }
     }
     #[cfg(debug_assertions)]
     if graph.kind == DiagramKind::Flowchart {

@@ -273,30 +273,35 @@ fn move_flowchart_labels_off_own_edges(
         }
         let dy = label.height + 24.0;
         let dx = label.width * 0.5 + 24.0;
-        for candidate in [
-            (anchor.0, anchor.1 - dy),
-            (anchor.0, anchor.1 + dy),
-            (anchor.0 - dx, anchor.1),
-            (anchor.0 + dx, anchor.1),
-            (anchor.0 - dx, anchor.1 - dy),
-            (anchor.0 + dx, anchor.1 - dy),
-            (anchor.0 - dx, anchor.1 + dy),
-            (anchor.0 + dx, anchor.1 + dy),
-        ] {
-            let candidate_rect = (
-                candidate.0 - label.width / 2.0,
-                candidate.1 - label.height / 2.0,
-                label.width,
-                label.height,
-            );
-            if polyline_rect_distance(&edge.points, &candidate_rect) > 0.0
-                && !obstacles
-                    .iter()
-                    .chain(other_labels.iter())
-                    .any(|rect| overlap_area(&candidate_rect, rect) > LABEL_OVERLAP_WIDE_THRESHOLD)
-            {
-                edge.label_anchor = Some(candidate);
-                break;
+        // A crowded immediate neighborhood can have no safe position. Expand
+        // deterministically through a small fixed set of rings before giving up.
+        'search: for scale in [1.0, 1.5, 2.0, 3.0] {
+            let dx = dx * scale;
+            let dy = dy * scale;
+            for candidate in [
+                (anchor.0, anchor.1 - dy),
+                (anchor.0, anchor.1 + dy),
+                (anchor.0 - dx, anchor.1),
+                (anchor.0 + dx, anchor.1),
+                (anchor.0 - dx, anchor.1 - dy),
+                (anchor.0 + dx, anchor.1 - dy),
+                (anchor.0 - dx, anchor.1 + dy),
+                (anchor.0 + dx, anchor.1 + dy),
+            ] {
+                let candidate_rect = (
+                    candidate.0 - label.width / 2.0,
+                    candidate.1 - label.height / 2.0,
+                    label.width,
+                    label.height,
+                );
+                if polyline_rect_distance(&edge.points, &candidate_rect) > 0.0
+                    && !obstacles.iter().chain(other_labels.iter()).any(|rect| {
+                        overlap_area(&candidate_rect, rect) > LABEL_OVERLAP_WIDE_THRESHOLD
+                    })
+                {
+                    edge.label_anchor = Some(candidate);
+                    break 'search;
+                }
             }
         }
     }

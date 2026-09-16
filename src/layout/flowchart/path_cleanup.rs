@@ -2076,6 +2076,31 @@ fn spine_simplification_candidates(
     candidates
 }
 
+// Keep the port and its direction, including role-specific branch/back-edge
+// choices that cannot be inferred from the bounding box at a shape corner.
+fn preserves_terminal_direction(
+    reference: &[(f32, f32)],
+    candidate: &[(f32, f32)],
+    source: bool,
+) -> bool {
+    let vector = |points: &[(f32, f32)]| {
+        let mut vectors = points
+            .windows(2)
+            .map(|pair| (pair[1].0 - pair[0].0, pair[1].1 - pair[0].1));
+        let nonzero = |(dx, dy): &(f32, f32)| dx.abs() + dy.abs() > 0.001;
+        if source {
+            vectors.find(nonzero)
+        } else {
+            vectors.rev().find(nonzero)
+        }
+    };
+    let (Some(a), Some(b)) = (vector(reference), vector(candidate)) else {
+        return false;
+    };
+    let scale = (a.0.hypot(a.1) * b.0.hypot(b.1)).max(1.0);
+    a.0 * b.0 + a.1 * b.1 > 0.0 && (a.0 * b.1 - a.1 * b.0).abs() <= 0.001 * scale
+}
+
 pub(in crate::layout) fn simplify_flowchart_detour_rectangles(
     graph: &Graph,
     nodes: &BTreeMap<String, NodeLayout>,
@@ -2141,7 +2166,11 @@ pub(in crate::layout) fn simplify_flowchart_detour_rectangles(
             }
         }
         for candidate in candidates {
-            if path_length(&candidate) > baseline_len + 0.05
+            if candidate.first() != baseline.first()
+                || candidate.last() != baseline.last()
+                || !preserves_terminal_direction(baseline, &candidate, true)
+                || !preserves_terminal_direction(baseline, &candidate, false)
+                || path_length(&candidate) > baseline_len + 0.05
                 || path_bend_count(&candidate) > baseline_bends
                 || flowchart_path_foreign_subgraph_hit_count(
                     &candidate, &edge.from, &edge.to, subgraphs,
