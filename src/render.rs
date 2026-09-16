@@ -1,3 +1,4 @@
+mod crossing_jumps;
 use crate::config::LayoutConfig;
 #[cfg(feature = "png")]
 use crate::config::RenderConfig;
@@ -11,6 +12,7 @@ use crate::layout::{
 use crate::text_metrics;
 use crate::theme::{Theme, adjust_color, parse_color_to_hsl};
 use anyhow::Result;
+pub use crossing_jumps::CrossingJumps;
 use serde::Serialize;
 use std::cmp::Ordering;
 use std::collections::HashMap;
@@ -209,6 +211,31 @@ pub fn render_svg_with_dimensions(
     config: &LayoutConfig,
     dimensions: Option<(f32, f32)>,
 ) -> String {
+    render_svg_internal(layout, theme, config, dimensions, None)
+}
+/// Optional crossing bridges computed from the final logical routes.
+pub fn render_svg_with_crossings(
+    layout: &Layout,
+    theme: &Theme,
+    config: &LayoutConfig,
+    options: CrossingJumps,
+) -> String {
+    render_svg_internal(layout, theme, config, None, Some(options))
+}
+fn render_svg_internal(
+    layout: &Layout,
+    theme: &Theme,
+    config: &LayoutConfig,
+    dimensions: Option<(f32, f32)>,
+    jumps: Option<CrossingJumps>,
+) -> String {
+    let jump_paths = if layout.kind == crate::ir::DiagramKind::Flowchart {
+        jumps
+            .map(|o| crossing_jumps::paths(layout, o))
+            .unwrap_or_default()
+    } else {
+        std::collections::BTreeMap::new()
+    };
     let mut svg = String::new();
     let state_font_size = if layout.kind == crate::ir::DiagramKind::State {
         theme.font_size * 0.85
@@ -1053,7 +1080,9 @@ pub fn render_svg_with_dimensions(
             _ => 2.0,
         };
         for (edge_idx, edge) in layout.edges.iter().enumerate() {
-            let d = if layout.kind == crate::ir::DiagramKind::Flowchart && edge.points.len() > 2 {
+            let d = if let Some(path) = jump_paths.get(&edge_idx) {
+                path.clone()
+            } else if layout.kind == crate::ir::DiagramKind::Flowchart && edge.points.len() > 2 {
                 rounded_polyline_path(&edge.points, 10.0)
             } else if layout.kind == crate::ir::DiagramKind::Mindmap && edge.points.len() > 2 {
                 basis_curve_path(&edge.points)

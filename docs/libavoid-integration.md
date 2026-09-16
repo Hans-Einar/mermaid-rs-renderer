@@ -108,3 +108,13 @@ den synlige formen. Runde hjørner behandles konservativt ved validering.
 Tilgjengelige porter er endelige (3–15 per side). Overbelastning av porter eller
 utilstrekkelig plass kan derfor gi eksplisitt feil. Nudging har en ønsket avstand,
 ikke en garanti i trange korridorer; resterende nærføringer rapporteres.
+
+## Kryssingshopp (milepæl 4)
+
+`render::render_svg_with_crossings` er opt-in. Høyere kantindeks får buen ved
+strengt indre, ortogonale kryssinger. Felles endepunkter, kollineære overlapp,
+korte avstander til hjørner/pilspisser, noder, tekst, tredje segment og andre
+hopp undertrykkes konservativt. Logiske punkter endres ikke. Radius begrenses
+til 1–8; diagrammer med over 4096 rutepunkter får vanlig SVG uten hopp for å
+begrense det kvadratiske presentasjonssøket. Tre tester dekker kryssingsregler,
+prioritet, klaring og at ruten forblir uendret.
