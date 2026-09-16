@@ -143,12 +143,15 @@ fn parallel_opposite_and_self_loop_have_distinct_ids() {
             target_port: None,
         },
     ]);
-    let r = Libavoid.route(&i, &control()).unwrap();
-    assert_eq!(r.routes.len(), 4);
-    for route in &r.routes {
-        assert!(route.points.len() >= 2);
+    // Repeated transactions catch allocator-sensitive zero self-loop paths.
+    for _ in 0..32 {
+        let r = Libavoid.route(&i, &control()).unwrap();
+        assert_eq!(r.routes.len(), 4);
+        for route in &r.routes {
+            assert!(route.points.len() >= 2);
+        }
+        assert_ne!(r.routes[0].points, r.routes[1].points);
     }
-    assert_ne!(r.routes[0].points, r.routes[1].points);
 }
 
 #[test]

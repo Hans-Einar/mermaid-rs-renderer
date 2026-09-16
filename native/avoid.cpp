@@ -83,9 +83,40 @@ extern "C" int mermaid_avoid_route(const Pt* points, const Pin* pins,
           std::clamp(p.y-bounds.min.y,0.0,bounds.max.y-bounds.min.y),false,0,dirs);
         pin->setExclusive(true); return cls;
       };
-      auto* conn = new Avoid::ConnRef(&router,
+      // Shape-pin virtual endpoints can collapse a self-loop to a zero path
+      // when other connectors share the shape. Use two explicit boundary
+      // endpoints for loops; libavoid still owns all orthogonal routing.
+      Pt loopSource{};
+      auto loopEnd = [&](bool source) {
+        const unsigned dirs = source ? e.source_dirs : e.target_dirs;
+        const unsigned bit = source ? 1 : 2;
+        if (e.locked & bit) {
+          const auto p = source ? e.source_pin : e.target_pin;
+          if (source) loopSource = p;
+          return Avoid::ConnEnd(Avoid::Point(p.x,p.y),dirs);
+        }
+        for (size_t k=0;k<shape_count;++k) if (shapes[k].id==e.source) {
+          const auto& shape = shapes[k];
+          for (size_t j=0;j<shape.pin_count;++j) {
+            const auto& p = pins[shape.first_pin+j];
+            if (!(p.dirs & dirs) || (!source && p.p.x==loopSource.x && p.p.y==loopSource.y)) continue;
+            if (source) loopSource=p.p;
+            return Avoid::ConnEnd(Avoid::Point(p.p.x,p.p.y),p.dirs & dirs);
+          }
+        }
+        throw std::runtime_error("no distinct boundary ports for self-loop");
+      };
+      Avoid::ConnRef* conn;
+      if (e.source==e.target) {
+        // Explicit evaluation order matters: destination excludes source.
+        const auto source = loopEnd(true);
+        const auto target = loopEnd(false);
+        conn = new Avoid::ConnRef(&router,source,target,unsigned(shape_count+i+1));
+      } else {
+        conn = new Avoid::ConnRef(&router,
           Avoid::ConnEnd(refs.at(e.source), fixedPin(true)),
           Avoid::ConnEnd(refs.at(e.target), fixedPin(false)), unsigned(shape_count+i+1));
+      }
       conn->setRoutingType(Avoid::ConnType_Orthogonal);
       connectors.push_back(conn);
     }

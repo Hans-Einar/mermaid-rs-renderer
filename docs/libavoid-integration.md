@@ -163,3 +163,18 @@ Dette er en eksplisitt, konservativ kompleksitetsgrense, ikke et timeout-resulta
 eller en garanti for alle mindre grafer. 128-noders kjede er fortsatt støttet.
 Kooperativ frist og callback beholdes i tillegg; native arbeid kan overskride
 fristen mellom callbackpunkter. Hard tidsisolasjon ville kreve egen prosess.
+
+## Plattformregresjoner
+
+Ubuntu/Pango 1.52.1-mål reproduserte en tvetydig etikett etter tredje native
+transaksjon. Et siste etikett-only-pass plasserer på de faktisk ferdige rutene,
+validerer alt på nytt og utfører aldri flere native transaksjoner. Maksimum er
+fortsatt tre transaksjoner per plassering og én avstandsretry. Målefixture og
+rød/grønn-regresjon ligger i tests/fixtures/flowchart/routing-review.
+
+Shape-pin-endepunkter kunne i sjeldne allokeringsmønstre kollapse en self-loop
+blant parallelle forbindelser til null lengde. For self-loops bruker adapteren
+nå to ulike, eksplisitte grensepunkter med tillatte retninger via `ConnEnd(Point)`.
+Libavoid beregner fortsatt hele ruten og forskyvningen. Vanlige kanter beholder
+bibliotekets valg blant ShapeConnectionPin-porter. Etterfølgende etikettpass
+beholder de valgte punktene; ingen egen self-loop-ruter er introdusert.

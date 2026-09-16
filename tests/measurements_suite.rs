@@ -66,3 +66,53 @@ fn external_measurements_reach_alternative_routing_without_reparsing() {
     assert_eq!(r.layout.nodes["A"].label.width, 123.);
     assert_eq!(r.layout.nodes["B"].label.width, 87.);
 }
+
+#[cfg(feature = "libavoid")]
+#[test]
+fn traceability_with_ubuntu_pango_measurements() {
+    use mermaid_rs_renderer::layout::routed::{Engine, compute, quality};
+    use mermaid_rs_renderer::routing_backend::RoutingControl;
+    use mermaid_rs_renderer::{LayoutConfig, Theme, parse_mermaid_strict};
+    let graph = parse_mermaid_strict(include_str!(
+        "fixtures/flowchart/routing-review/traceability.mmd"
+    ))
+    .unwrap()
+    .graph;
+    let values: serde_json::Value = serde_json::from_str(include_str!(
+        "fixtures/flowchart/routing-review/traceability-ubuntu-pango.json"
+    ))
+    .unwrap();
+    let labels = values
+        .as_object()
+        .unwrap()
+        .iter()
+        .map(|(s, v)| {
+            (
+                s.clone(),
+                TextBlock {
+                    lines: vec![s.clone()],
+                    width: v["width"].as_f64().unwrap() as f32,
+                    height: v["height"].as_f64().unwrap() as f32,
+                },
+            )
+        })
+        .collect();
+    let mut theme = Theme::modern();
+    theme.font_size = 16.;
+    theme.font_family = "DejaVu Sans".into();
+    let c = RoutingControl {
+        deadline: std::time::Instant::now() + Duration::from_secs(5),
+        cancelled: &|| false,
+    };
+    let r = measurements::with_measurements(labels, Duration::from_secs(5), || {
+        compute(
+            &graph,
+            &theme,
+            &LayoutConfig::default(),
+            Engine::Libavoid,
+            &c,
+        )
+    })
+    .unwrap();
+    assert_eq!(quality::measure(&r.layout, 8.).label_collisions, 0);
+}

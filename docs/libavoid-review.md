@@ -71,3 +71,15 @@ at begge grensene avvises før native transaksjon.
 
 Etter admission-endringen bestod 12 libavoid-tester og 2 måleseam-tester på nytt.
 De vanlige før/etter-rutene er uendret; grensen rammer stressinnmatingen.
+
+### Ubuntu og self-loop-regresjon
+
+GitHub Ubuntu avdekket en tvetydig etikett med andre Pango-mål. De faktiske
+målene ble hentet i en Ubuntu-container og ga identisk feil lokalt. Et siste
+etikett-only-pass på ferdige ruter rettet dette uten å svekke valideringen.
+Et sjeldent nullresultat for self-loops blant parallelle kanter ble også funnet;
+to eksplisitte, retningsbundne boundary-endepunkter unngår bibliotekets kollaps
+av virtuelle ShapeConnectionPin-endepunkter. 50 separate gjentakelser bestod;
+regresjonen gjentar nå transaksjonen 32 ganger i selve testen.
+
+Etter rettelsene bestod 12 libavoid- og 3 måleseam-tester, inkludert Ubuntu-data.

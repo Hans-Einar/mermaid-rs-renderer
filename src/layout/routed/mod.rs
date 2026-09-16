@@ -178,7 +178,12 @@ pub fn route_positioned(
             }
         }
         if !completed {
+            // The last native transaction may have moved a route away from
+            // its reserved caption. One final label-only placement uses the
+            // actual routes; no further transaction or repair follows it.
+            labels::place(&mut layout)?;
             labels::validate(&layout)?;
+            diagnostics.push("final label-only placement on completed routes".into());
         }
         control.check()?;
         let quality = quality::measure(&layout, input.separation);
