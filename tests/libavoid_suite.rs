@@ -46,6 +46,7 @@ fn input() -> RoutingInput {
         clearance: 4.,
         separation: 8.,
         bend_cost: 20.,
+        slide_ports: false,
     }
 }
 #[test]

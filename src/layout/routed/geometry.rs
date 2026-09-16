@@ -88,6 +88,11 @@ pub(super) fn input(layout: &Layout) -> Result<RoutingInput, RoutingError> {
         clearance: 4.,
         separation: 8.,
         bend_cost: 20.,
+        slide_ports: layout
+            .nodes
+            .values()
+            .filter(|n| !n.hidden)
+            .all(|n| n.shape == crate::ir::NodeShape::Rectangle),
     })
 }
 pub(super) fn validate(layout: &Layout) -> Result<(), RoutingError> {
@@ -160,7 +165,7 @@ pub(super) fn interior(a: (f32, f32), b: (f32, f32), n: &crate::layout::NodeLayo
             ((q.0 - p.0) as f64 * (r.1 - p.1) as f64 - (q.1 - p.1) as f64 * (r.0 - p.0) as f64)
                 * area.signum()
         };
-        let v = cross(a) - 0.001;
+        let v = cross(a) - (q.0 - p.0).hypot(q.1 - p.1) as f64 * 0.01;
         let d = cross(b) - cross(a);
         if d.abs() < 1e-9 {
             if v <= 0. {

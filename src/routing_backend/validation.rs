@@ -40,9 +40,10 @@ pub(super) fn obstacle(o: &Obstacle) -> bool {
             && p.point.1 <= bounds.3 + 0.001
     })
 }
-fn port_ok(obstacle: &Obstacle, mask: u32, point: Point, next: Point) -> bool {
+fn port_ok(obstacle: &Obstacle, mask: u32, point: Point, next: Point, slide: bool) -> bool {
     obstacle.ports.iter().any(|p| {
-        let matches = (p.point.0 - point.0).abs() < 0.01 && (p.point.1 - point.1).abs() < 0.01;
+        let matches = ((p.point.0 - point.0).abs() < 0.01 && (p.point.1 - point.1).abs() < 0.01)
+            || (slide && sliding_point(obstacle, p, point));
         let dx = next.0 - point.0;
         let dy = next.1 - point.1;
         let direction = if dx.abs() < 0.01 {
@@ -69,14 +70,19 @@ pub(super) fn routes(input: &RoutingInput, routes: &[Route]) -> Result<(), Routi
         let e = input.connections.iter().find(|e| e.id == r.id).unwrap();
         let source = input.obstacles.iter().find(|o| o.id == e.source).unwrap();
         let target = input.obstacles.iter().find(|o| o.id == e.target).unwrap();
-        if !port_ok(source, e.source_directions, r.points[0], r.points[1])
-            || !port_ok(
-                target,
-                e.target_directions,
-                *r.points.last().unwrap(),
-                r.points[r.points.len() - 2],
-            )
-        {
+        if !port_ok(
+            source,
+            e.source_directions,
+            r.points[0],
+            r.points[1],
+            input.slide_ports,
+        ) || !port_ok(
+            target,
+            e.target_directions,
+            *r.points.last().unwrap(),
+            r.points[r.points.len() - 2],
+            input.slide_ports,
+        ) {
             return Err(RoutingError::Backend(format!(
                 "invalid selected port/direction: edge {}",
                 r.id
@@ -84,4 +90,35 @@ pub(super) fn routes(input: &RoutingInput, routes: &[Route]) -> Result<(), Routi
         }
     }
     Ok(())
+}
+
+pub(super) fn sliding_rectangle(o: &Obstacle) -> bool {
+    o.polygon.len() == 4
+        && o.polygon
+            .iter()
+            .zip(o.polygon.iter().cycle().skip(1))
+            .all(|(a, b)| a.0 == b.0 || a.1 == b.1)
+        && o.ports.iter().all(|p| {
+            [UP, DOWN, LEFT, RIGHT].contains(&p.directions) && sliding_point(o, p, p.point)
+        })
+}
+fn sliding_point(o: &Obstacle, p: &Port, q: Point) -> bool {
+    let (x0, y0, x1, y1) = o.polygon.iter().fold(
+        (
+            f64::INFINITY,
+            f64::INFINITY,
+            f64::NEG_INFINITY,
+            f64::NEG_INFINITY,
+        ),
+        |a, p| (a.0.min(p.0), a.1.min(p.1), a.2.max(p.0), a.3.max(p.1)),
+    );
+    let in_x = q.0 >= x0 - 0.01 && q.0 <= x1 + 0.01;
+    let in_y = q.1 >= y0 - 0.01 && q.1 <= y1 + 0.01;
+    match p.directions {
+        UP => (q.1 - y0).abs() < 0.01 && in_x,
+        DOWN => (q.1 - y1).abs() < 0.01 && in_x,
+        LEFT => (q.0 - x0).abs() < 0.01 && in_y,
+        RIGHT => (q.0 - x1).abs() < 0.01 && in_y,
+        _ => false,
+    }
 }

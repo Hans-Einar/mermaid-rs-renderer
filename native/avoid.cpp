@@ -24,7 +24,7 @@ public:
 };
 extern "C" int mermaid_avoid_route(const Pt* points, const Pin* pins,
     const Shape* shapes, size_t shape_count, const Edge* edges, size_t edge_count,
-    double clearance, double separation, double bend_cost,
+    double clearance, double separation, double bend_cost, uint8_t slide_ports,
     Continue check, Emit emit, void* context, char* error, size_t error_size) noexcept {
   try {
     if (!check(context)) return 1;
@@ -35,7 +35,7 @@ extern "C" int mermaid_avoid_route(const Pt* points, const Pin* pins,
     router.setRoutingParameter(Avoid::fixedSharedPathPenalty, 0);
     router.setRoutingParameter(Avoid::shapeBufferDistance, clearance);
     router.setRoutingParameter(Avoid::idealNudgingDistance, separation);
-    router.setRoutingOption(Avoid::nudgeOrthogonalSegmentsConnectedToShapes, false);
+    router.setRoutingOption(Avoid::nudgeOrthogonalSegmentsConnectedToShapes, slide_ports != 0);
     router.setRoutingOption(Avoid::nudgeSharedPathsWithCommonEndPoint, true);
     router.setRoutingOption(Avoid::nudgeOrthogonalTouchingColinearSegments, true);
     std::map<uint32_t, Avoid::ShapeRef*> refs;

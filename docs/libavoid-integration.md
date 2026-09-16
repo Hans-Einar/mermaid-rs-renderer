@@ -78,9 +78,10 @@ kjører fortsatt gammel kode. Libavoid kjøres etter nodeplassering og før kun
 uniform slutttranslasjon/bounds. Ingen Legacy-reparasjon følger etterpå.
 
 Portklasser gir libavoid flere tillatte tilkoblingspunkter. Eksklusive porter
-og nudging av mellomsegmenter skiller forbindelser. Sluttsegment-nudging er
-**deaktivert**: biblioteket kan ellers flytte endepunkter bort fra eksplisitte
-porter og fra den synlige kanten på ikke-rektangulære former. Self-loops bruker
+og nudging av mellomsegmenter skiller forbindelser. Sluttsegment-nudging brukes i første pass når alle tilkoblede noder er
+rektangler og kontrakten tillater glidning langs sidene. Faktiske porter beholdes
+ved senere etikettpass. For øvrige former er sluttsegment-nudging deaktivert:
+biblioteket kan ellers flytte endepunkter bort fra den synlige formen. Self-loops bruker
 forskjellige sider (høyre/bunn), slik at nullruter ikke blir valgt.
 
 Etikettplassering reserverer målte bokser med klaring; maksimalt tre samlede

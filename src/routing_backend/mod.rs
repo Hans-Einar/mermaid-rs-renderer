@@ -34,6 +34,8 @@ pub struct RoutingInput {
     pub clearance: f64,
     pub separation: f64,
     pub bend_cost: f64,
+    /// Allow native terminal nudging along rectangular sides on the first pass.
+    pub slide_ports: bool,
 }
 #[derive(Clone, Debug)]
 pub struct Route {

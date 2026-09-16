@@ -45,6 +45,7 @@ unsafe extern "C" {
         clearance: f64,
         separation: f64,
         bend_cost: f64,
+        slide_ports: u8,
         check: extern "C" fn(*mut c_void) -> u8,
         emit: extern "C" fn(*mut c_void, u32, *const Pt, usize) -> u8,
         context: *mut c_void,
@@ -145,6 +146,12 @@ impl RoutingBackend for Libavoid {
             if !super::validation::obstacle(o) {
                 return Err(invalid(
                     "non-convex/degenerate obstacle or out-of-bounds pin",
+                ));
+            }
+            if input.slide_ports && !o.ports.is_empty() && !super::validation::sliding_rectangle(o)
+            {
+                return Err(invalid(
+                    "sliding ports require axis-aligned rectangular boundaries",
                 ));
             }
             shapes.push(Shape {
@@ -257,7 +264,7 @@ impl RoutingBackend for Libavoid {
             routes: Vec::new(),
             error: None,
         };
-        let mut error = [0i8; 1024];
+        let mut error = [0 as c_char; 1024];
         let status = unsafe {
             mermaid_avoid_route(
                 points.as_ptr(),
@@ -269,6 +276,7 @@ impl RoutingBackend for Libavoid {
                 input.clearance,
                 input.separation,
                 input.bend_cost,
+                u8::from(input.slide_ports),
                 check,
                 emit,
                 (&mut ctx as *mut Context<'_, '_>).cast(),

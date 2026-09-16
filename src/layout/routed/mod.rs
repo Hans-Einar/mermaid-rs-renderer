@@ -56,6 +56,7 @@ pub fn compute(
     // Only uniform translation/bounds adjustment after routing; never Legacy
     // route repair, label nudge, coordinate scaling or aspect folding.
     super::finalize_graph_label_bounds(&mut result.layout, config);
+    geometry::validate(&result.layout)?;
     result.total_time = start.elapsed();
     Ok(result)
 }
@@ -89,6 +90,33 @@ pub fn route_positioned(
             ));
             routing_time += output.elapsed;
             for route in output.routes {
+                if input.slide_ports {
+                    let c = &input.connections[route.id as usize];
+                    for (id, p) in [(c.source, route.source_port), (c.target, route.target_port)] {
+                        let o = input.obstacles.iter_mut().find(|o| o.id == id).unwrap();
+                        let xs: Vec<_> = o.polygon.iter().map(|p| p.0).collect();
+                        let ys: Vec<_> = o.polygon.iter().map(|p| p.1).collect();
+                        let dir = if (p.1 - ys.iter().copied().fold(f64::INFINITY, f64::min)).abs()
+                            < 0.01
+                        {
+                            UP
+                        } else if (p.1 - ys.iter().copied().fold(f64::NEG_INFINITY, f64::max)).abs()
+                            < 0.01
+                        {
+                            DOWN
+                        } else if (p.0 - xs.iter().copied().fold(f64::INFINITY, f64::min)).abs()
+                            < 0.01
+                        {
+                            LEFT
+                        } else {
+                            RIGHT
+                        };
+                        o.ports.push(Port {
+                            point: p,
+                            directions: dir,
+                        });
+                    }
+                }
                 let connection = &mut input.connections[route.id as usize];
                 connection.source_port = Some(route.source_port);
                 connection.target_port = Some(route.target_port);
@@ -102,6 +130,7 @@ pub fn route_positioned(
                     .map(|p| (p.0 as f32, p.1 as f32))
                     .collect();
             }
+            input.slide_ports = false;
             geometry::validate(&layout)?;
             if pass == 0 {
                 labels::place(&mut layout)?;
@@ -121,9 +150,9 @@ pub fn route_positioned(
                 break;
             } else if pass == 1 {
                 labels::place(&mut layout)?;
-                let connections = input.connections;
-                input = geometry::input(&layout)?;
-                input.connections = connections;
+                // Keep selected sliding pins and remove only label obstacles.
+                let node_count = geometry::input(&layout)?.obstacles.len();
+                input.obstacles.truncate(node_count);
                 input
                     .obstacles
                     .extend(labels::obstacles(&layout, input.obstacles.len() as u32 + 1));
