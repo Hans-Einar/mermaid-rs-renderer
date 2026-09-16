@@ -1,0 +1,11 @@
+flowchart LR
+    D[Domain contracts] --> T[Transport and session]
+    T --> U[UI Domain]
+    U --> R[Representation]
+    C[Composition] -->|owns lifetime and references| R
+    C -->|supplies context and bindings| P[Presentation]
+    P -->|schema and delivery policy| S[Delivery scheduler]
+    R -->|state changes| S
+    S -->|schema and patches| V[Renderer]
+    V -->|typed intent through Presentation binding| Q[Command coordinator]
+    Q -->|domain command| D
