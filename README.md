@@ -1,3 +1,11 @@
+> **Hans-Einar-fork:** valgfri `libavoid`-feature gir en utskiftbar ortogonal
+> rutemotor via en liten C++17/C-ABI-adapter. Denne profilen er ikke ren Rust.
+> Bruk `layout::routed::compute` med `Engine::Libavoid` eller eksplisitt `Legacy`;
+> nodeplassering velges separat. CLI-ens eksisterende standard er uendret.
+> Se [kontrakt, bygg og LGPL-krav](docs/libavoid-integration.md),
+> [målinger og begrensninger](docs/libavoid-review.md) og
+> [før/etter-SVG/PNG](docs/libavoid-preview/). Ingen Node eller nettleser kreves.
+
 <div align="center">
 
 # mmdr

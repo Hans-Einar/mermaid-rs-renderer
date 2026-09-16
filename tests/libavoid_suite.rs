@@ -162,6 +162,9 @@ fn visible_shape_ports_groups_and_cycles() {
         "flowchart LR\n A[Rectangle] --> B(Rounded)\n B --> C{Diamond}\n C --> D((Circle))\n D --> A",
         "flowchart TD\n subgraph G[Group]\n A[One] --> B[Two]\n end\n C[Outside] --> A\n B --> C",
         "flowchart TD\n A[Self] --> A",
+        "flowchart TD\n A(Rounded self) --> A",
+        "flowchart TD\n A{Diamond self} --> A",
+        "flowchart TD\n A((Circle self)) --> A",
         "flowchart LR\n A[One] --> B[Two]\n A --> B\n B --> A",
         "flowchart TD\n A-->D\n B-->D\n C-->D\n D-->E\n D-->F\n D-->G",
     ] {

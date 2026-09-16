@@ -87,3 +87,7 @@ Etter rettelsene bestod 12 libavoid- og 3 måleseam-tester, inkludert Ubuntu-dat
 Etter `6ff5a54` ble alle seks sammenligninger kjørt på nytt. SVG, rutepunkter
 og kvalitetsmål var uendret; bare tidsmålingene ble oppdatert. Ubuntu-fixturen
 dekker et annet, eksplisitt målesett enn standardtemaets frosne A/B-eksempler.
+
+Self-loops er også testet på avrundet rektangel, diamant og sirkel. Valgrind ble
+kjørt på nytt med den ferdige self-loop-adapteren og 32 transaksjoner: ingen
+minnefeil eller definitely/indirectly lost; samme små Rust-harness-retensjon.
