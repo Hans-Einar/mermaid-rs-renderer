@@ -152,3 +152,14 @@ logiske ruter er uendret. Bibliotekets bakgrunnsfarge følger temaet.
 
 Crate-manifestet oppgir MIT AND LGPL-2.1-or-later fordi den distribuerte
 kildepakken inkluderer LGPL-kilder; Rust-/adapterkoden er fortsatt MIT.
+
+## Native arbeidsgrense
+
+Stressgrafen med 128 noder / 512 kanter avdekket lange perioder inne i libavoids
+nudging-solver uten progresjonscallback. GDB viste `Block::splitBetween` /
+`findMinLMBetween`; forsøket ble stoppet etter over 30 sekunder. Derfor avviser
+adapteren nå mer enn 256 forbindelser eller 2048 kandidatporter før C++-kallet.
+Dette er en eksplisitt, konservativ kompleksitetsgrense, ikke et timeout-resultat
+eller en garanti for alle mindre grafer. 128-noders kjede er fortsatt støttet.
+Kooperativ frist og callback beholdes i tillegg; native arbeid kan overskride
+fristen mellom callbackpunkter. Hard tidsisolasjon ville kreve egen prosess.

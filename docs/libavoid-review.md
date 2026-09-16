@@ -58,3 +58,16 @@ Se også `libavoid-integration.md` for kontrakt, eierskap, lisens og byggekrav.
 
 SVG-kryssingspresentasjon og LGPL-metadata er i `8a4cf63`; denne commiten kan
 pinnes av XFMD separat fra denne rapport-/artefaktcommiten.
+
+### XFMD-stress og admission
+
+XFMDs faktiske Pango-mål ga traceability 64 ms, service-map 4 ms,
+layer-delivery 13 ms og 128-noders kjede 605 ms i en Release-kjøring.
+128 noder / 512 tette kanter kunne derimot bli værende lenge i native nudging
+uten callback og ble stoppet. Den nye adaptergrensen avviser slike grafer før
+native arbeid: maksimalt 256 forbindelser og 2048 kandidatporter. Dette er en
+synlig begrensning, ikke en påstand om hard tidsgrense. Egen regresjon kontrollerer
+at begge grensene avvises før native transaksjon.
+
+Etter admission-endringen bestod 12 libavoid-tester og 2 måleseam-tester på nytt.
+De vanlige før/etter-rutene er uendret; grensen rammer stressinnmatingen.

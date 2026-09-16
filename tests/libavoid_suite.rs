@@ -320,3 +320,27 @@ fn labelled_review_graphs_complete_with_bounded_spacing_retry() {
         assert_eq!(q.label_collisions, 0);
     }
 }
+
+#[test]
+fn rejects_dense_work_before_native_nudging() {
+    let mut i = input();
+    i.connections = (0..257)
+        .map(|id| {
+            let mut e = i.connections[0].clone();
+            e.id = id;
+            e
+        })
+        .collect();
+    let start = Instant::now();
+    assert!(
+        matches!(Libavoid.route(&i, &control()), Err(RoutingError::InvalidInput(s)) if s.contains("complexity limit"))
+    );
+    assert!(start.elapsed() < Duration::from_secs(1));
+    let mut i = input();
+    i.obstacles = (0..513)
+        .map(|id| box_at(id, id as f64 * 100., 0.))
+        .collect();
+    assert!(
+        matches!(Libavoid.route(&i, &control()), Err(RoutingError::InvalidInput(s)) if s.contains("complexity limit"))
+    );
+}

@@ -123,6 +123,16 @@ impl RoutingBackend for Libavoid {
         if input.obstacles.len() > 1024 || input.connections.len() > 4096 {
             return Err(invalid("diagram size limit"));
         }
+        // Native visibility/nudging phases do not offer a callback per inner
+        // iteration. Bound their workload before entering C++; this is an
+        // admission limit, not a claim of a hard real-time deadline.
+        if input.connections.len() > 256
+            || input.obstacles.iter().map(|o| o.ports.len()).sum::<usize>() > 2048
+        {
+            return Err(invalid(
+                "libavoid complexity limit (256 connections / 2048 candidate ports)",
+            ));
+        }
         if [input.clearance, input.separation, input.bend_cost]
             .iter()
             .any(|v| !v.is_finite() || *v < 0.0 || *v > 1000.0)
