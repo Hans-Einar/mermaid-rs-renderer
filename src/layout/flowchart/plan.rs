@@ -151,6 +151,7 @@ impl FlowchartLayoutPlan {
         let mut labels = Vec::with_capacity(graph.edges.len());
 
         for (idx, edge) in graph.edges.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             let Some(port_info) = edge_ports.get(idx).copied() else {
                 continue;
             };
@@ -287,6 +288,7 @@ pub(super) fn plan_edge_lanes(
     let mut pair_index: Vec<usize> = vec![0; graph.edges.len()];
     let mut pair_total: Vec<usize> = vec![1; graph.edges.len()];
     for (idx, edge) in graph.edges.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         let key = edge_pair_key(edge);
         pair_total[idx] = *pair_counts.get(&key).unwrap_or(&1);
         let seen = pair_seen.entry(key).or_insert(0usize);
@@ -300,6 +302,7 @@ pub(super) fn plan_edge_lanes(
         let band_size = (config.node_spacing * 2.0).max(30.0);
         let mut groups: HashMap<i32, Vec<(usize, f32)>> = HashMap::new();
         for (idx, edge) in graph.edges.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             let (Some(from_layout), Some(to_layout)) = (nodes.get(&edge.from), nodes.get(&edge.to))
             else {
                 continue;
@@ -361,12 +364,14 @@ pub(super) fn plan_edge_lanes(
         }
         let spacing = (config.node_spacing * 0.45).max(8.0);
         for (_bucket, mut group) in groups {
+            crate::layout::measurements::checkpoint();
             if group.len() <= 1 {
                 continue;
             }
             group.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(Ordering::Equal));
             let center = (group.len() as f32 - 1.0) * 0.5;
             for (pos, (idx, _)) in group.iter().enumerate() {
+                crate::layout::measurements::checkpoint();
                 cross_edge_offsets[*idx] = (pos as f32 - center) * spacing;
             }
         }

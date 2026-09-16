@@ -10,6 +10,7 @@ mod invariants;
 mod journey;
 mod kanban;
 pub(crate) mod label_placement;
+pub mod measurements;
 mod mindmap;
 mod pie;
 mod quadrant;
@@ -259,6 +260,7 @@ fn normalize_graph_for_layout(graph: &Graph) -> Cow<'_, Graph> {
 
     let mut normalized = graph.clone();
     for edge in &graph.edges {
+        crate::layout::measurements::checkpoint();
         normalized.ensure_node(&edge.from, None, None);
         normalized.ensure_node(&edge.to, None, None);
     }
@@ -267,6 +269,7 @@ fn normalize_graph_for_layout(graph: &Graph) -> Cow<'_, Graph> {
         crate::ir::DiagramKind::Sequence | crate::ir::DiagramKind::ZenUML
     ) {
         for id in &graph.sequence_participants {
+            crate::layout::measurements::checkpoint();
             normalized.ensure_node(id, None, None);
         }
     }
@@ -294,15 +297,19 @@ fn translate_graph_layout(layout: &mut Layout, dx: f32, dy: f32) {
         return;
     }
     for node in layout.nodes.values_mut() {
+        crate::layout::measurements::checkpoint();
         node.x += dx;
         node.y += dy;
     }
     for subgraph in &mut layout.subgraphs {
+        crate::layout::measurements::checkpoint();
         subgraph.x += dx;
         subgraph.y += dy;
     }
     for edge in &mut layout.edges {
+        crate::layout::measurements::checkpoint();
         for point in &mut edge.points {
+            crate::layout::measurements::checkpoint();
             point.0 += dx;
             point.1 += dy;
         }
@@ -321,6 +328,7 @@ fn translate_graph_layout(layout: &mut Layout, dx: f32, dy: f32) {
     }
     if let DiagramData::Graph { state_notes } = &mut layout.diagram {
         for note in state_notes {
+            crate::layout::measurements::checkpoint();
             note.x += dx;
             note.y += dy;
         }
@@ -335,6 +343,7 @@ fn finalize_graph_label_bounds(layout: &mut Layout, config: &LayoutConfig) {
     let (label_pad_x, label_pad_y) = label_placement::edge_label_padding(layout.kind, config);
 
     for node in layout.nodes.values() {
+        crate::layout::measurements::checkpoint();
         include_rect_bounds(
             &mut min_x,
             &mut min_y,
@@ -347,6 +356,7 @@ fn finalize_graph_label_bounds(layout: &mut Layout, config: &LayoutConfig) {
         );
     }
     for subgraph in &layout.subgraphs {
+        crate::layout::measurements::checkpoint();
         include_rect_bounds(
             &mut min_x,
             &mut min_y,
@@ -359,7 +369,9 @@ fn finalize_graph_label_bounds(layout: &mut Layout, config: &LayoutConfig) {
         );
     }
     for edge in &layout.edges {
+        crate::layout::measurements::checkpoint();
         for point in &edge.points {
+            crate::layout::measurements::checkpoint();
             min_x = min_x.min(point.0);
             min_y = min_y.min(point.1);
             max_x = max_x.max(point.0);
@@ -404,6 +416,7 @@ fn finalize_graph_label_bounds(layout: &mut Layout, config: &LayoutConfig) {
     }
     if let DiagramData::Graph { state_notes } = &layout.diagram {
         for note in state_notes {
+            crate::layout::measurements::checkpoint();
             include_rect_bounds(
                 &mut min_x,
                 &mut min_y,
@@ -449,6 +462,7 @@ fn compute_flowchart_layout(
     }
 
     for node in graph.nodes.values() {
+        crate::layout::measurements::checkpoint();
         let label = measure_label_with_font_size(
             &node.label,
             measure_font_size,
@@ -505,6 +519,7 @@ fn compute_flowchart_layout(
     let mut anchor_info = apply_subgraph_anchor_sizes(graph, &mut nodes, theme, config);
     let mut anchored_subgraph_nodes: HashSet<String> = HashSet::new();
     for info in anchor_info.values() {
+        crate::layout::measurements::checkpoint();
         if let Some(sub) = graph.subgraphs.get(info.sub_idx) {
             anchored_subgraph_nodes.extend(sub.nodes.iter().cloned());
         }
@@ -514,6 +529,7 @@ fn compute_flowchart_layout(
     let mut edge_redirects: HashMap<String, String> = HashMap::new();
     if !graph.subgraphs.is_empty() {
         for (idx, sub) in graph.subgraphs.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             let Some(anchor_id) = subgraph_anchor_id(sub, &nodes) else {
                 continue;
             };
@@ -530,6 +546,7 @@ fn compute_flowchart_layout(
 
     let mut layout_edges: Vec<crate::ir::Edge> = Vec::with_capacity(graph.edges.len());
     for edge in &graph.edges {
+        crate::layout::measurements::checkpoint();
         let mut layout_edge = edge.clone();
         if let Some(new_from) = edge_redirects.get(&layout_edge.from) {
             layout_edge.from = new_from.clone();
@@ -559,6 +576,7 @@ fn compute_flowchart_layout(
         anchor_info = apply_subgraph_anchor_sizes(graph, &mut nodes, theme, config);
         anchored_subgraph_nodes.clear();
         for info in anchor_info.values() {
+            crate::layout::measurements::checkpoint();
             if let Some(sub) = graph.subgraphs.get(info.sub_idx) {
                 anchored_subgraph_nodes.extend(sub.nodes.iter().cloned());
             }
@@ -864,25 +882,30 @@ fn assign_positions(
         .collect();
     let mut max_rank = 0usize;
     for rank in ranks.values() {
+        crate::layout::measurements::checkpoint();
         max_rank = max_rank.max(*rank);
     }
 
     let mut rank_nodes: Vec<Vec<String>> = vec![Vec::new(); max_rank + 1];
     for node_id in node_ids {
+        crate::layout::measurements::checkpoint();
         let rank = *ranks.get(node_id).unwrap_or(&0);
         if let Some(bucket) = rank_nodes.get_mut(rank) {
             bucket.push(node_id.clone());
         }
     }
     for bucket in &mut rank_nodes {
+        crate::layout::measurements::checkpoint();
         bucket.sort_by_key(|id| node_order.get(id.as_str()).copied().unwrap_or(usize::MAX));
     }
 
     let mut main_cursor = 0.0;
     for bucket in rank_nodes {
+        crate::layout::measurements::checkpoint();
         let mut cross_cursor = 0.0;
         let mut max_main: f32 = 0.0;
         for node_id in bucket {
+            crate::layout::measurements::checkpoint();
             if let Some(node) = nodes.get_mut(&node_id) {
                 if is_horizontal(direction) {
                     node.x = origin_x + main_cursor;
@@ -916,10 +939,12 @@ pub(in crate::layout) fn bounds_with_edges(
     let mut max_x: f32 = 0.0;
     let mut max_y: f32 = 0.0;
     for node in nodes.values() {
+        crate::layout::measurements::checkpoint();
         max_x = max_x.max(node.x + node.width);
         max_y = max_y.max(node.y + node.height);
     }
     for sub in subgraphs {
+        crate::layout::measurements::checkpoint();
         let invisible_region = sub.label.trim().is_empty()
             && sub.style.stroke.as_deref() == Some("none")
             && sub.style.fill.as_deref() == Some("none");
@@ -931,7 +956,9 @@ pub(in crate::layout) fn bounds_with_edges(
     }
     // Also include edge points - routing can place waypoints outside node bounds
     for edge in edges {
+        crate::layout::measurements::checkpoint();
         for point in &edge.points {
+            crate::layout::measurements::checkpoint();
             max_x = max_x.max(point.0);
             max_y = max_y.max(point.1);
         }
@@ -974,6 +1001,7 @@ fn apply_preferred_aspect_ratio_layout(layout: &mut Layout, config: &LayoutConfi
     let mut total_scale_x = 1.0f32;
     let mut total_scale_y = 1.0f32;
     for _ in 0..PREFERRED_ASPECT_MAX_PASSES {
+        crate::layout::measurements::checkpoint();
         let (width, height) = graph_layout_dimensions(layout);
         let current_ratio = width / height;
         if (current_ratio - target_ratio).abs() <= PREFERRED_ASPECT_TOLERANCE {
@@ -1016,6 +1044,7 @@ fn reanchor_edge_endpoints(
     endpoint_anchors: &[(Option<(f32, f32)>, Option<(f32, f32)>)],
 ) {
     for (edge_idx, edge) in layout.edges.iter_mut().enumerate() {
+        crate::layout::measurements::checkpoint();
         let Some((start_anchor, end_anchor)) = endpoint_anchors.get(edge_idx) else {
             continue;
         };
@@ -1056,11 +1085,14 @@ fn reanchor_edge_endpoints(
 
 fn scale_graph_geometry(layout: &mut Layout, scale_x: f32, scale_y: f32) {
     for node in layout.nodes.values_mut() {
+        crate::layout::measurements::checkpoint();
         node.x *= scale_x;
         node.y *= scale_y;
     }
     for edge in &mut layout.edges {
+        crate::layout::measurements::checkpoint();
         for point in &mut edge.points {
+            crate::layout::measurements::checkpoint();
             point.0 *= scale_x;
             point.1 *= scale_y;
         }
@@ -1078,6 +1110,7 @@ fn scale_graph_geometry(layout: &mut Layout, scale_x: f32, scale_y: f32) {
         }
     }
     for sub in &mut layout.subgraphs {
+        crate::layout::measurements::checkpoint();
         sub.x *= scale_x;
         sub.y *= scale_y;
         sub.width *= scale_x;
@@ -1085,6 +1118,7 @@ fn scale_graph_geometry(layout: &mut Layout, scale_x: f32, scale_y: f32) {
     }
     if let DiagramData::Graph { state_notes } = &mut layout.diagram {
         for note in state_notes {
+            crate::layout::measurements::checkpoint();
             note.x *= scale_x;
             note.y *= scale_y;
         }
@@ -1095,6 +1129,7 @@ fn graph_layout_dimensions(layout: &Layout) -> (f32, f32) {
     let (mut max_x, mut max_y) = bounds_with_edges(&layout.nodes, &layout.subgraphs, &layout.edges);
     if let DiagramData::Graph { state_notes } = &layout.diagram {
         for note in state_notes {
+            crate::layout::measurements::checkpoint();
             max_x = max_x.max(note.x + note.width);
             max_y = max_y.max(note.y + note.height);
         }
@@ -1114,10 +1149,13 @@ pub(in crate::layout) fn apply_direction_mirror(
     let (max_x, max_y) = bounds_without_padding(nodes, subgraphs);
     if matches!(direction, Direction::RightLeft) {
         for node in nodes.values_mut() {
+            crate::layout::measurements::checkpoint();
             node.x = max_x - node.x - node.width;
         }
         for edge in edges.iter_mut() {
+            crate::layout::measurements::checkpoint();
             for point in edge.points.iter_mut() {
+                crate::layout::measurements::checkpoint();
                 point.0 = max_x - point.0;
             }
             if let Some(anchor) = edge.label_anchor.as_mut() {
@@ -1131,15 +1169,19 @@ pub(in crate::layout) fn apply_direction_mirror(
             }
         }
         for sub in subgraphs.iter_mut() {
+            crate::layout::measurements::checkpoint();
             sub.x = max_x - sub.x - sub.width;
         }
     }
     if matches!(direction, Direction::BottomTop) {
         for node in nodes.values_mut() {
+            crate::layout::measurements::checkpoint();
             node.y = max_y - node.y - node.height;
         }
         for edge in edges.iter_mut() {
+            crate::layout::measurements::checkpoint();
             for point in edge.points.iter_mut() {
+                crate::layout::measurements::checkpoint();
                 point.1 = max_y - point.1;
             }
             if let Some(anchor) = edge.label_anchor.as_mut() {
@@ -1153,6 +1195,7 @@ pub(in crate::layout) fn apply_direction_mirror(
             }
         }
         for sub in subgraphs.iter_mut() {
+            crate::layout::measurements::checkpoint();
             sub.y = max_y - sub.y - sub.height;
         }
     }
@@ -1166,16 +1209,20 @@ pub(in crate::layout) fn normalize_layout(
     let mut min_x = f32::MAX;
     let mut min_y = f32::MAX;
     for node in nodes.values() {
+        crate::layout::measurements::checkpoint();
         min_x = min_x.min(node.x);
         min_y = min_y.min(node.y);
     }
     for sub in subgraphs.iter() {
+        crate::layout::measurements::checkpoint();
         min_x = min_x.min(sub.x);
         min_y = min_y.min(sub.y);
     }
     // Also check edge points - routing can place waypoints outside node bounds
     for edge in edges.iter() {
+        crate::layout::measurements::checkpoint();
         for point in &edge.points {
+            crate::layout::measurements::checkpoint();
             min_x = min_x.min(point.0);
             min_y = min_y.min(point.1);
         }
@@ -1193,11 +1240,14 @@ pub(in crate::layout) fn normalize_layout(
     }
 
     for node in nodes.values_mut() {
+        crate::layout::measurements::checkpoint();
         node.x += shift_x;
         node.y += shift_y;
     }
     for edge in edges.iter_mut() {
+        crate::layout::measurements::checkpoint();
         for point in edge.points.iter_mut() {
+            crate::layout::measurements::checkpoint();
             point.0 += shift_x;
             point.1 += shift_y;
         }
@@ -1215,6 +1265,7 @@ pub(in crate::layout) fn normalize_layout(
         }
     }
     for sub in subgraphs.iter_mut() {
+        crate::layout::measurements::checkpoint();
         sub.x += shift_x;
         sub.y += shift_y;
     }
@@ -1225,6 +1276,7 @@ fn resolve_node_style(node_id: &str, graph: &Graph) -> crate::ir::NodeStyle {
 
     if let Some(classes) = graph.node_classes.get(node_id) {
         for class_name in classes {
+            crate::layout::measurements::checkpoint();
             if let Some(class_style) = graph.class_defs.get(class_name) {
                 merge_node_style(&mut style, class_style);
             }
@@ -1276,6 +1328,7 @@ fn build_graph_node_layouts(
 ) -> BTreeMap<String, NodeLayout> {
     let mut nodes = BTreeMap::new();
     for node in graph.nodes.values() {
+        crate::layout::measurements::checkpoint();
         let label = measure_label(&node.label, theme, config);
         let (width, height) = shape_size(node.shape, &label, config, theme, graph.kind);
         let style = resolve_node_style(node.id.as_str(), graph);
@@ -1316,6 +1369,7 @@ fn separate_state_pseudostate_markers(
     let marker_ids: Vec<String> = nodes.keys().filter(|id| is_marker(id)).cloned().collect();
 
     for id in marker_ids {
+        crate::layout::measurements::checkpoint();
         let Some(node) = nodes.get(&id) else {
             continue;
         };
@@ -1325,6 +1379,7 @@ fn separate_state_pseudostate_markers(
         let (mut mx, mut my, mw, mh) = (node.x, node.y, node.width, node.height);
         // Resolve against each obstacle, moving along the main axis only.
         for &(ox, oy, ow, oh) in &obstacles {
+            crate::layout::measurements::checkpoint();
             let overlaps = mx < ox + ow && ox < mx + mw && my < oy + oh && oy < my + mh;
             if !overlaps {
                 continue;
@@ -1364,7 +1419,9 @@ fn push_non_members_out_of_subgraphs(
     // Collect which nodes belong to which subgraphs
     let mut node_subgraphs: HashSet<String> = HashSet::new();
     for sub in &graph.subgraphs {
+        crate::layout::measurements::checkpoint();
         for node_id in &sub.nodes {
+            crate::layout::measurements::checkpoint();
             node_subgraphs.insert(node_id.clone());
         }
     }
@@ -1372,6 +1429,7 @@ fn push_non_members_out_of_subgraphs(
     // Also treat subgraph IDs/labels as "member" since they're anchor nodes
     let mut subgraph_ids: HashSet<String> = HashSet::new();
     for sub in &graph.subgraphs {
+        crate::layout::measurements::checkpoint();
         if let Some(ref id) = sub.id {
             subgraph_ids.insert(id.clone());
         }
@@ -1385,11 +1443,13 @@ fn push_non_members_out_of_subgraphs(
     // Compute subgraph bounds from their member nodes
     let mut sub_bounds: Vec<(f32, f32, f32, f32)> = Vec::new();
     for sub in &graph.subgraphs {
+        crate::layout::measurements::checkpoint();
         let mut min_x = f32::MAX;
         let mut min_y = f32::MAX;
         let mut max_x = f32::MIN;
         let mut max_y = f32::MIN;
         for node_id in &sub.nodes {
+            crate::layout::measurements::checkpoint();
             if let Some(node) = nodes.get(node_id) {
                 min_x = min_x.min(node.x);
                 min_y = min_y.min(node.y);
@@ -1413,6 +1473,7 @@ fn push_non_members_out_of_subgraphs(
     // For each non-member node, check if it overlaps with any subgraph bounds
     let node_ids: Vec<String> = nodes.keys().cloned().collect();
     for node_id in &node_ids {
+        crate::layout::measurements::checkpoint();
         if node_subgraphs.contains(node_id) || subgraph_ids.contains(node_id) {
             continue;
         }
@@ -1426,6 +1487,7 @@ fn push_non_members_out_of_subgraphs(
         let nh = node.height;
 
         for (sx, sy, sx2, sy2) in &sub_bounds {
+            crate::layout::measurements::checkpoint();
             // Check if node rectangle overlaps with subgraph rectangle
             if nx + nw > *sx && nx < *sx2 && ny + nh > *sy && ny < *sy2 {
                 // Push node below the subgraph
@@ -1717,6 +1779,7 @@ mod tests {
             assert!((after.1 - before.1 - shift.1).abs() < 1e-3);
         }
         for (before, after) in original.points.iter().zip(&edge.points) {
+            crate::layout::measurements::checkpoint();
             assert!((after.0 - before.0 - shift.0).abs() < 1e-3);
             assert!((after.1 - before.1 - shift.1).abs() < 1e-3);
         }
@@ -1876,7 +1939,9 @@ flowchart LR
         let layout = compute_layout(&parsed.graph, &Theme::modern(), &LayoutConfig::default());
 
         for sub in &layout.subgraphs {
+            crate::layout::measurements::checkpoint();
             for node_id in &sub.nodes {
+                crate::layout::measurements::checkpoint();
                 let node = layout
                     .nodes
                     .get(node_id)
@@ -1931,7 +1996,9 @@ flowchart LR
         );
 
         for (idx, left) in layout.subgraphs.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             for right in layout.subgraphs.iter().skip(idx + 1) {
+                crate::layout::measurements::checkpoint();
                 let overlaps_x = left.x < right.x + right.width && right.x < left.x + left.width;
                 let overlaps_y = left.y < right.y + right.height && right.y < left.y + left.height;
                 assert!(
@@ -1958,6 +2025,7 @@ flowchart LR
         let layout = compute_layout(&parsed.graph, &Theme::modern(), &LayoutConfig::default());
 
         for edge in &layout.edges {
+            crate::layout::measurements::checkpoint();
             assert!(
                 !flowchart::path_cleanup::flowchart_path_hits_non_endpoint_nodes(
                     &edge.points,
@@ -2091,6 +2159,7 @@ flowchart RL
         let layout = compute_layout(&parsed.graph, &Theme::modern(), &LayoutConfig::default());
 
         for (from, to) in [("B", "C"), ("C", "D")] {
+            crate::layout::measurements::checkpoint();
             let edge = layout
                 .edges
                 .iter()
@@ -2145,6 +2214,7 @@ flowchart RL
         let layout = compute_layout(&parsed.graph, &Theme::modern(), &LayoutConfig::default());
 
         for (from, to) in [("A", "B"), ("B", "C"), ("C", "D"), ("D", "E")] {
+            crate::layout::measurements::checkpoint();
             let edge = layout
                 .edges
                 .iter()
@@ -2231,6 +2301,7 @@ flowchart RL
 
         let mut idx = 0usize;
         while idx + 2 < points.len() {
+            crate::layout::measurements::checkpoint();
             let a = points[idx];
             let b = points[idx + 1];
             let c = points[idx + 2];
@@ -2346,7 +2417,9 @@ flowchart LR
             .expect("D->H edge");
 
         for a in be.points.windows(2) {
+            crate::layout::measurements::checkpoint();
             for b in dh.points.windows(2) {
+                crate::layout::measurements::checkpoint();
                 assert!(
                     !segments_intersect(a[0], a[1], b[0], b[1]),
                     "dense routing should avoid B->E crossing D->H"
@@ -2604,6 +2677,7 @@ flowchart LR
 
         let mut labeled_edges = 0usize;
         for edge in &layout.edges {
+            crate::layout::measurements::checkpoint();
             let (Some(_label), Some(anchor)) = (&edge.label, edge.label_anchor) else {
                 continue;
             };
@@ -2638,6 +2712,7 @@ flowchart LR
 
         let mut labeled_edges = 0usize;
         for edge in &layout.edges {
+            crate::layout::measurements::checkpoint();
             let (Some(label), Some(anchor)) = (&edge.label, edge.label_anchor) else {
                 continue;
             };
@@ -2713,6 +2788,7 @@ flowchart LR
 
         let mut nodes = BTreeMap::new();
         for idx in 0..16 {
+            crate::layout::measurements::checkpoint();
             let id = format!("N{idx}");
             let row = idx / 8;
             let col = idx % 8;
@@ -2722,6 +2798,7 @@ flowchart LR
         }
 
         for idx in 0..16 {
+            crate::layout::measurements::checkpoint();
             let from = format!("N{idx}");
             let to = format!("N{}", (idx + 1) % 16);
             graph
@@ -2729,6 +2806,7 @@ flowchart LR
                 .push(make_edge(&from, &to, crate::ir::EdgeStyle::Solid));
         }
         for idx in 0..8 {
+            crate::layout::measurements::checkpoint();
             let from = format!("N{idx}");
             let to = format!("N{}", idx + 8);
             graph
@@ -2763,6 +2841,7 @@ flowchart LR
             "expected whitespace compaction to reduce horizontal spread (before={before_span:.2}, after={after_span:.2})"
         );
         for (id, before_y) in before_cross {
+            crate::layout::measurements::checkpoint();
             let after_y = nodes.get(&id).map(|node| node.y).unwrap_or(before_y);
             assert!(
                 (after_y - before_y).abs() <= 1e-3,

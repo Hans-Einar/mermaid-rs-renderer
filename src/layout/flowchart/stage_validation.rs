@@ -64,11 +64,13 @@ pub(in crate::layout) fn validate_node_placement(
     }
 
     for node_id in graph.nodes.keys() {
+        crate::layout::measurements::checkpoint();
         if !nodes.contains_key(node_id) {
             report.missing_nodes += 1;
         }
     }
     for node in nodes.values() {
+        crate::layout::measurements::checkpoint();
         if !node.x.is_finite()
             || !node.y.is_finite()
             || !node.width.is_finite()
@@ -97,6 +99,7 @@ pub(in crate::layout) fn validate_port_assignment(
         report.port_count_mismatch = 1;
     }
     for port in edge_ports.iter().take(graph.edges.len()) {
+        crate::layout::measurements::checkpoint();
         if !port.start_offset.is_finite() || !port.end_offset.is_finite() {
             report.invalid_ports += 1;
         }
@@ -122,6 +125,7 @@ pub(in crate::layout) fn validate_routes(
     }
 
     for (idx, edge) in graph.edges.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         let Some(points) = routed_points.get(idx) else {
             report.short_routes += 1;
             continue;

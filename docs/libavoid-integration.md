@@ -119,3 +119,13 @@ hopp undertrykkes konservativt. Logiske punkter endres ikke. Radius begrenses
 til 1–8; diagrammer med over 4096 rutepunkter får vanlig SVG uten hopp for å
 begrense det kvadratiske presentasjonssøket. Tre tester dekker kryssingsregler,
 prioritet, klaring og at ruten forblir uendret.
+
+## Eksterne tekstmål og XFMD-seam
+
+XFMDs eksisterende måle-/fristpatch er flyttet hit med kontekstbasert treveis-
+integrasjon mot den undersøkte upstream-basen. Forkens tidligere Legacy-
+forbedringer er bevart. `measurements::with_measurements` gir begge strategier
+samme eksterne TextBlock-verdier og scoped, trådlokal deadline. Tilstand gjenopprettes
+også ved nesting og unwind. Native libavoid-avbrudd returnerer Result; gamle
+Rust-checkpoints kan fortsatt unwinde til XFMDs etablerte panic-barriere.
+To egne tester dekker faktisk måleverdi i ny ruter og TLS-opprydding.

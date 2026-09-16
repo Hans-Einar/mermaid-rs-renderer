@@ -86,6 +86,7 @@ pub(super) fn initialize_route_label_plans(
     let mut route_label_obstacles = label_obstacles;
 
     for idx in 0..graph.edges.len() {
+        crate::layout::measurements::checkpoint();
         let Some(label) = edge_route_labels.get(idx).and_then(|label| label.as_ref()) else {
             continue;
         };
@@ -221,6 +222,7 @@ fn provisional_route_label_center(
             };
             let clearance = label_cross * 0.5 + margin + multiline_lift;
             for sign in [preferred_sign, -preferred_sign] {
+                crate::layout::measurements::checkpoint();
                 let mut candidate = center;
                 if is_horizontal(graph.direction) {
                     candidate.1 += sign * clearance;
@@ -355,6 +357,7 @@ fn detour_flowchart_path_around_label(
         [right, left]
     };
     for x in xs {
+        crate::layout::measurements::checkpoint();
         let mut candidate = Vec::with_capacity(points.len() + 2);
         candidate.extend_from_slice(&points[..=first]);
         candidate.push((x, entry.1));
@@ -374,6 +377,7 @@ fn detour_flowchart_path_around_label(
         [bottom, top]
     };
     for y in ys {
+        crate::layout::measurements::checkpoint();
         let mut candidate = Vec::with_capacity(points.len() + 2);
         candidate.extend_from_slice(&points[..=first]);
         candidate.push((entry.0, y));
@@ -401,6 +405,7 @@ pub(super) fn apply_label_dummy_anchors(
     kind: DiagramKind,
 ) {
     for (idx, dummy_id_opt) in label_dummy_ids.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         let Some(dummy_id) = dummy_id_opt else {
             continue;
         };

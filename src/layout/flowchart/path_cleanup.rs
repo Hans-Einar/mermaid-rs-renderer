@@ -18,10 +18,13 @@ use super::super::types::SubgraphLayout;
 fn flowchart_path_overlap_with_prior(path: &[(f32, f32)], prior: &[Vec<(f32, f32)>]) -> f32 {
     let mut overlap = 0.0f32;
     for segment in path.windows(2) {
+        crate::layout::measurements::checkpoint();
         let a1 = segment[0];
         let a2 = segment[1];
         for other in prior {
+            crate::layout::measurements::checkpoint();
             for other_segment in other.windows(2) {
+                crate::layout::measurements::checkpoint();
                 overlap += collinear_overlap_length(a1, a2, other_segment[0], other_segment[1]);
             }
         }
@@ -34,6 +37,7 @@ fn append_path_segments(path: &[(f32, f32)], segments: &mut Vec<Segment>) {
         return;
     }
     for window in path.windows(2) {
+        crate::layout::measurements::checkpoint();
         segments.push((window[0], window[1]));
     }
 }
@@ -102,6 +106,7 @@ fn reduce_crossing_sweep(
     const MAX_LEN_RATIO_MULTI_GAIN: f32 = 2.6;
 
     for &idx in order {
+        crate::layout::measurements::checkpoint();
         if routed_points[idx].len() < 2 {
             append_path_segments(&routed_points[idx], &mut existing_segments);
             continue;
@@ -122,7 +127,9 @@ fn reduce_crossing_sweep(
         let mut best_points = routed_points[idx].clone();
         let segment_count = routed_points[idx].len().saturating_sub(1);
         for seg_idx in 0..segment_count {
+            crate::layout::measurements::checkpoint();
             for &delta in deltas {
+                crate::layout::measurements::checkpoint();
                 let Some(candidate) = bump_orthogonal_segment(&routed_points[idx], seg_idx, delta)
                 else {
                     continue;
@@ -279,6 +286,7 @@ pub(in crate::layout) fn reduce_orthogonal_path_crossings(
     let reverse: Vec<usize> = (0..routed_points.len()).rev().collect();
 
     for _ in 0..3 {
+        crate::layout::measurements::checkpoint();
         let mut changed = reduce_crossing_sweep(
             &forward,
             graph,
@@ -317,12 +325,14 @@ pub(in crate::layout) fn collapse_axis_aligned_flowchart_handoffs(
 ) {
     let mut pair_counts: HashMap<(String, String), usize> = HashMap::new();
     for edge in &graph.edges {
+        crate::layout::measurements::checkpoint();
         *pair_counts
             .entry((edge.from.clone(), edge.to.clone()))
             .or_insert(0) += 1;
     }
 
     for (idx, points) in routed_points.iter_mut().enumerate() {
+        crate::layout::measurements::checkpoint();
         if points.len() < 3 {
             continue;
         }
@@ -420,9 +430,11 @@ pub(in crate::layout) fn repair_flowchart_orthogonal_crossings(
     // inputs while scaling the budget with the number of edges.
     let repair_budget = graph.edges.len().saturating_mul(2).clamp(4, 64);
     for _ in 0..repair_budget {
+        crate::layout::measurements::checkpoint();
         let mut changed = false;
         'pairs: for fixed_idx in 0..routed_points.len() {
             for repair_idx in 0..routed_points.len() {
+                crate::layout::measurements::checkpoint();
                 if fixed_idx == repair_idx || routed_points[repair_idx].len() < 2 {
                     continue;
                 }
@@ -433,7 +445,9 @@ pub(in crate::layout) fn repair_flowchart_orthogonal_crossings(
                     continue;
                 }
                 for fixed_segment in routed_points[fixed_idx].windows(2) {
+                    crate::layout::measurements::checkpoint();
                     for seg_idx in 0..routed_points[repair_idx].len().saturating_sub(1) {
+                        crate::layout::measurements::checkpoint();
                         let a = routed_points[repair_idx][seg_idx];
                         let b = routed_points[repair_idx][seg_idx + 1];
                         let Some(crossing) =
@@ -473,7 +487,9 @@ pub(in crate::layout) fn repair_flowchart_orthogonal_crossings(
     // Consider local notches before outer lanes to avoid graph-wide detours.
     let mut pair_priority_repaired = HashSet::new();
     for fixed_idx in 0..routed_points.len() {
+        crate::layout::measurements::checkpoint();
         for repair_idx in 0..routed_points.len() {
+            crate::layout::measurements::checkpoint();
             if fixed_idx == repair_idx
                 || pair_priority_repaired.contains(&repair_idx)
                 || routed_points[repair_idx].len() < 4
@@ -523,6 +539,7 @@ fn best_pair_priority_crossing_candidate(
 
     let mut other_segments = Vec::new();
     for (idx, points) in routed_points.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         if idx != repair_idx {
             append_path_segments(points, &mut other_segments);
         }
@@ -534,7 +551,9 @@ fn best_pair_priority_crossing_candidate(
     let fixed_len = path_length(fixed_points);
     let mut candidates = Vec::new();
     for fixed_segment in fixed_points.windows(2) {
+        crate::layout::measurements::checkpoint();
         for (seg_idx, segment) in repair_points.windows(2).enumerate() {
+            crate::layout::measurements::checkpoint();
             let Some(crossing) =
                 orthogonal_crossing(segment[0], segment[1], fixed_segment[0], fixed_segment[1])
             else {
@@ -557,6 +576,7 @@ fn best_pair_priority_crossing_candidate(
 
     let mut best: Option<(usize, f32, Vec<(f32, f32)>)> = None;
     for raw_candidate in candidates {
+        crate::layout::measurements::checkpoint();
         for candidate in crossing_candidate_clearance_variants(&raw_candidate, edge, nodes, margin)
         {
             if flowchart_endpoint_reentry_count(&candidate, edge, nodes) > 0
@@ -639,6 +659,7 @@ fn best_crossing_notch_candidate(
     let edge = graph.edges.get(repair_idx)?;
     let mut other_segments = Vec::new();
     for (idx, points) in routed_points.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         if idx == repair_idx {
             continue;
         }
@@ -671,6 +692,7 @@ fn best_crossing_notch_candidate(
         margin,
     ));
     for raw_candidate in candidates {
+        crate::layout::measurements::checkpoint();
         for candidate in crossing_candidate_clearance_variants(&raw_candidate, edge, nodes, margin)
         {
             if flowchart_endpoint_reentry_count(&candidate, edge, nodes) > 0
@@ -794,11 +816,13 @@ fn crossing_notch_candidates(
             }
         }
         for detour_y in [fixed_min_y - 1.0, fixed_max_y + 1.0] {
+            crate::layout::measurements::checkpoint();
             if let Some(candidate) = bump_orthogonal_segment(points, seg_idx, detour_y - a.1) {
                 out.push(candidate);
             }
         }
         for detour_y in [fixed_min_y - margin, fixed_max_y + margin] {
+            crate::layout::measurements::checkpoint();
             if let Some(candidate) = bump_orthogonal_segment(points, seg_idx, detour_y - a.1) {
                 out.push(candidate);
             }
@@ -842,11 +866,13 @@ fn crossing_notch_candidates(
             }
         }
         for detour_x in [fixed_min_x - 1.0, fixed_max_x + 1.0] {
+            crate::layout::measurements::checkpoint();
             if let Some(candidate) = bump_orthogonal_segment(points, seg_idx, detour_x - a.0) {
                 out.push(candidate);
             }
         }
         for detour_x in [fixed_min_x - margin, fixed_max_x + margin] {
+            crate::layout::measurements::checkpoint();
             if let Some(candidate) = bump_orthogonal_segment(points, seg_idx, detour_x - a.0) {
                 out.push(candidate);
             }
@@ -876,6 +902,7 @@ fn outer_crossing_detour_candidates(
         .filter(|node| !node.hidden && node.anchor_subgraph.is_none());
     let (mut min_x, mut max_x, mut min_y, mut max_y) = (f32::MAX, f32::MIN, f32::MAX, f32::MIN);
     for node in visible {
+        crate::layout::measurements::checkpoint();
         min_x = min_x.min(node.x);
         max_x = max_x.max(node.x + node.width);
         min_y = min_y.min(node.y);
@@ -941,9 +968,11 @@ pub(in crate::layout) fn flowchart_path_hits_non_endpoint_nodes(
     nodes: &BTreeMap<String, NodeLayout>,
 ) -> bool {
     for segment in path.windows(2) {
+        crate::layout::measurements::checkpoint();
         let a = segment[0];
         let b = segment[1];
         for node in nodes.values() {
+            crate::layout::measurements::checkpoint();
             if node.id == from_id
                 || node.id == to_id
                 || node.hidden
@@ -975,9 +1004,11 @@ fn flowchart_path_non_endpoint_hit_count(
 ) -> usize {
     let mut hit_ids = std::collections::BTreeSet::new();
     for segment in path.windows(2) {
+        crate::layout::measurements::checkpoint();
         let a = segment[0];
         let b = segment[1];
         for node in nodes.values() {
+            crate::layout::measurements::checkpoint();
             if node.id == from_id
                 || node.id == to_id
                 || node.hidden
@@ -1008,9 +1039,11 @@ fn first_non_endpoint_node_hit(
     nodes: &BTreeMap<String, NodeLayout>,
 ) -> Option<(usize, usize, Obstacle)> {
     for (seg_idx, segment) in path.windows(2).enumerate() {
+        crate::layout::measurements::checkpoint();
         let a = segment[0];
         let b = segment[1];
         for node in nodes.values() {
+            crate::layout::measurements::checkpoint();
             if node.id == from_id
                 || node.id == to_id
                 || node.hidden
@@ -1030,9 +1063,11 @@ fn first_non_endpoint_node_hit(
                 let mut merged = obstacle;
                 let mut last_idx = seg_idx;
                 for (later_idx, later_segment) in path.windows(2).enumerate().skip(seg_idx) {
+                    crate::layout::measurements::checkpoint();
                     let la = later_segment[0];
                     let lb = later_segment[1];
                     for other in nodes.values() {
+                        crate::layout::measurements::checkpoint();
                         if other.id == from_id
                             || other.id == to_id
                             || other.hidden
@@ -1123,6 +1158,7 @@ fn graph_detour_candidates(
     let mut top = f32::INFINITY;
     let mut bottom = f32::NEG_INFINITY;
     for node in nodes.values() {
+        crate::layout::measurements::checkpoint();
         if node.id == from_id || node.id == to_id || node.hidden || node.anchor_subgraph.is_some() {
             continue;
         }
@@ -1174,6 +1210,7 @@ fn graph_perimeter_detour_candidates(
     let mut top = f32::INFINITY;
     let mut bottom = f32::NEG_INFINITY;
     for node in nodes.values() {
+        crate::layout::measurements::checkpoint();
         if node.id == from_id || node.id == to_id || node.hidden || node.anchor_subgraph.is_some() {
             continue;
         }
@@ -1209,10 +1246,12 @@ pub(in crate::layout) fn detour_flowchart_paths_around_non_endpoint_nodes(
 ) {
     let clearance = (config.node_spacing * 0.12).max(8.0);
     for (idx, points) in routed_points.iter_mut().enumerate() {
+        crate::layout::measurements::checkpoint();
         let Some(edge) = graph.edges.get(idx) else {
             continue;
         };
         for _ in 0..8 {
+            crate::layout::measurements::checkpoint();
             let Some((first_seg_idx, last_seg_idx, obstacle)) =
                 first_non_endpoint_node_hit(points, &edge.from, &edge.to, nodes)
             else {
@@ -1222,6 +1261,7 @@ pub(in crate::layout) fn detour_flowchart_paths_around_non_endpoint_nodes(
             let mut best_cost = f32::INFINITY;
             let mut best_hits = usize::MAX;
             for clearance_scale in [1.0, 1.5, 2.0, 3.0, 4.0] {
+                crate::layout::measurements::checkpoint();
                 let candidate_clearance = clearance * clearance_scale;
                 let candidates = node_detour_candidates(
                     points,
@@ -1241,6 +1281,7 @@ pub(in crate::layout) fn detour_flowchart_paths_around_non_endpoint_nodes(
                     candidate_clearance,
                 ));
                 for candidate in candidates {
+                    crate::layout::measurements::checkpoint();
                     let hits = flowchart_path_non_endpoint_hit_count(
                         &candidate, &edge.from, &edge.to, nodes,
                     );
@@ -1293,6 +1334,7 @@ fn foreign_subgraph_obstacles(
 ) -> Vec<Obstacle> {
     let mut obstacles = Vec::new();
     for sub in subgraphs {
+        crate::layout::measurements::checkpoint();
         let members: HashSet<&str> = sub.nodes.iter().map(|s| s.as_str()).collect();
         if members.contains(edge_from) || members.contains(edge_to) {
             continue;
@@ -1320,8 +1362,10 @@ fn foreign_subgraph_obstacles(
 fn path_foreign_subgraph_hits(path: &[(f32, f32)], obstacles: &[Obstacle]) -> usize {
     let mut hits = 0usize;
     for obstacle in obstacles {
+        crate::layout::measurements::checkpoint();
         let mut hit = false;
         for segment in path.windows(2) {
+            crate::layout::measurements::checkpoint();
             if segment_intersects_rect(segment[0], segment[1], obstacle) {
                 hit = true;
                 break;
@@ -1349,10 +1393,13 @@ fn first_foreign_subgraph_hit(
     obstacles: &[Obstacle],
 ) -> Option<(usize, usize, Obstacle)> {
     for (seg_idx, segment) in path.windows(2).enumerate() {
+        crate::layout::measurements::checkpoint();
         for obstacle in obstacles {
+            crate::layout::measurements::checkpoint();
             if segment_intersects_rect(segment[0], segment[1], obstacle) {
                 let mut last_idx = seg_idx;
                 for (later_idx, later_segment) in path.windows(2).enumerate().skip(seg_idx) {
+                    crate::layout::measurements::checkpoint();
                     if segment_intersects_rect(later_segment[0], later_segment[1], obstacle) {
                         last_idx = later_idx;
                     }
@@ -1380,6 +1427,7 @@ pub(in crate::layout) fn detour_flowchart_paths_around_foreign_subgraphs(
     }
     let clearance = (config.node_spacing * 0.12).max(8.0);
     for (idx, points) in routed_points.iter_mut().enumerate() {
+        crate::layout::measurements::checkpoint();
         let Some(edge) = graph.edges.get(idx) else {
             continue;
         };
@@ -1391,6 +1439,7 @@ pub(in crate::layout) fn detour_flowchart_paths_around_foreign_subgraphs(
             continue;
         }
         for _ in 0..6 {
+            crate::layout::measurements::checkpoint();
             let Some((first_seg_idx, last_seg_idx, obstacle)) =
                 first_foreign_subgraph_hit(points, &obstacles)
             else {
@@ -1403,6 +1452,7 @@ pub(in crate::layout) fn detour_flowchart_paths_around_foreign_subgraphs(
             let mut best_cost = f32::INFINITY;
             let mut best_hits = (current_sub_hits, current_node_hits);
             for clearance_scale in [1.0f32, 1.5, 2.0, 3.0] {
+                crate::layout::measurements::checkpoint();
                 let candidate_clearance = clearance * clearance_scale;
                 for candidate in node_detour_candidates(
                     points,
@@ -1491,6 +1541,7 @@ fn first_endpoint_reentry_span(
     let last_segment_idx = points.len().saturating_sub(2);
     let mut idx = 0usize;
     while idx < last_segment_idx + 1 {
+        crate::layout::measurements::checkpoint();
         let allowed_endpoint_stub = if is_source {
             idx == 0
         } else {
@@ -1502,6 +1553,7 @@ fn first_endpoint_reentry_span(
             let first = idx;
             let mut last = idx;
             while last < last_segment_idx {
+                crate::layout::measurements::checkpoint();
                 let next_idx = last + 1;
                 let next_allowed = if is_source {
                     next_idx == 0
@@ -1641,6 +1693,7 @@ fn repair_endpoint_reentry_once(
     }
 
     for (node, is_source) in endpoint_specs {
+        crate::layout::measurements::checkpoint();
         let Some((first_seg_idx, last_seg_idx)) =
             first_endpoint_reentry_span(points, node, is_source)
         else {
@@ -1648,6 +1701,7 @@ fn repair_endpoint_reentry_once(
         };
         let obstacle = endpoint_node_obstacle(node);
         for clearance_scale in [1.0, 1.5, 2.0, 3.0, 4.0] {
+            crate::layout::measurements::checkpoint();
             let candidate_clearance = clearance * clearance_scale;
             let candidates = node_detour_candidates(
                 points,
@@ -1666,6 +1720,7 @@ fn repair_endpoint_reentry_once(
                 is_source,
             ));
             for candidate in candidates {
+                crate::layout::measurements::checkpoint();
                 let violations =
                     flowchart_endpoint_direction_violation_count(&candidate, edge, nodes);
                 let hits_non_endpoint =
@@ -1705,10 +1760,12 @@ pub(in crate::layout) fn repair_flowchart_endpoint_reentries(
     config: &LayoutConfig,
 ) {
     for (idx, points) in routed_points.iter_mut().enumerate() {
+        crate::layout::measurements::checkpoint();
         let Some(edge) = graph.edges.get(idx) else {
             continue;
         };
         for _ in 0..6 {
+            crate::layout::measurements::checkpoint();
             let Some(candidate) = repair_endpoint_reentry_once(points, edge, nodes, config) else {
                 break;
             };
@@ -1771,8 +1828,10 @@ pub(in crate::layout) fn deoverlap_flowchart_paths(
     let min_segment_len = (base_delta * 1.2).max(6.0);
 
     for _ in 0..4 {
+        crate::layout::measurements::checkpoint();
         let mut changed = false;
         for idx in 1..routed_points.len() {
+            crate::layout::measurements::checkpoint();
             if routed_points[idx].len() < 2 {
                 continue;
             }
@@ -1796,10 +1855,12 @@ pub(in crate::layout) fn deoverlap_flowchart_paths(
                 .collect();
             segment_order.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(Ordering::Equal));
             for (seg_idx, seg_len) in segment_order {
+                crate::layout::measurements::checkpoint();
                 if seg_len < min_segment_len {
                     continue;
                 }
                 for delta in deltas {
+                    crate::layout::measurements::checkpoint();
                     let Some(candidate) =
                         bump_orthogonal_segment(&routed_points[idx], seg_idx, delta)
                     else {
@@ -1872,6 +1933,7 @@ fn collapse_axis_aligned_runs(points: &[(f32, f32)]) -> Vec<(f32, f32)> {
     collapsed.push(points[0]);
 
     while idx + 1 < points.len() {
+        crate::layout::measurements::checkpoint();
         let current = points[idx];
         let next = points[idx + 1];
         let same_x = (next.0 - current.0).abs() <= 1e-3;
@@ -1889,6 +1951,7 @@ fn collapse_axis_aligned_runs(points: &[(f32, f32)]) -> Vec<(f32, f32)> {
 
         let mut end_idx = idx + 1;
         while end_idx + 1 < points.len() {
+            crate::layout::measurements::checkpoint();
             let candidate = points[end_idx + 1];
             let continues_run = if same_x {
                 (candidate.0 - current.0).abs() <= 1e-3
@@ -1917,6 +1980,7 @@ pub(in crate::layout) fn simplify_flowchart_axis_oscillations(
     routed_points: &mut [Vec<(f32, f32)>],
 ) {
     for path in routed_points.iter_mut() {
+        crate::layout::measurements::checkpoint();
         let collapsed = collapse_axis_aligned_runs(path);
         *path = collapse_near_axis_aligned_path(&collapsed).unwrap_or(collapsed);
     }
@@ -1941,6 +2005,7 @@ fn detour_rectangle_simplification_candidates(points: &[(f32, f32)]) -> Vec<Vec<
         vertical_first,
     ];
     for (idx, segment) in points.windows(2).enumerate() {
+        crate::layout::measurements::checkpoint();
         let is_vertical = (segment[0].0 - segment[1].0).abs() <= 1e-3;
         if is_vertical != vertical_pattern[idx] {
             return Vec::new();
@@ -1950,6 +2015,7 @@ fn detour_rectangle_simplification_candidates(points: &[(f32, f32)]) -> Vec<Vec<
     let mut candidates = Vec::new();
     if vertical_first {
         for &cross_y in &[points[1].1, points[3].1] {
+            crate::layout::measurements::checkpoint();
             candidates.push(compress_path(&[
                 points[0],
                 (points[0].0, cross_y),
@@ -1959,6 +2025,7 @@ fn detour_rectangle_simplification_candidates(points: &[(f32, f32)]) -> Vec<Vec<
         }
     } else {
         for &cross_x in &[points[1].0, points[3].0] {
+            crate::layout::measurements::checkpoint();
             candidates.push(compress_path(&[
                 points[0],
                 (cross_x, points[0].1),
@@ -2052,6 +2119,7 @@ fn spine_simplification_candidates(
         cross_levels.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
         cross_levels.dedup_by(|a, b| (*a - *b).abs() <= 1e-3);
         for cross_y in cross_levels {
+            crate::layout::measurements::checkpoint();
             candidates.push(compress_path(&[
                 points[0],
                 (points[0].0, cross_y),
@@ -2064,6 +2132,7 @@ fn spine_simplification_candidates(
         cross_levels.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
         cross_levels.dedup_by(|a, b| (*a - *b).abs() <= 1e-3);
         for cross_x in cross_levels {
+            crate::layout::measurements::checkpoint();
             candidates.push(compress_path(&[
                 points[0],
                 (cross_x, points[0].1),
@@ -2108,6 +2177,7 @@ pub(in crate::layout) fn simplify_flowchart_detour_rectangles(
     routed_points: &mut [Vec<(f32, f32)>],
 ) {
     for idx in 0..routed_points.len() {
+        crate::layout::measurements::checkpoint();
         let baseline = &routed_points[idx];
         if baseline.len() < 4 || baseline.len() > 64 {
             continue;
@@ -2153,6 +2223,7 @@ pub(in crate::layout) fn simplify_flowchart_detour_rectangles(
             0
         };
         for i in 0..shortcut_vertices.saturating_sub(2) {
+            crate::layout::measurements::checkpoint();
             for j in i + 2..shortcut_vertices {
                 for elbow in [
                     (baseline[i].0, baseline[j].1),
@@ -2166,6 +2237,7 @@ pub(in crate::layout) fn simplify_flowchart_detour_rectangles(
             }
         }
         for candidate in candidates {
+            crate::layout::measurements::checkpoint();
             if candidate.first() != baseline.first()
                 || candidate.last() != baseline.last()
                 || !preserves_terminal_direction(baseline, &candidate, true)
