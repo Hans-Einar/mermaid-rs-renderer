@@ -55,6 +55,18 @@ fn hit(points: &[(f32, f32)], r: Rect) -> bool {
         }
     })
 }
+fn distance_to_rect(points: &[(f32, f32)], r: Rect) -> f64 {
+    points
+        .windows(2)
+        .map(|s| {
+            let x0 = s[0].0.min(s[1].0) as f64;
+            let x1 = s[0].0.max(s[1].0) as f64;
+            let y0 = s[0].1.min(s[1].1) as f64;
+            let y1 = s[0].1.max(s[1].1) as f64;
+            (r.0 - x1).max(x0 - r.0 - r.2).max(0.) + (r.1 - y1).max(y0 - r.1 - r.3).max(0.)
+        })
+        .fold(f64::INFINITY, f64::min)
+}
 fn near(points: &[(f32, f32)], a: (f32, f32), w: f32, h: f32) -> bool {
     points.windows(2).any(|s| {
         let x = a.0.clamp(s[0].0.min(s[1].0), s[0].0.max(s[1].0));
@@ -126,8 +138,20 @@ pub(super) fn place(layout: &mut Layout) -> Result<(), RoutingError> {
                                     (x - a.0).abs() + (y - a.1).abs()
                                 })
                                 .fold(f32::INFINITY, f32::min);
+                            let own = distance_to_rect(&e.points, r);
+                            let ambiguous = layout
+                                .edges
+                                .iter()
+                                .enumerate()
+                                .filter(|(i, other)| {
+                                    *i != idx
+                                        && !hit(&other.points, r)
+                                        && distance_to_rect(&other.points, r) + 3. < own
+                                })
+                                .count();
                             choices.push((
-                                crossings as f32 * 100000.
+                                ambiguous as f32 * 1000000.
+                                    + crossings as f32 * 100000.
                                     + gap * 100.
                                     + center_distance
                                     + shift.abs() * 10.,
@@ -181,6 +205,17 @@ pub(super) fn validate(layout: &Layout) -> Result<(), RoutingError> {
         {
             return Err(RoutingError::NoSpace(format!(
                 "label collision on edge {idx}"
+            )));
+        }
+        let own = distance_to_rect(&e.points, r);
+        if layout
+            .edges
+            .iter()
+            .enumerate()
+            .any(|(i, other)| i != idx && distance_to_rect(&other.points, r) + 3. < own)
+        {
+            return Err(RoutingError::NoSpace(format!(
+                "ambiguous label on edge {idx}"
             )));
         }
         // The label must remain near its own route after routing around text.
