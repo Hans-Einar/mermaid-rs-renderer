@@ -21,7 +21,7 @@ pub(in crate::layout) fn apply_edge_path_cleanup(
     if graph.kind == DiagramKind::Flowchart {
         reduce_orthogonal_path_crossings(graph, nodes, routed_points, config);
         deoverlap_flowchart_paths(graph, nodes, routed_points, config);
-        simplify_flowchart_detour_rectangles(graph, nodes, routed_points);
+        simplify_flowchart_detour_rectangles(graph, nodes, subgraphs, routed_points);
         simplify_flowchart_axis_oscillations(routed_points);
         detour_flowchart_paths_around_non_endpoint_nodes(graph, nodes, routed_points, config);
         detour_flowchart_paths_around_foreign_subgraphs(

@@ -3110,6 +3110,16 @@ pub(in crate::layout) fn build_routed_edges(ctx: RoutedEdgeBuildContext<'_>) -> 
             &mut routed_points,
         );
     }
+    if graph.kind == DiagramKind::Flowchart {
+        // Endpoint repairs can introduce detours. Simplify once more after those
+        // repairs, with the same hard geometry checks and no later route mutation.
+        path_cleanup::simplify_flowchart_detour_rectangles(
+            graph,
+            nodes,
+            subgraphs,
+            &mut routed_points,
+        );
+    }
     #[cfg(debug_assertions)]
     if graph.kind == DiagramKind::Flowchart {
         let report = stage_validation::validate_routes(graph, nodes, &routed_points);

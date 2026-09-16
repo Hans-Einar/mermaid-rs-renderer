@@ -2079,79 +2079,86 @@ fn spine_simplification_candidates(
 pub(in crate::layout) fn simplify_flowchart_detour_rectangles(
     graph: &Graph,
     nodes: &BTreeMap<String, NodeLayout>,
+    subgraphs: &[SubgraphLayout],
     routed_points: &mut [Vec<(f32, f32)>],
 ) {
-    if graph.edges.len() < 2 {
-        return;
-    }
-
     for idx in 0..routed_points.len() {
-        let baseline = routed_points[idx].clone();
-        let baseline_bends = path_bend_count(&baseline);
-        if baseline_bends < 4 {
+        let baseline = &routed_points[idx];
+        if baseline.len() < 4 || baseline.len() > 64 {
             continue;
         }
-
-        let from_id = graph.edges[idx].from.as_str();
-        let to_id = graph.edges[idx].to.as_str();
-        let mut other_segments: Vec<Segment> = Vec::new();
+        let edge = &graph.edges[idx];
+        if edge.from == edge.to {
+            continue;
+        }
+        let mut other_segments = Vec::new();
         for (other_idx, path) in routed_points.iter().enumerate() {
-            if other_idx == idx {
-                continue;
+            if other_idx != idx {
+                append_path_segments(path, &mut other_segments);
             }
-            append_path_segments(path, &mut other_segments);
         }
-        let (baseline_cross, baseline_overlap) =
-            edge_crossings_with_existing(&baseline, &other_segments);
-        let baseline_len = path_length(&baseline);
+        // Bounded exchange rates in layout units: a crossing is undesirable,
+        // but must not buy an arbitrarily long detour. Hard geometry is checked
+        // separately and can never be traded for a lower cost.
+        let baseline_len = path_length(baseline);
+        let baseline_bends = path_bend_count(baseline);
+        let cost = |points: &[(f32, f32)]| {
+            let (crossings, overlap) = edge_crossings_with_existing(points, &other_segments);
+            path_length(points)
+                + 24.0 * path_bend_count(points) as f32
+                + 80.0 * crossings as f32
+                + 2.0 * overlap
+        };
         let mut best = baseline.clone();
-        let mut best_bends = baseline_bends;
-        let mut best_cross = baseline_cross;
-        let mut best_overlap = baseline_overlap;
-        let mut best_len = baseline_len;
-
-        let Some(from) = nodes.get(from_id) else {
+        let mut best_cost = cost(&best);
+        let Some(from) = nodes.get(&edge.from) else {
             continue;
         };
-        let Some(to) = nodes.get(to_id) else {
+        let Some(to) = nodes.get(&edge.to) else {
             continue;
         };
-        let mut candidates = detour_rectangle_simplification_candidates(&baseline);
-        candidates.extend(shoulder_simplification_candidates(&baseline));
-        candidates.extend(spine_simplification_candidates(&baseline, from, to));
+        let mut candidates = detour_rectangle_simplification_candidates(baseline);
+        candidates.extend(shoulder_simplification_candidates(baseline));
+        candidates.extend(spine_simplification_candidates(baseline, from, to));
+        // Reuse the existing path vertices; no new visibility graph or recursive
+        // port search. Limit the quadratic search to the small-graph tier.
+        let shortcut_vertices = if graph.edges.len() <= 64 && baseline.len() <= 32 {
+            baseline.len()
+        } else {
+            0
+        };
+        for i in 0..shortcut_vertices.saturating_sub(2) {
+            for j in i + 2..shortcut_vertices {
+                for elbow in [
+                    (baseline[i].0, baseline[j].1),
+                    (baseline[j].0, baseline[i].1),
+                ] {
+                    let mut candidate = baseline[..=i].to_vec();
+                    candidate.push(elbow);
+                    candidate.extend_from_slice(&baseline[j..]);
+                    candidates.push(compress_path(&candidate));
+                }
+            }
+        }
         for candidate in candidates {
-            if candidate.len() >= baseline.len() {
+            if path_length(&candidate) > baseline_len + 0.05
+                || path_bend_count(&candidate) > baseline_bends
+                || flowchart_path_foreign_subgraph_hit_count(
+                    &candidate, &edge.from, &edge.to, subgraphs,
+                ) != 0
+                || flowchart_endpoint_direction_violation_count(&candidate, edge, nodes) != 0
+                || flowchart_endpoint_reentry_count(&candidate, edge, nodes) != 0
+                || flowchart_path_hits_non_endpoint_nodes(&candidate, &edge.from, &edge.to, nodes)
+            {
                 continue;
             }
-            if flowchart_path_hits_non_endpoint_nodes(&candidate, from_id, to_id, nodes) {
-                continue;
-            }
-            let bends = path_bend_count(&candidate);
-            if bends >= best_bends {
-                continue;
-            }
-            let (crossings, overlap) = edge_crossings_with_existing(&candidate, &other_segments);
-            let len = path_length(&candidate);
-            let better = crossings < best_cross
-                || (crossings == best_cross
-                    && overlap <= best_overlap + 0.05
-                    && bends < best_bends)
-                || (crossings == best_cross
-                    && (overlap - best_overlap).abs() <= 0.05
-                    && bends == best_bends
-                    && len + 1.0 < best_len);
-            if better {
+            let candidate_cost = cost(&candidate);
+            if candidate_cost + 1.0 < best_cost {
                 best = candidate;
-                best_bends = bends;
-                best_cross = crossings;
-                best_overlap = overlap;
-                best_len = len;
+                best_cost = candidate_cost;
             }
         }
-
-        if best_bends < baseline_bends && best_cross <= baseline_cross {
-            routed_points[idx] = best;
-        }
+        routed_points[idx] = best;
     }
 }
 
@@ -2229,6 +2236,56 @@ mod tests {
             style: NodeStyle::default(),
             icon: None,
         }
+    }
+
+    #[test]
+    fn detour_shortcut_preserves_ports_and_avoids_obstacles() {
+        let mut graph = Graph::new();
+        graph.edges = vec![edge("A", "B")];
+        let mut nodes = BTreeMap::new();
+        nodes.insert("A".into(), node_layout("A", 0.0, 0.0, 20.0, 20.0));
+        nodes.insert("B".into(), node_layout("B", 100.0, 0.0, 20.0, 20.0));
+        let original = vec![
+            (20.0, 10.0),
+            (30.0, 10.0),
+            (30.0, -80.0),
+            (90.0, -80.0),
+            (90.0, 10.0),
+            (100.0, 10.0),
+        ];
+        let mut paths = vec![original.clone()];
+        super::simplify_flowchart_detour_rectangles(&graph, &nodes, &[], &mut paths);
+        assert_eq!(super::path_bend_count(&paths[0]), 0);
+        assert!((super::path_length(&paths[0]) - 80.0).abs() < 0.01);
+        assert_eq!(paths[0].first(), original.first());
+        assert_eq!(paths[0].last(), original.last());
+
+        // The same geometric shortcut is invalid with a box in the corridor.
+        nodes.insert("C".into(), node_layout("C", 45.0, 0.0, 30.0, 20.0));
+        paths[0] = original.clone();
+        super::simplify_flowchart_detour_rectangles(&graph, &nodes, &[], &mut paths);
+        assert!(!flowchart_path_hits_non_endpoint_nodes(
+            &paths[0], "A", "B", &nodes
+        ));
+        assert_eq!(
+            flowchart_endpoint_direction_violation_count(&paths[0], &graph.edges[0], &nodes),
+            0
+        );
+        assert_eq!(
+            flowchart_endpoint_reentry_count(&paths[0], &graph.edges[0], &nodes),
+            0
+        );
+        assert_eq!(paths[0].first(), original.first());
+        assert_eq!(paths[0].last(), original.last());
+
+        nodes.remove("C");
+        let subgraphs = vec![subgraph_layout("foreign", 45.0, 0.0, 30.0, 20.0)];
+        paths[0] = original;
+        super::simplify_flowchart_detour_rectangles(&graph, &nodes, &subgraphs, &mut paths);
+        assert_eq!(
+            flowchart_path_foreign_subgraph_hit_count(&paths[0], "A", "B", &subgraphs),
+            0
+        );
     }
 
     #[test]
