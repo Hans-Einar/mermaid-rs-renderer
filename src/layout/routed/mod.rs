@@ -1,4 +1,5 @@
 //! Explicit routing selection independent of the configured node placement engine.
+mod attachment;
 mod geometry;
 mod labels;
 pub mod quality;
@@ -157,9 +158,11 @@ pub fn route_positioned(
                     completed = true;
                     break;
                 }
-                input
-                    .obstacles
-                    .extend(labels::obstacles(&layout, input.obstacles.len() as u32 + 1));
+                input.obstacles.extend(labels::obstacles(
+                    &layout,
+                    input.obstacles.len() as u32 + 1,
+                    input.clearance,
+                ));
                 if layout.edges.iter().all(|e| e.label.is_none()) {
                     completed = true;
                     break;
@@ -172,9 +175,11 @@ pub fn route_positioned(
                 // Keep selected sliding pins and remove only label obstacles.
                 let node_count = geometry::input(&layout)?.obstacles.len();
                 input.obstacles.truncate(node_count);
-                input
-                    .obstacles
-                    .extend(labels::obstacles(&layout, input.obstacles.len() as u32 + 1));
+                input.obstacles.extend(labels::obstacles(
+                    &layout,
+                    input.obstacles.len() as u32 + 1,
+                    input.clearance,
+                ));
             }
         }
         if !completed {

@@ -9,6 +9,7 @@ pub struct Quality {
     pub close_parallel_segments: usize,
     pub node_traversals: usize,
     pub label_collisions: usize,
+    pub attachment_intrusions: usize,
 }
 pub fn measure(layout: &Layout, separation: f64) -> Quality {
     let mut q = Quality::default();
@@ -64,6 +65,7 @@ pub fn measure(layout: &Layout, separation: f64) -> Quality {
             }
         }
     }
+    q.attachment_intrusions = super::attachment::intrusions(layout);
     q.label_collisions = super::labels::collisions(layout);
     q
 }

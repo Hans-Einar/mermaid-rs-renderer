@@ -197,6 +197,10 @@ fn traceability_labels_are_validated() {
     )
     .unwrap();
     assert_eq!(r.layout.edges.len(), 17);
+    assert_eq!(
+        mermaid_rs_renderer::layout::routed::quality::measure(&r.layout, 8.).attachment_intrusions,
+        0
+    );
     assert!(r.layout.edges.iter().all(|e| e.label_anchor.is_some()));
 }
 

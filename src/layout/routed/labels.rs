@@ -1,10 +1,10 @@
 use super::geometry::rectangle;
 use super::*;
-type Rect = (f64, f64, f64, f64);
+pub(super) type Rect = (f64, f64, f64, f64);
 fn overlap(a: Rect, b: Rect) -> bool {
     a.0 < b.0 + b.2 && b.0 < a.0 + a.2 && a.1 < b.1 + b.3 && b.1 < a.1 + a.3
 }
-fn rect(p: (f32, f32), w: f32, h: f32) -> Rect {
+pub(super) fn rect(p: (f32, f32), w: f32, h: f32) -> Rect {
     (
         (p.0 - w / 2.) as f64 - 4.,
         (p.1 - h / 2.) as f64 - 4.,
@@ -42,7 +42,7 @@ fn node_rects(layout: &Layout) -> Vec<Rect> {
     );
     r
 }
-fn hit(points: &[(f32, f32)], r: Rect) -> bool {
+pub(super) fn hit(points: &[(f32, f32)], r: Rect) -> bool {
     points.windows(2).any(|s| {
         let (a, b) = (
             (s[0].0 as f64, s[0].1 as f64),
@@ -75,6 +75,35 @@ fn near(points: &[(f32, f32)], a: (f32, f32), w: f32, h: f32) -> bool {
     })
 }
 pub(super) fn place(layout: &mut Layout) -> Result<(), RoutingError> {
+    let original = layout.clone();
+    let mut first = None;
+    let mut failure = None;
+    // A bounded change of greedy caption order can free a corridor occupied
+    // by an earlier caption. Never move routes or extend the routing budget.
+    for order in 0..4 {
+        super::super::measurements::checkpoint();
+        let mut candidate = original.clone();
+        match place_order(&mut candidate, order) {
+            Ok(()) => {
+                if validate(&candidate).is_ok() {
+                    *layout = candidate;
+                    return Ok(());
+                }
+                if first.is_none() {
+                    first = Some(candidate);
+                }
+            }
+            Err(e) => failure = Some(e),
+        }
+    }
+    if let Some(candidate) = first {
+        *layout = candidate;
+        Ok(())
+    } else {
+        Err(failure.unwrap())
+    }
+}
+fn place_order(layout: &mut Layout, variant: usize) -> Result<(), RoutingError> {
     let mut occupied = node_rects(layout);
     let mut order: Vec<_> = (0..layout.edges.len()).collect();
     order.sort_by(|&a, &b| {
@@ -86,7 +115,15 @@ pub(super) fn place(layout: &mut Layout) -> Result<(), RoutingError> {
         };
         area(b).total_cmp(&area(a)).then(a.cmp(&b))
     });
+    if variant == 1 {
+        order.reverse();
+    } else if variant == 2 {
+        order.sort();
+    } else if variant == 3 {
+        order.sort_by(|a, b| b.cmp(a));
+    }
     for idx in order {
+        super::super::measurements::checkpoint();
         let e = &layout.edges[idx];
         if e.start_label.is_some() || e.end_label.is_some() {
             return Err(RoutingError::InvalidInput(
@@ -124,6 +161,15 @@ pub(super) fn place(layout: &mut Layout) -> Result<(), RoutingError> {
                             if occupied.iter().any(|&o| overlap(r, o)) || hit(&e.points, r) {
                                 continue;
                             }
+                            let Some(zone) = attachment::zone(&e.points, r) else {
+                                continue;
+                            };
+                            let intrusions = layout
+                                .edges
+                                .iter()
+                                .enumerate()
+                                .filter(|(i, edge)| *i != idx && hit(&edge.points, zone))
+                                .count();
                             let crossings = layout
                                 .edges
                                 .iter()
@@ -150,8 +196,9 @@ pub(super) fn place(layout: &mut Layout) -> Result<(), RoutingError> {
                                 })
                                 .count();
                             choices.push((
-                                ambiguous as f32 * 1000000.
-                                    + crossings as f32 * 100000.
+                                intrusions as f32 * 1000000.
+                                    + ambiguous as f32 * 1000000.
+                                    + crossings as f32 * 10000000.
                                     + gap * 100.
                                     + center_distance
                                     + shift.abs() * 10.,
@@ -174,14 +221,16 @@ pub(super) fn place(layout: &mut Layout) -> Result<(), RoutingError> {
     }
     Ok(())
 }
-pub(super) fn obstacles(layout: &Layout, first: u32) -> Vec<Obstacle> {
+pub(super) fn obstacles(layout: &Layout, first: u32, clearance: f64) -> Vec<Obstacle> {
     layout
         .edges
         .iter()
-        .filter_map(|e| Some((e.label.as_ref()?, e.label_anchor?)))
+        .filter_map(|e| Some((e, e.label.as_ref()?, e.label_anchor?)))
         .enumerate()
-        .map(|(i, (l, a))| {
+        .map(|(i, (e, l, a))| {
             let r = rect(a, l.width, l.height);
+            let r =
+                attachment::zone(&e.points, r).map_or(r, |z| attachment::obstacle(r, z, clearance));
             Obstacle {
                 id: first + i as u32,
                 polygon: rectangle(r.0, r.1, r.2, r.3),
@@ -205,6 +254,19 @@ pub(super) fn validate(layout: &Layout) -> Result<(), RoutingError> {
         {
             return Err(RoutingError::NoSpace(format!(
                 "label collision on edge {idx}"
+            )));
+        }
+        let zone = attachment::zone(&e.points, r).ok_or_else(|| {
+            RoutingError::NoSpace(format!("no attachment segment for label {idx}"))
+        })?;
+        if layout
+            .edges
+            .iter()
+            .enumerate()
+            .any(|(i, other)| i != idx && hit(&other.points, zone))
+        {
+            return Err(RoutingError::NoSpace(format!(
+                "label attachment intrusion on edge {idx}"
             )));
         }
         let own = distance_to_rect(&e.points, r);
