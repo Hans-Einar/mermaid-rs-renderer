@@ -57,14 +57,28 @@ fn label_rect(e: &crate::layout::EdgeLayout, pad: P) -> Option<Rect> {
 fn candidates(points: &[P], r: Rect) -> Vec<Candidate> {
     let mut result = vec![];
     for (segment, s) in points.windows(2).enumerate() {
+        // Arrowheads extend 7.5 units; rounded internal corners use radius 10.
+        // Include the 2.2-unit dot rather than reserving corner space at terminals.
+        let first = if segment == 0 { 10. } else { 14. };
+        let last = if segment + 2 == points.len() {
+            10.
+        } else {
+            14.
+        };
+        let ascending = s[0].0 < s[1].0 || ((s[0].0 - s[1].0).abs() < 0.01 && s[0].1 < s[1].1);
+        let (low, high) = if ascending {
+            (first, last)
+        } else {
+            (last, first)
+        };
         for side in 0..2 {
             let sign = if side == 0 { -1. } else { 1. };
             let x = if side == 0 { r.0 } else { r.0 + r.2 };
             let p = if (s[0].0 - s[1].0).abs() < 0.01 {
                 let y = r.1 + r.3 / 2.;
                 if (s[0].0 - x) * sign <= 0.
-                    || y < s[0].1.min(s[1].1) + 14.
-                    || y > s[0].1.max(s[1].1) - 14.
+                    || y < s[0].1.min(s[1].1) + low
+                    || y > s[0].1.max(s[1].1) - high
                 {
                     continue;
                 }
@@ -80,16 +94,16 @@ fn candidates(points: &[P], r: Rect) -> Vec<Candidate> {
                 };
                 let gap = (target - y).abs();
                 let available = if side == 0 {
-                    x - s[0].0.min(s[1].0) - 14.
+                    x - s[0].0.min(s[1].0) - low
                 } else {
-                    s[0].0.max(s[1].0) - 14. - x
+                    s[0].0.max(s[1].0) - high - x
                 };
                 let leg = 8_f32.min(gap / 2.).min(available);
                 if leg < 2. {
                     continue;
                 }
                 let end_x = x + sign * leg;
-                if end_x < s[0].0.min(s[1].0) + 14. || end_x > s[0].0.max(s[1].0) - 14. {
+                if end_x < s[0].0.min(s[1].0) + low || end_x > s[0].0.max(s[1].0) - high {
                     continue;
                 }
                 vec![
@@ -242,10 +256,16 @@ mod tests {
         let c = candidates(&[(-50., -30.), (100., -30.)], (0., 0., 40., 20.));
         assert_eq!(c[0].points, vec![(0., 0.), (-8., -8.), (-8., -30.)]);
         assert_eq!(c[1].side, 1);
-        let c = candidates(&[(-20., -30.), (100., -30.)], (0., 0., 40., 20.));
+        let c = candidates(&[(-16., -30.), (100., -30.)], (0., 0., 40., 20.));
         assert_eq!(c[0].points, vec![(0., 0.), (-6., -6.), (-6., -30.)]);
         // The rendered route rounds corners by 10; the dot must be on a straight span.
-        assert!(candidates(&[(-20., 0.), (-20., 20.)], (0., 0., 40., 20.)).is_empty());
+        assert!(
+            candidates(
+                &[(-20., -10.), (-20., 0.), (-20., 20.), (-20., 30.)],
+                (0., 0., 40., 20.)
+            )
+            .is_empty()
+        );
     }
     #[test]
     fn blocks_diagonal_crossings_and_near_touches() {

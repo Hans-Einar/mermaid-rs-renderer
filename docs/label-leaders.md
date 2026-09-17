@@ -13,8 +13,8 @@ halve gapet, og forkortes ved behov for å holde klaring til segmentender. Miter
 Fargen følger theme.line_color og kan styles gjennom SVG.
 
 Geometrien bruker faktisk tekstboks og samme padding som SVG-rendereren.
-Treffpunktet ligger minst 14 enheter fra segmentender (10 for avrundet rutehjørne
-pluss plass til prikk og pilspiss). Pekeren unngår node- og
+Treffpunktet ligger minst 14 enheter fra indre segmentender (avrundede hjørner)
+og 10 fra rutens endepunkter (pilspiss pluss prikk). Pekeren unngår node- og
 tittelbokser, andre etiketter, kanter og tidligere pekere. Prikken holder
 avstand til andre segmenter, blant annet for å unngå kryssingshopp. Alle
 kandidater er maksimalt 100 enheter lange. Over 256 kanter / 4096 rutepunkter
