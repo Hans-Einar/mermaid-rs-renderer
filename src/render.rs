@@ -1,4 +1,5 @@
 mod crossing_jumps;
+mod label_leaders;
 use crate::config::LayoutConfig;
 #[cfg(feature = "png")]
 use crate::config::RenderConfig;
@@ -13,6 +14,7 @@ use crate::text_metrics;
 use crate::theme::{Theme, adjust_color, parse_color_to_hsl};
 use anyhow::Result;
 pub use crossing_jumps::CrossingJumps;
+pub use label_leaders::add_label_leaders;
 use serde::Serialize;
 use std::cmp::Ordering;
 use std::collections::HashMap;
