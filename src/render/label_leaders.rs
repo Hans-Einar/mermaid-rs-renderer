@@ -63,8 +63,8 @@ fn candidates(points: &[P], r: Rect) -> Vec<Candidate> {
             let p = if (s[0].0 - s[1].0).abs() < 0.01 {
                 let y = r.1 + r.3 / 2.;
                 if (s[0].0 - x) * sign <= 0.
-                    || y < s[0].1.min(s[1].1) + 8.
-                    || y > s[0].1.max(s[1].1) - 8.
+                    || y < s[0].1.min(s[1].1) + 14.
+                    || y > s[0].1.max(s[1].1) - 14.
                 {
                     continue;
                 }
@@ -84,7 +84,7 @@ fn candidates(points: &[P], r: Rect) -> Vec<Candidate> {
                     continue;
                 }
                 let end_x = x + sign * leg;
-                if end_x < s[0].0.min(s[1].0) + 8. || end_x > s[0].0.max(s[1].0) - 8. {
+                if end_x < s[0].0.min(s[1].0) + 14. || end_x > s[0].0.max(s[1].0) - 14. {
                     continue;
                 }
                 vec![
@@ -231,6 +231,8 @@ mod tests {
         let c = candidates(&[(-50., -30.), (100., -30.)], (0., 0., 40., 20.));
         assert_eq!(c[0].points, vec![(0., 0.), (-8., -8.), (-8., -30.)]);
         assert_eq!(c[1].side, 1);
+        // The rendered route rounds corners by 10; the dot must be on a straight span.
+        assert!(candidates(&[(-20., 0.), (-20., 20.)], (0., 0., 40., 20.)).is_empty());
     }
     #[test]
     fn blocks_diagonal_crossings_and_near_touches() {

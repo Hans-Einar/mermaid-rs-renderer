@@ -13,7 +13,8 @@ halve gapet. Miter/butt, bredde 1, prikkradius 2,2; vanlig kantbredde er 2.
 Fargen følger theme.line_color og kan styles gjennom SVG.
 
 Geometrien bruker faktisk tekstboks og samme padding som SVG-rendereren.
-Treffpunktet ligger minst 8 enheter fra segmentender. Pekeren unngår node- og
+Treffpunktet ligger minst 14 enheter fra segmentender (10 for avrundet rutehjørne
+pluss plass til prikk og pilspiss). Pekeren unngår node- og
 tittelbokser, andre etiketter, kanter og tidligere pekere. Prikken holder
 avstand til andre segmenter, blant annet for å unngå kryssingshopp. Alle
 kandidater er maksimalt 100 enheter lange. Over 256 kanter / 4096 rutepunkter
