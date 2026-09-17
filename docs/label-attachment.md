@@ -34,3 +34,9 @@ Etikettplassering kan prøve fire faste rekkefølger (areal synkende/stigende,
 kant-ID stigende/synkende). Den første fullt validerte plasseringen beholdes;
 ellers brukes første kandidat til neste eksisterende rutepass. Dette er
 avgrenset til samme opprinnelige arbeidsbudsjett.
+
+En låst port uten gyldig ut-/innretning etter en hindringstransaksjon er
+NoSpace. Den ugyldige ruten publiseres aldri; dette lar eksisterende, ene
+nodeavstandsretry forsøke på nytt. Andre backend-/FFI-feil endrer ikke kategori.
+Regresjonsfixturen layer-delivery-xfmd-wrapped.json inneholder faktiske
+DejaVu Sans 12 pt-mål fra XFMD, omregnet til SVG-enheter, og ferdige tekstlinjer.

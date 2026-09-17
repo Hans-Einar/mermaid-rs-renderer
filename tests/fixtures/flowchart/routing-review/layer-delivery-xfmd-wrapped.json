@@ -1,0 +1,125 @@
+{
+  "": {
+    "width": 0.0,
+    "height": 21.791666666666668,
+    "lines": [
+      ""
+    ]
+  },
+  "Command coordinator": {
+    "width": 168.0,
+    "height": 21.791666666666668,
+    "lines": [
+      "Command coordinator"
+    ]
+  },
+  "Composition": {
+    "width": 93.33333333333333,
+    "height": 21.791666666666668,
+    "lines": [
+      "Composition"
+    ]
+  },
+  "Delivery scheduler": {
+    "width": 138.66666666666666,
+    "height": 21.791666666666668,
+    "lines": [
+      "Delivery scheduler"
+    ]
+  },
+  "Domain contracts": {
+    "width": 132.0,
+    "height": 21.791666666666668,
+    "lines": [
+      "Domain contracts"
+    ]
+  },
+  "Presentation": {
+    "width": 94.66666666666667,
+    "height": 21.791666666666668,
+    "lines": [
+      "Presentation"
+    ]
+  },
+  "Renderer": {
+    "width": 69.33333333333333,
+    "height": 21.791666666666668,
+    "lines": [
+      "Renderer"
+    ]
+  },
+  "Representation": {
+    "width": 113.33333333333333,
+    "height": 21.791666666666668,
+    "lines": [
+      "Representation"
+    ]
+  },
+  "Transport and session": {
+    "width": 164.0,
+    "height": 21.791666666666668,
+    "lines": [
+      "Transport and session"
+    ]
+  },
+  "UI Domain": {
+    "width": 80.0,
+    "height": 21.791666666666668,
+    "lines": [
+      "UI Domain"
+    ]
+  },
+  "domain command": {
+    "width": 134.66666666666666,
+    "height": 21.791666666666668,
+    "lines": [
+      "domain command"
+    ]
+  },
+  "owns lifetime and references": {
+    "width": 130.66666666666666,
+    "height": 43.583333333333336,
+    "lines": [
+      "owns lifetime and",
+      "references"
+    ]
+  },
+  "schema and delivery policy": {
+    "width": 153.33333333333334,
+    "height": 43.583333333333336,
+    "lines": [
+      "schema and delivery",
+      "policy"
+    ]
+  },
+  "schema and patches": {
+    "width": 153.33333333333334,
+    "height": 21.791666666666668,
+    "lines": [
+      "schema and patches"
+    ]
+  },
+  "state changes": {
+    "width": 104.0,
+    "height": 21.791666666666668,
+    "lines": [
+      "state changes"
+    ]
+  },
+  "supplies context and bindings": {
+    "width": 152.0,
+    "height": 43.583333333333336,
+    "lines": [
+      "supplies context and",
+      "bindings"
+    ]
+  },
+  "typed intent through Presentation binding": {
+    "width": 153.33333333333334,
+    "height": 43.583333333333336,
+    "lines": [
+      "typed intent through",
+      "Presentation binding"
+    ]
+  }
+}

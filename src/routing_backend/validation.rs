@@ -83,8 +83,8 @@ pub(super) fn routes(input: &RoutingInput, routes: &[Route]) -> Result<(), Routi
             r.points[r.points.len() - 2],
             input.slide_ports,
         ) {
-            return Err(RoutingError::Backend(format!(
-                "invalid selected port/direction: edge {} {:?}",
+            return Err(RoutingError::NoSpace(format!(
+                "no valid selected port/direction: edge {} {:?}",
                 r.id, r.points
             )));
         }
