@@ -9,7 +9,7 @@ Søk begge sider av etiketten. Frie venstrekandidater prioriteres; innen siden
 velges korteste, med segmentindeks som stabil tie-break. Loddrett mål gir
 vannrett strek fra sidens midtpunkt. Vannrett mål gir 45° ut fra øvre/nedre
 hjørne og så loddrett til segmentet. Diagonalbenet er maks 8 enheter og høyst
-halve gapet. Miter/butt, bredde 1, prikkradius 2,2; vanlig kantbredde er 2.
+halve gapet, og forkortes ved behov for å holde klaring til segmentender. Miter/butt, bredde 1, prikkradius 2,2; vanlig kantbredde er 2.
 Fargen følger theme.line_color og kan styles gjennom SVG.
 
 Geometrien bruker faktisk tekstboks og samme padding som SVG-rendereren.

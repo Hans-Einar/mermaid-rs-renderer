@@ -79,7 +79,12 @@ fn candidates(points: &[P], r: Rect) -> Vec<Candidate> {
                     continue;
                 };
                 let gap = (target - y).abs();
-                let leg = 8_f32.min(gap / 2.);
+                let available = if side == 0 {
+                    x - s[0].0.min(s[1].0) - 14.
+                } else {
+                    s[0].0.max(s[1].0) - 14. - x
+                };
+                let leg = 8_f32.min(gap / 2.).min(available);
                 if leg < 2. {
                     continue;
                 }
@@ -237,6 +242,8 @@ mod tests {
         let c = candidates(&[(-50., -30.), (100., -30.)], (0., 0., 40., 20.));
         assert_eq!(c[0].points, vec![(0., 0.), (-8., -8.), (-8., -30.)]);
         assert_eq!(c[1].side, 1);
+        let c = candidates(&[(-20., -30.), (100., -30.)], (0., 0., 40., 20.));
+        assert_eq!(c[0].points, vec![(0., 0.), (-6., -6.), (-6., -30.)]);
         // The rendered route rounds corners by 10; the dot must be on a straight span.
         assert!(candidates(&[(-20., 0.), (-20., 20.)], (0., 0., 40., 20.)).is_empty());
     }
