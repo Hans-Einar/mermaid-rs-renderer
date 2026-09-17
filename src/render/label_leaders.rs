@@ -142,7 +142,7 @@ pub fn add_label_leaders(
         .nodes
         .values()
         .filter(|n| !n.hidden)
-        .map(|n| (n.x - 2., n.y - 2., n.width + 4., n.height + 4.))
+        .map(|n| (n.x - 3., n.y - 3., n.width + 6., n.height + 6.))
         .chain(
             layout
                 .subgraphs
@@ -176,7 +176,7 @@ pub fn add_label_leaders(
             let tip = *c.points.last().unwrap();
             for (other, edge) in layout.edges.iter().enumerate() {
                 if other != idx
-                    && let Some(b) = label_rect(edge, (pad.0 + 2., pad.1 + 2.))
+                    && let Some(b) = label_rect(edge, (pad.0 + 3., pad.1 + 3.))
                     && hits(&c.points, b)
                 {
                     return false;
@@ -193,6 +193,12 @@ pub fn add_label_leaders(
                         return false;
                     }
                 }
+            }
+            if chosen.iter().any(|other| {
+                let p = other.last().unwrap();
+                (p.0 - tip.0).hypot(p.1 - tip.1) < 5.
+            }) {
+                return false;
             }
             !chosen.iter().any(|other| {
                 other.windows(2).any(|s| {
