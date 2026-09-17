@@ -62,6 +62,7 @@ impl SequenceGeometry {
 }
 
 fn measure_sequence_text(text: &str, theme: &Theme, config: &LayoutConfig) -> TextBlock {
+    super::measurements::checkpoint();
     let mut sequence_config = config.clone();
     sequence_config.max_label_width_chars = sequence_config.max_label_width_chars.min(14);
     measure_label_with_font_size(
@@ -180,13 +181,13 @@ pub(super) fn compute_sequence_layout(
         let node = graph.nodes.get(id).expect("participant missing");
         let label = measure_sequence_text(&node.label, theme, config);
         max_label_height = max_label_height.max(label.height);
-        let width = geometry.actor_min_width;
+        let width = geometry.actor_min_width.max(label.width + 24.0);
         participant_widths.insert(id.clone(), width);
         label_blocks.insert(id.clone(), label);
     }
 
     let actor_height =
-        (max_label_height + geometry.actor_pad_y * 2.0).max(geometry.actor_min_height);
+        (max_label_height + geometry.actor_pad_y * 2.0 + 48.0).max(geometry.actor_min_height);
     let lane_centers = compute_sequence_lane_centers(
         &participants,
         &participant_widths,
@@ -436,7 +437,7 @@ pub(super) fn compute_sequence_layout(
             let mut min_y = first_y;
             let mut max_y = last_y;
             for note in &sequence_notes {
-                if note.index >= frame.start_idx && note.index <= frame.end_idx {
+                if note.index >= frame.start_idx && note.index < frame.end_idx {
                     min_y = min_y.min(note.y);
                     max_y = max_y.max(note.y + note.height);
                 }

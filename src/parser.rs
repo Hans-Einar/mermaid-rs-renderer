@@ -1084,7 +1084,7 @@ fn parse_sequence_participant(
 ) -> Option<(String, Option<String>, crate::ir::NodeShape)> {
     let lowered = line.to_ascii_lowercase();
     let keywords = [
-        ("participant ", crate::ir::NodeShape::ActorBox),
+        ("participant ", crate::ir::NodeShape::Rectangle),
         ("actor ", crate::ir::NodeShape::ActorBox),
         ("boundary ", crate::ir::NodeShape::ActorBox),
         ("control ", crate::ir::NodeShape::ActorBox),

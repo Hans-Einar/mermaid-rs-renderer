@@ -1597,17 +1597,15 @@ fn render_svg_internal(
                     svg.push_str(&format!("<title>{}</title>", escape_xml(title)));
                 }
             }
-            svg.push_str(&format!(
-                "<rect x=\"{:.2}\" y=\"{:.2}\" width=\"{:.2}\" height=\"{:.2}\" rx=\"3\" ry=\"3\" fill=\"{}\" stroke=\"{}\" stroke-width=\"1.0\"/>",
-                node.x,
-                node.y,
-                node.width,
-                node.height,
-                theme.sequence_actor_fill,
-                theme.sequence_actor_border
-            ));
             let center_x = node.x + node.width / 2.0;
-            let center_y = node.y + node.height / 2.0;
+            let mut center_y = node.y + node.height / 2.0;
+            if node.shape == crate::ir::NodeShape::ActorBox {
+                svg.push_str(&sequence_actor_svg(node, theme));
+                center_y = node.y + node.height - 12.0 - node.label.height / 2.0;
+            } else {
+                svg.push_str(&format!("<rect x=\"{:.2}\" y=\"{:.2}\" width=\"{:.2}\" height=\"{:.2}\" rx=\"3\" fill=\"{}\" stroke=\"{}\"/>",
+                    node.x, node.y, node.width, node.height, theme.sequence_actor_fill, theme.sequence_actor_border));
+            }
             let hide_label = node.label.lines.iter().all(|line| line.trim().is_empty())
                 || node.id.starts_with("__start_")
                 || node.id.starts_with("__end_");
@@ -1634,17 +1632,15 @@ fn render_svg_internal(
                     svg.push_str(&format!("<title>{}</title>", escape_xml(title)));
                 }
             }
-            svg.push_str(&format!(
-                "<rect x=\"{:.2}\" y=\"{:.2}\" width=\"{:.2}\" height=\"{:.2}\" rx=\"3\" ry=\"3\" fill=\"{}\" stroke=\"{}\" stroke-width=\"1.0\"/>",
-                footbox.x,
-                footbox.y,
-                footbox.width,
-                footbox.height,
-                theme.sequence_actor_fill,
-                theme.sequence_actor_border
-            ));
             let center_x = footbox.x + footbox.width / 2.0;
-            let center_y = footbox.y + footbox.height / 2.0;
+            let mut center_y = footbox.y + footbox.height / 2.0;
+            if footbox.shape == crate::ir::NodeShape::ActorBox {
+                svg.push_str(&sequence_actor_svg(footbox, theme));
+                center_y = footbox.y + footbox.height - 12.0 - footbox.label.height / 2.0;
+            } else {
+                svg.push_str(&format!("<rect x=\"{:.2}\" y=\"{:.2}\" width=\"{:.2}\" height=\"{:.2}\" rx=\"3\" fill=\"{}\" stroke=\"{}\"/>",
+                    footbox.x, footbox.y, footbox.width, footbox.height, theme.sequence_actor_fill, theme.sequence_actor_border));
+            }
             let hide_label = footbox
                 .label
                 .lines
@@ -7222,4 +7218,27 @@ mod tests {
         assert_eq!(c.blue(), 0.0);
         assert_eq!(c.alpha(), 128.0 / 255.0);
     }
+}
+
+// Actor and participant remain distinct in sequence presentation. Labels fit
+// below the glyph inside the measured header/footer box.
+fn sequence_actor_svg(node: &crate::layout::NodeLayout, theme: &Theme) -> String {
+    let x = node.x + node.width / 2.0;
+    let y = node.y + 10.0;
+    format!(
+        "<g class=\"sequence-actor\" fill=\"none\" stroke=\"{}\" stroke-width=\"1.5\"><circle cx=\"{x}\" cy=\"{}\" r=\"7\"/><path d=\"M {x} {} V {} M {} {} H {} M {x} {} L {} {} M {x} {} L {} {}\"/></g>",
+        theme.line_color,
+        y + 7.0,
+        y + 14.0,
+        y + 30.0,
+        x - 12.0,
+        y + 21.0,
+        x + 12.0,
+        y + 30.0,
+        x - 12.0,
+        y + 42.0,
+        y + 30.0,
+        x + 12.0,
+        y + 42.0
+    )
 }
