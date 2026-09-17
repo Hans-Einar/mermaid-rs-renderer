@@ -65,7 +65,11 @@ fn candidates(points: &[P], r: Rect) -> Vec<Candidate> {
         } else {
             14.
         };
-        let ascending = s[0].0 < s[1].0 || ((s[0].0 - s[1].0).abs() < 0.01 && s[0].1 < s[1].1);
+        let ascending = if (s[0].0 - s[1].0).abs() < 0.01 {
+            s[0].1 < s[1].1
+        } else {
+            s[0].0 < s[1].0
+        };
         let (low, high) = if ascending {
             (first, last)
         } else {
