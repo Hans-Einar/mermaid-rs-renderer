@@ -862,7 +862,7 @@ pub(super) fn subgraph_padding_from_label(
         let title_clearance = (theme.font_size * 0.75).max(10.0);
         pad_y.max(label_height + SUBGRAPH_LABEL_GAP_FLOWCHART + title_clearance)
     } else if graph.kind == crate::ir::DiagramKind::Kanban {
-        pad_y.max(label_height + SUBGRAPH_LABEL_GAP_KANBAN)
+        pad_y.max(label_height + SUBGRAPH_LABEL_GAP_KANBAN + 16.)
     } else if graph.kind == crate::ir::DiagramKind::State {
         // Header height (matches the rendered title band) plus a body inset
         // so the topmost child clears the title separator line instead of

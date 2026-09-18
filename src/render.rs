@@ -2275,9 +2275,10 @@ fn render_sankey(layout: &SankeyLayout, theme: &Theme, _config: &LayoutConfig) -
         }
     }
 
+    let labels_start = svg.len();
     svg.push_str(&format!(
-        "<g class=\"node-labels\" font-size=\"{}\" fill=\"{}\">",
-        label_font_size, theme.primary_text_color
+        "<g class=\"node-labels\" font-family=\"{}\" font-size=\"{}\" fill=\"{}\">",
+        escape_xml(&normalize_font_family(&theme.font_family)), label_font_size, theme.primary_text_color
     ));
     for (idx, node) in layout.nodes.iter().enumerate() {
         let align_left_of_node = node.rank > 0;
@@ -2303,6 +2304,7 @@ fn render_sankey(layout: &SankeyLayout, theme: &Theme, _config: &LayoutConfig) -
     }
     svg.push_str("</g>");
 
+    let labels = svg.split_off(labels_start);
     svg.push_str("<g class=\"links\" fill=\"none\" stroke-opacity=\"0.5\">");
     for link in &layout.links {
         let mid_x = (link.start.0 + link.end.0) / 2.0;
@@ -2338,6 +2340,7 @@ fn render_sankey(layout: &SankeyLayout, theme: &Theme, _config: &LayoutConfig) -
     }
     svg.push_str("</g>");
 
+    svg.push_str(&labels);
     svg
 }
 
