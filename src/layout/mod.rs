@@ -12,6 +12,7 @@ mod kanban;
 pub(crate) mod label_placement;
 pub mod measurements;
 mod mindmap;
+mod packet;
 mod pie;
 mod quadrant;
 pub(crate) mod radar;
@@ -19,6 +20,7 @@ mod ranking;
 mod routing;
 mod sankey;
 mod sequence;
+mod sequence_events;
 mod subgraphs;
 mod text;
 mod timeline;
@@ -208,21 +210,26 @@ pub fn compute_layout_with_metrics(
         crate::ir::DiagramKind::XYChart => compute_xychart_layout(graph, theme, config),
         crate::ir::DiagramKind::Timeline => compute_timeline_layout(graph, theme, config),
         crate::ir::DiagramKind::Journey => compute_journey_layout(graph, theme, config),
+        crate::ir::DiagramKind::Packet => packet::compute(graph, theme, config),
         crate::ir::DiagramKind::Class
         | crate::ir::DiagramKind::State
         | crate::ir::DiagramKind::Er
         | crate::ir::DiagramKind::Requirement
-        | crate::ir::DiagramKind::Packet
         | crate::ir::DiagramKind::Flowchart => {
             compute_flowchart_layout(graph, theme, config, Some(&mut stage_metrics), true)
         }
     };
 
+    if !graph.sequence_events.is_empty() {
+        sequence_events::apply(graph, &mut layout, theme, config);
+    }
     apply_preferred_aspect_ratio_layout(&mut layout, config);
 
     // Final pass: resolve all edge label positions using collision avoidance.
     let label_start = Instant::now();
-    label_placement::resolve_all_label_positions(&mut layout, theme, config);
+    if graph.sequence_events.is_empty() {
+        label_placement::resolve_all_label_positions(&mut layout, theme, config);
+    }
     if matches!(layout.diagram, DiagramData::Sequence(_)) {
         sequence::finalize_sequence_layout_bounds(&mut layout);
     } else if matches!(layout.diagram, DiagramData::Graph { .. }) {
@@ -3188,3 +3195,6 @@ flowchart LR
 }
 
 pub mod routed;
+
+mod semantic_layout;
+pub use semantic_layout::compute_semantic_layout;

@@ -568,3 +568,14 @@ has no dependency on `resvg` unless the separate `png` feature is enabled.
 `render_scene(input, RenderOptions)` returns `anyhow::Result<Scene>` and preserves
 strict `ParseError` diagnostics through `anyhow` downcasting. The scene types are
 available both at the crate root and in `mermaid_rs_renderer::scene`.
+
+### XFMD Sequence 1 integration (fork)
+
+`phase/sequence-foundation` distinguishes `actor` (ActorBox/stick figure) from
+`participant` (Rectangle), sizes participant boxes using measured labels, checks
+the cooperative deadline while measuring sequence text, and treats frame ends
+as exclusive when including notes. It does not claim full Mermaid sequence
+compatibility: async arrows and nested-frame/event-boundary fidelity still need
+work. XFMD exposes a validated subset and preserves ordered typed events.
+Verification: `cargo test --locked --no-default-features --features libavoid --lib
+--test sequence_profile_suite`. The budget is cooperative, not a hard timeout.

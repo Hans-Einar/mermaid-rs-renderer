@@ -30,10 +30,18 @@ pub(super) fn input(layout: &Layout) -> Result<RoutingInput, RoutingError> {
             for i in 0..count {
                 let offset = (i as f32 / (count - 1) as f32 - 0.5) * (len - 16.).max(0.) * 0.8;
                 let p = anchor_point_for_node(n, side, offset);
-                ports.push(Port {
-                    point: (p.0 as f64, p.1 as f64),
-                    directions: dir,
-                });
+                let point = (p.0 as f64, p.1 as f64);
+                // Small pseudostates have no tangential port span. Do not
+                // register multiple exclusive pins at the same location.
+                if !ports
+                    .iter()
+                    .any(|port: &Port| port.point == point && port.directions == dir)
+                {
+                    ports.push(Port {
+                        point,
+                        directions: dir,
+                    });
+                }
             }
         }
         let oid = obstacles.len() as u32 + 1;
