@@ -8,8 +8,8 @@ use crate::ir::{DiagramKind, EdgeArrowhead};
 pub(crate) fn arrowhead_inset(kind: DiagramKind, arrow_kind: Option<EdgeArrowhead>) -> f32 {
     match kind {
         DiagramKind::Class => match arrow_kind {
-            Some(EdgeArrowhead::OpenTriangle) => 17.0,
-            Some(EdgeArrowhead::ClassDependency | EdgeArrowhead::OpenV) => 5.0,
+            Some(EdgeArrowhead::OpenTriangle) => 0.0,
+            Some(EdgeArrowhead::ClassDependency | EdgeArrowhead::OpenV) => 0.0,
             None => 4.0,
         },
         _ => 0.0,

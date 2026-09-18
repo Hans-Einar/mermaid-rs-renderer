@@ -3194,3 +3194,6 @@ flowchart LR
 }
 
 pub mod routed;
+
+mod semantic_layout;
+pub use semantic_layout::compute_semantic_layout;

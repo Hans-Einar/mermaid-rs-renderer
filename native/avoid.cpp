@@ -68,6 +68,7 @@ extern "C" int mermaid_avoid_route(const Pt* points, const Pin* pins,
       }
     }
     std::vector<Avoid::ConnRef*> connectors;
+    std::vector<std::pair<Pt,Pt>> loopBoundaries(edge_count);
     for (size_t i=0;i<edge_count;++i) {
       const auto& e = edges[i];
       auto fixedPin = [&](bool source) {
@@ -87,13 +88,26 @@ extern "C" int mermaid_avoid_route(const Pt* points, const Pin* pins,
       // when other connectors share the shape. Use two explicit boundary
       // endpoints for loops; libavoid still owns all orthogonal routing.
       Pt loopSource{};
+      auto exteriorEnd = [&](Pt p, unsigned dirs, bool source) {
+        // Free-point endpoints on an inflated shape can become trapped after
+        // locking a previously selected loop port. Start libavoid just outside
+        // its buffer, then restore the short normal boundary segment on output.
+        if (source) loopBoundaries[i].first=p; else loopBoundaries[i].second=p;
+        const double distance=clearance+1.0;
+        if (dirs & Avoid::ConnDirUp) p.y-=distance;
+        else if (dirs & Avoid::ConnDirDown) p.y+=distance;
+        else if (dirs & Avoid::ConnDirLeft) p.x-=distance;
+        else if (dirs & Avoid::ConnDirRight) p.x+=distance;
+        else throw std::runtime_error("self-loop endpoint has no direction");
+        return Avoid::ConnEnd(Avoid::Point(p.x,p.y),dirs);
+      };
       auto loopEnd = [&](bool source) {
         const unsigned dirs = source ? e.source_dirs : e.target_dirs;
         const unsigned bit = source ? 1 : 2;
         if (e.locked & bit) {
           const auto p = source ? e.source_pin : e.target_pin;
           if (source) loopSource = p;
-          return Avoid::ConnEnd(Avoid::Point(p.x,p.y),dirs);
+          return exteriorEnd(p,dirs,source);
         }
         for (size_t k=0;k<shape_count;++k) if (shapes[k].id==e.source) {
           const auto& shape = shapes[k];
@@ -101,7 +115,7 @@ extern "C" int mermaid_avoid_route(const Pt* points, const Pin* pins,
             const auto& p = pins[shape.first_pin+j];
             if (!(p.dirs & dirs) || (!source && p.p.x==loopSource.x && p.p.y==loopSource.y)) continue;
             if (source) loopSource=p.p;
-            return Avoid::ConnEnd(Avoid::Point(p.p.x,p.p.y),p.dirs & dirs);
+            return exteriorEnd(p.p,p.dirs & dirs,source);
           }
         }
         throw std::runtime_error("no distinct boundary ports for self-loop");
@@ -125,7 +139,9 @@ extern "C" int mermaid_avoid_route(const Pt* points, const Pin* pins,
     for (size_t i=0;i<edge_count;++i) {
       const auto& route = connectors[i]->displayRoute();
       std::vector<Pt> result;
+      if (edges[i].source==edges[i].target) result.push_back(loopBoundaries[i].first);
       for (const auto& p : route.ps) result.push_back({p.x,p.y});
+      if (edges[i].source==edges[i].target) result.push_back(loopBoundaries[i].second);
       if (result.size()<2) throw std::runtime_error("libavoid returned no route");
       if (!emit(context,edges[i].id,result.data(),result.size())) return 2;
     }

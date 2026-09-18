@@ -400,19 +400,19 @@ fn render_svg_internal(
         }
         if is_class {
             svg.push_str(&format!(
-                "<marker id=\"arrow-class-open-{idx}\" viewBox=\"0 0 20 14\" refX=\"1\" refY=\"7\" markerUnits=\"userSpaceOnUse\" markerWidth=\"20\" markerHeight=\"14\" orient=\"auto\"><path d=\"M 1 7 L 18 13 V 1 Z\" fill=\"none\" stroke=\"{}\" stroke-width=\"1\" stroke-dasharray=\"1,0\"/></marker>",
-                color
+                "<marker id=\"arrow-class-open-{idx}\" viewBox=\"0 0 20 14\" refX=\"18\" refY=\"7\" markerUnits=\"userSpaceOnUse\" markerWidth=\"20\" markerHeight=\"14\" orient=\"auto\"><path d=\"M 18 7 L 1 13 V 1 Z\" fill=\"{}\" stroke=\"{}\" stroke-width=\"1\" stroke-dasharray=\"1,0\"/></marker>",
+                theme.background, color
             ));
             svg.push_str(&format!(
-                "<marker id=\"arrow-class-open-start-{idx}\" viewBox=\"0 0 20 14\" refX=\"18\" refY=\"7\" markerUnits=\"userSpaceOnUse\" markerWidth=\"20\" markerHeight=\"14\" orient=\"auto\"><path d=\"M 1 7 L 18 13 V 1 Z\" fill=\"none\" stroke=\"{}\" stroke-width=\"1\" stroke-dasharray=\"1,0\"/></marker>",
-                color
+                "<marker id=\"arrow-class-open-start-{idx}\" viewBox=\"0 0 20 14\" refX=\"1\" refY=\"7\" markerUnits=\"userSpaceOnUse\" markerWidth=\"20\" markerHeight=\"14\" orient=\"auto\"><path d=\"M 1 7 L 18 13 V 1 Z\" fill=\"{}\" stroke=\"{}\" stroke-width=\"1\" stroke-dasharray=\"1,0\"/></marker>",
+                theme.background, color
             ));
             svg.push_str(&format!(
-                "<marker id=\"arrow-class-dep-{idx}\" viewBox=\"0 0 20 14\" refX=\"13\" refY=\"7\" markerUnits=\"userSpaceOnUse\" markerWidth=\"20\" markerHeight=\"14\" orient=\"auto\"><path d=\"M 18 7 L 9 13 L 14 7 L 9 1 Z\" fill=\"{}\" stroke=\"{}\" stroke-width=\"1\" stroke-dasharray=\"1,0\"/></marker>",
+                "<marker id=\"arrow-class-dep-{idx}\" viewBox=\"0 0 20 14\" refX=\"18\" refY=\"7\" markerUnits=\"userSpaceOnUse\" markerWidth=\"20\" markerHeight=\"14\" orient=\"auto\"><path d=\"M 18 7 L 9 13 L 14 7 L 9 1 Z\" fill=\"{}\" stroke=\"{}\" stroke-width=\"1\" stroke-dasharray=\"1,0\"/></marker>",
                 color, color
             ));
             svg.push_str(&format!(
-                "<marker id=\"arrow-class-dep-start-{idx}\" viewBox=\"0 0 20 14\" refX=\"6\" refY=\"7\" markerUnits=\"userSpaceOnUse\" markerWidth=\"20\" markerHeight=\"14\" orient=\"auto\"><path d=\"M 5 7 L 9 13 L 1 7 L 9 1 Z\" fill=\"{}\" stroke=\"{}\" stroke-width=\"1\" stroke-dasharray=\"1,0\"/></marker>",
+                "<marker id=\"arrow-class-dep-start-{idx}\" viewBox=\"0 0 20 14\" refX=\"1\" refY=\"7\" markerUnits=\"userSpaceOnUse\" markerWidth=\"20\" markerHeight=\"14\" orient=\"auto\"><path d=\"M 5 7 L 9 13 L 1 7 L 9 1 Z\" fill=\"{}\" stroke=\"{}\" stroke-width=\"1\" stroke-dasharray=\"1,0\"/></marker>",
                 color, color
             ));
         }
@@ -6137,7 +6137,12 @@ fn edge_decoration_svg(
     let mut angle = angle_deg;
     if matches!(
         decoration,
-        crate::ir::EdgeDecoration::Diamond | crate::ir::EdgeDecoration::DiamondFilled
+        crate::ir::EdgeDecoration::Diamond
+            | crate::ir::EdgeDecoration::DiamondFilled
+            | crate::ir::EdgeDecoration::CrowsFootOne
+            | crate::ir::EdgeDecoration::CrowsFootZeroOne
+            | crate::ir::EdgeDecoration::CrowsFootMany
+            | crate::ir::EdgeDecoration::CrowsFootZeroMany
     ) && !at_start
     {
         angle += 180.0;
@@ -6168,19 +6173,19 @@ fn edge_decoration_svg(
         }
         // Crow's foot notation for ER diagrams
         crate::ir::EdgeDecoration::CrowsFootOne => format!(
-            "<path d=\"M 0 -6 L 0 6 M 5 -6 L 5 6\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"{join}/>",
+            "<path d=\"M 6 -6 L 6 6 M 12 -6 L 12 6\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"{join}/>",
             stroke, stroke_width
         ),
         crate::ir::EdgeDecoration::CrowsFootZeroOne => format!(
-            "<g><circle cx=\"-4\" cy=\"0\" r=\"4\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"/><path d=\"M 4 -6 L 4 6\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"{join}/></g>",
+            "<g><circle cx=\"18\" cy=\"0\" r=\"4\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"/><path d=\"M 6 -6 L 6 6\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"{join}/></g>",
             stroke, stroke_width, stroke, stroke_width
         ),
         crate::ir::EdgeDecoration::CrowsFootMany => format!(
-            "<path d=\"M 0 -6 L 0 6 M 0 0 L 8 -6 M 0 0 L 8 6\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"{join}/>",
+            "<path d=\"M 0 -6 L 10 0 L 0 6 M 16 -6 L 16 6\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"{join}/>",
             stroke, stroke_width
         ),
         crate::ir::EdgeDecoration::CrowsFootZeroMany => format!(
-            "<g><circle cx=\"-4\" cy=\"0\" r=\"4\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"/><path d=\"M 4 0 L 12 -6 M 4 0 L 12 6\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"{join}/></g>",
+            "<g><circle cx=\"18\" cy=\"0\" r=\"4\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"/><path d=\"M 0 -6 L 10 0 L 0 6\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"{join}/></g>",
             stroke, stroke_width, stroke, stroke_width
         ),
     };
