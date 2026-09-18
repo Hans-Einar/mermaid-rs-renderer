@@ -1,0 +1,179 @@
+{
+  "contract": "BX-HOST/0.1-draft1",
+  "key": {
+    "session": "test-session",
+    "epoch": "1",
+    "blockId": "activity-demo",
+    "incarnation": "1",
+    "sourceRevision": "1",
+    "bindingRevision": "1",
+    "stateRevision": "1",
+    "viewportRevision": "1",
+    "themeRevision": "1",
+    "frameSequence": "1"
+  },
+  "model": {
+    "profile": "boxui/0.1",
+    "documentId": "activity-demo",
+    "bindings": [
+      {
+        "id": "measurement",
+        "role": "value",
+        "type": "number"
+      },
+      {
+        "id": "context",
+        "role": "value",
+        "type": "string"
+      },
+      {
+        "id": "set-context",
+        "role": "command",
+        "type": "string"
+      },
+      {
+        "id": "suspend",
+        "role": "command",
+        "type": "none"
+      },
+      {
+        "id": "resume",
+        "role": "command",
+        "type": "none"
+      }
+    ],
+    "root": {
+      "id": "panel",
+      "kind": "column",
+      "version": 1,
+      "children": [
+        {
+          "id": "heading",
+          "kind": "text",
+          "version": 1,
+          "text": "Simulert Activity — ikke produksjonsstyring"
+        },
+        {
+          "id": "measure",
+          "kind": "value",
+          "version": 1,
+          "label": "Måling (mm)",
+          "valueBinding": "measurement"
+        },
+        {
+          "id": "context-input",
+          "kind": "input",
+          "version": 1,
+          "label": "Arbeidskontekst",
+          "valueBinding": "context",
+          "commandBinding": "set-context"
+        },
+        {
+          "id": "actions",
+          "kind": "row",
+          "version": 1,
+          "children": [
+            {
+              "id": "pause",
+              "kind": "button",
+              "version": 1,
+              "label": "Suspend",
+              "commandBinding": "suspend"
+            },
+            {
+              "id": "continue",
+              "kind": "button",
+              "version": 1,
+              "label": "Resume",
+              "commandBinding": "resume"
+            }
+          ]
+        },
+        {
+          "id": "state-view",
+          "kind": "diagram",
+          "version": 1,
+          "label": "Dokumentert livsløp, ikke kjørbar tilstandsmaskin",
+          "family": "stateDiagram-v2",
+          "size": {
+            "min": 160,
+            "grow": 1
+          },
+          "childRef": "state-view"
+        }
+      ]
+    }
+  },
+  "snapshot": {
+    "contextRevision": "ctx-1",
+    "values": [
+      {
+        "id": "measurement",
+        "type": "number",
+        "value": 42,
+        "validity": "current",
+        "revision": "1",
+        "sourceSession": "source-1"
+      },
+      {
+        "id": "context",
+        "type": "string",
+        "value": "C1",
+        "validity": "current",
+        "revision": "1",
+        "sourceSession": "source-1"
+      }
+    ],
+    "commands": [
+      {
+        "id": "set-context",
+        "argumentType": "string",
+        "enabled": true,
+        "reason": "",
+        "provenance": "simulated"
+      },
+      {
+        "id": "suspend",
+        "argumentType": "none",
+        "enabled": true,
+        "reason": "",
+        "provenance": "simulated"
+      },
+      {
+        "id": "resume",
+        "argumentType": "none",
+        "enabled": true,
+        "reason": "",
+        "provenance": "simulated"
+      }
+    ]
+  },
+  "viewport": {
+    "width": 640,
+    "height": 480
+  },
+  "palette": {
+    "background": "#202020ff",
+    "foreground": "#eeeeeeff",
+    "surface": "#202020ff",
+    "border": "#eeeeeeff",
+    "accent": "#eeeeeeff",
+    "muted": "#eeeeeeff",
+    "error": "#eeeeeeff"
+  },
+  "fontSignature": "fixture-font-v1",
+  "budgetMs": 2000,
+  "childProfiles": [
+    "XFMD Flowchart 1",
+    "XFMD Sequence 2",
+    "XFMD State 1"
+  ],
+  "children": [
+    {
+      "ref": "state-view",
+      "width": 200,
+      "height": 160,
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"160\"><text x=\"5\" y=\"20\">Mock child scene</text></svg>"
+    }
+  ]
+}

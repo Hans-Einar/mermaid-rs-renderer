@@ -11,9 +11,9 @@ updated: 2026-09-18
 
 | ID | Description | Structured descriptor | Readiness |
 |---|---|---|---|
-| BX-BP01 | [System responsibilities](10-02--System-Responsibilities.md) | [Descriptor](10-02--System-Responsibilities.blueprint.json) | Blocked: formal source and generator not bound. |
-| BX-BP02 | [Widget layout](10-03--Widget-Layout.md) | [Descriptor](10-03--Widget-Layout.blueprint.json) | Blocked: BoxUI model/profile and generator not bound. |
-| BX-BP03 | [Frame and input interaction](10-04--Frame-Interaction.md) | [Descriptor](10-04--Frame-Interaction.blueprint.json) | Blocked: behavioral model and generator not bound. |
+| BX-BP01 | [System responsibilities](10-02--System-Responsibilities.md) | [Descriptor](10-02--System-Responsibilities.blueprint.json) | Blocked: structural source exists; projection generator not bound. |
+| BX-BP02 | [Widget layout](10-03--Widget-Layout.md) | [Descriptor](10-03--Widget-Layout.blueprint.json) | Blocked: draft widget contract exists; generator not bound. |
+| BX-BP03 | [Frame and input interaction](10-04--Frame-Interaction.md) | [Descriptor](10-04--Frame-Interaction.blueprint.json) | Blocked: prose behavior exists; executable projection not bound. |
 
 A blueprint is a named projection of model facts with a purpose and preservation
 rules. It is not merely “render whichever Mermaid file is found.”

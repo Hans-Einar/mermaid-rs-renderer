@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract": {
+      "const": "BX-HOST/0.1-draft1"
+    },
+    "commandId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contextRevision": {
+      "type": "string"
+    },
+    "outcome": {
+      "enum": [
+        "accepted",
+        "rejected",
+        "pending",
+        "unknown"
+      ]
+    },
+    "message": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract",
+    "commandId",
+    "contextRevision",
+    "outcome",
+    "message"
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

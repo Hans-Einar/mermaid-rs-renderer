@@ -11,7 +11,7 @@
     "title": "Mermaid BoxUI extension",
     "repository": "https://github.com/Hans-Einar/mermaid-rs-renderer",
     "branchAtCapture": "feature/boxui-extension",
-    "headAtCapture": "225a5a28632bbfd36c78fa522327f5dbe177d78e"
+    "headAtCapture": "d1e70c4c52502a549fdde3081387643f0c498441"
   },
   "generatedRoot": "generated",
   "documents": [
@@ -164,6 +164,18 @@
       "path": "02--Study/02-02--Workspace-Provenance.md",
       "title": "Workspace provenance",
       "status": "inventory"
+    },
+    {
+      "id": "SDP-06-02",
+      "path": "06--Container-Design/06-02--XFMD-Host-Contract.md",
+      "title": "XFMD host contract — BX-HOST/0.1-draft1",
+      "status": "draft"
+    },
+    {
+      "id": "SDP-09-03",
+      "path": "09--Verification/09-03--Acceptance-Catalog.md",
+      "title": "Acceptance catalog",
+      "status": "draft"
     }
   ],
   "modules": [
@@ -243,7 +255,23 @@
       "evidence": []
     }
   ],
-  "sourceSets": [],
+  "sourceSets": [
+    {
+      "id": "BX-SRC-STRUCTURE",
+      "language": "design-core",
+      "profile": "design-core/0.1",
+      "members": [
+        "07--Detailed-Design/SDL/BoxUi.design"
+      ],
+      "entryPoints": [
+        {
+          "id": "BX-ENTRY-STRUCTURE",
+          "path": "07--Detailed-Design/SDL/BoxUi.design",
+          "system": "BoxUiLibrary"
+        }
+      ]
+    }
+  ],
   "targets": [
     {
       "id": "BX-TGT-RENDERER-TEST",
@@ -309,7 +337,7 @@
       "kind": "parse",
       "module": "BX-MOD-SDL",
       "state": "blocked",
-      "reason": "No compatible SDL profile or explicit source set/entry point is bound.",
+      "reason": "Structural source declared and checked externally with design-core 0.1; portable parser dependency/runner not bound in this repository.",
       "runner": null,
       "requires": [],
       "outputs": [],
@@ -349,7 +377,7 @@
       "kind": "blueprint",
       "module": "BX-MOD-BOXUI",
       "state": "blocked",
-      "reason": "Canonical model source and projection/generator bindings are not implemented.",
+      "reason": "Structural SDL source exists, but projection/compiler and widget/behavior source semantics are not implemented.",
       "runner": null,
       "requires": [],
       "outputs": [
@@ -363,7 +391,7 @@
       "kind": "blueprint",
       "module": "BX-MOD-BOXUI",
       "state": "blocked",
-      "reason": "Canonical model source and projection/generator bindings are not implemented.",
+      "reason": "Structural SDL source exists, but projection/compiler and widget/behavior source semantics are not implemented.",
       "runner": null,
       "requires": [],
       "outputs": [
@@ -377,13 +405,33 @@
       "kind": "blueprint",
       "module": "BX-MOD-HOST",
       "state": "blocked",
-      "reason": "Canonical model source and projection/generator bindings are not implemented.",
+      "reason": "Structural SDL source exists, but projection/compiler and widget/behavior source semantics are not implemented.",
       "runner": null,
       "requires": [],
       "outputs": [
         "blueprints/BX-BP03.mmd"
       ],
       "evidence": []
+    },
+    {
+      "id": "BX-TGT-DESIGN-CHECK",
+      "title": "Check local design artifacts (not product behavior)",
+      "kind": "test",
+      "module": "BX-MOD-BOXUI",
+      "state": "bound",
+      "reason": "Scoped authoring checker; Python 3 and jsonschema required. No runtime acceptance claim.",
+      "runner": {
+        "root": "sdp",
+        "argv": [
+          "python3",
+          "09--Verification/check_design.py"
+        ]
+      },
+      "requires": [],
+      "outputs": [],
+      "evidence": [
+        "SDP-09-02"
+      ]
     }
   ],
   "blueprints": [
@@ -451,4 +499,3 @@
     }
   ]
 }
-

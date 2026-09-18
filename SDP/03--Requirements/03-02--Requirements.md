@@ -31,10 +31,26 @@ nature are separate classifications. Changes retain IDs and rationale.
 ## Coverage and unresolved measurements
 
 User cases BX-UC-01 through BX-UC-04 motivate these obligations. The functional
-and verification documents map contributions and checks. BX-R08 budget values,
-BX-R02 viewport cases and BX-R12 exact input/accessibility support remain open;
-do not claim completed design or verification until relevant gaps are resolved.
+and verification documents map contributions and checks. Draft1 now supplies proposed BX-R08 budgets, BX-R02 viewports and BX-R12
+input/accessibility scope below. They await owner review and real implementation
+evidence; specified values are not measured product results.
 
 Prototype checks do not establish native production-toolkit equivalence or
 physical machine suitability.
 
+
+## Derived XFMD obligations and acceptance values — draft1
+
+| ID | Nature | Obligation | Acceptance |
+|---|---|---|---|
+| BX-R13 | Functional | XFMD is the required native interactive host for BoxUI in mixed Markdown. | BX-AT01/04/06: no browser process, real FOX input, unaffected adjacent text/links. |
+| BX-R14 | Constraint | Preview/PDF share geometry; PDF freezes accepted values and never runs interactions. | BX-AT08: vector export, simulated marker, no draft leakage or dispatch. |
+| BX-R15 | Constraint | Separate renderer/host workstreams share a versioned contract before parallel implementation. | BX-AT12: registered artifacts, ownership, independently usable mocks, review gate. |
+
+BX-R08 numeric budgets are in host contract section 8. BX-R02 test viewports are
+320x240, 640x480 and 1280x720, with overflow expected when minima cannot fit.
+BX-R12 requires keyboard-only activation, focus traversal, Unicode editing and
+clipboard; role/name/disabled descriptors. Screen-reader integration and broad
+IME/platform equivalence are explicitly not established by the prototype.
+[Acceptance catalog](../09--Verification/09-03--Acceptance-Catalog.md) gives cases
+and expected outcomes. All obligations are design candidates, not passed product tests.

@@ -28,3 +28,16 @@ These cases propose scope within the mandate; exact actors, preconditions,
 alternative paths and measurable acceptance criteria must be completed before
 claiming design coverage. A UI demonstration alone does not prove every case.
 
+
+## Concrete first actor and paths
+
+The actor opens a local `.md` file in XFMD; no web page is launched.
+BX-UC-01 precondition: supported fence/profile; success is readable static graphics
+and available controls. Unknown profile/duplicate block ID gives a local source diagnostic.
+BX-UC-02 precondition: explicitly enabled registered synthetic session; mouse and
+keyboard submissions reach its typed port, results and Value currentness are visible.
+Unbound controls remain disabled; opening a document alone never starts a scenario.
+BX-UC-03 precondition: dirty input draft and active frame; resize/theme-only replacement
+retains it, binding/context changes reject stale submissions and explain discarded drafts.
+BX-UC-04 starts at SDP README and reaches source model, contracts, acceptance cases,
+missing runtime bindings and separate XFMD task without implying those targets ran.

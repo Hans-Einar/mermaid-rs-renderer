@@ -17,9 +17,11 @@ The existing Rust library test target records `cargo test --locked --lib`
 at repository root. It was not run for this documentation-only delivery;
 toolchain/dependency readiness is checked when execution is requested.
 
-All BoxUI compile/run/test targets have no runner binding yet. They must be listed
-with blockers rather than hidden or marked runnable. No SDL source set/entry
-point is currently declared. Generated outputs are not sources.
+All BoxUI product compile/run/test targets have no runner binding yet.
+The scoped design-artifact checker is a separate bound authoring target. They must be listed
+with blockers rather than hidden or marked runnable. One structural design-core 0.1 source set and entry point is now declared;
+its parser was run from the inspected sibling SDP checkout. No portable parser
+runner or executable SDL behavior is bound here. Generated outputs are not sources.
 
 ## Binding completion
 

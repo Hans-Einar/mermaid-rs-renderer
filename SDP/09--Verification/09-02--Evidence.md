@@ -51,3 +51,31 @@ Schema SHA-256 at check:
 These checks establish consistency of this authoring snapshot. They are not a
 general validator implementation, a passed Cargo test suite, executable SDL
 coverage or evidence that the proposed structure is optimal for other projects.
+
+
+## Delivery record BX-E02 — parallel-design review checkpoint
+
+This additive record supersedes BX-E01 counts/current-path inventory; BX-E01
+remains historical authoring evidence from before mandate relocation.
+
+Checked draft1: 27 documents, one real design-core 0.1 source set, 11 targets,
+78 local Markdown links, six contract schemas/positive fixtures, ten negative
+artifact cases. Source/model/prepare fixture consistency is checked separately
+from rendering. [Actual checker output](evidence/design-check.txt).
+
+The external SDP design-core parser accepts the canonical structural model with
+zero diagnostics; reversed ownership is rejected. [Positive](evidence/sdl-check.json),
+[negative](evidence/sdl-negative.json), [source/parser fingerprints](evidence/design-fingerprint.json).
+These checks establish syntax, structural typing and bounded artifact consistency.
+They do not establish temporal behavior, native input, SVG safety, layout quality,
+PDF output, thread safety or source-code conformance. No product tests or build ran.
+
+Manual author review traced parser -> typed model -> child preparation -> layout
+-> frame publication -> FOX controls -> intent -> participant -> observed Value.
+It found and corrected (1) optional-XFMD wording, (2) raw child-source parsing at
+the layout boundary, (3) distinction between old-context host rejection and
+participant context conflict, (4) mock viewport mismatch. This is author review,
+not an independent verifier or owner approval.
+
+Gate G-PARALLEL-REVIEW: design package available for recap. No implementation gate
+has passed. Remaining bounded choices are recorded in SDP-12-01.

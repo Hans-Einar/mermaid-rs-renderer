@@ -1,0 +1,72 @@
+language design-core version 0.1.
+functionality AllocateRegions.
+interface BoxUiFrameContract.
+unit BoxUiLayout.
+unit BoxUiLibrary.
+unit BoxUiPainter.
+unit BoxUiParser.
+capability ComposedPresentation.
+functionality DefineWidgets.
+activity EditAndSubmit.
+unit FoxOverlay.
+capability InteractivePrototype.
+interface ObservationContract.
+functionality ParseBoxUi.
+activity PrepareAndPublish.
+functionality PrepareFrame.
+unit PresentationCoordinator.
+mode PrototypeMode.
+activity PrototypeSession.
+functionality PublishFrame.
+functionality RetainDraft.
+functionality RouteIntent.
+functionality SimulateActivity.
+capability StableReplacement.
+unit SyntheticParticipant.
+interface TypedIntentContract.
+unit WidgetRegistry.
+container XfmdHost.
+AllocateRegions has repeatability = deterministic.
+AllocateRegions has state-retention = stateless.
+AllocateRegions realizes ComposedPresentation.
+BoxUiLayout owns AllocateRegions.
+BoxUiLibrary contains BoxUiLayout.
+BoxUiLibrary contains BoxUiPainter.
+BoxUiLibrary contains BoxUiParser.
+BoxUiLibrary contains WidgetRegistry.
+BoxUiLibrary provides ComposedPresentation.
+BoxUiPainter owns PrepareFrame.
+BoxUiParser owns ParseBoxUi.
+DefineWidgets has repeatability = deterministic.
+DefineWidgets has state-retention = stateless.
+DefineWidgets realizes ComposedPresentation.
+EditAndSubmit refines PrototypeSession.
+FoxOverlay owns RetainDraft.
+InteractivePrototype requires TypedIntentContract in mode PrototypeMode.
+ParseBoxUi has repeatability = deterministic.
+ParseBoxUi has state-retention = stateless.
+ParseBoxUi realizes ComposedPresentation.
+PrepareAndPublish refines PrototypeSession.
+PrepareFrame has repeatability = deterministic.
+PrepareFrame has state-retention = stateless.
+PrepareFrame realizes ComposedPresentation.
+PresentationCoordinator consumes BoxUiFrameContract.
+PresentationCoordinator consumes ObservationContract.
+PresentationCoordinator consumes TypedIntentContract.
+PresentationCoordinator owns PublishFrame.
+PresentationCoordinator owns RouteIntent.
+PublishFrame has state-retention = stateful.
+PublishFrame realizes StableReplacement.
+RetainDraft has state-retention = stateful.
+RetainDraft realizes StableReplacement.
+RouteIntent has state-retention = stateful.
+RouteIntent realizes InteractivePrototype.
+SimulateActivity has state-retention = stateful.
+SimulateActivity realizes InteractivePrototype.
+SyntheticParticipant owns SimulateActivity.
+WidgetRegistry owns DefineWidgets.
+XfmdHost contains FoxOverlay.
+XfmdHost contains PresentationCoordinator.
+XfmdHost contains SyntheticParticipant.
+XfmdHost provides InteractivePrototype.
+XfmdHost provides StableReplacement.

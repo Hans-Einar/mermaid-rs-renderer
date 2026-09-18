@@ -14,6 +14,17 @@ The machine entry point is [sdp-project.json](sdp-project.json), validated again
 planned modules, bound and blocked targets, and explicit blueprint descriptions.
 No current SDL compiler or SDP-Analyzer compatibility is implied.
 
+## Current review entry
+
+[Delivery/recap](12--Delivery/12-01--Delivery-and-Compatibility.md),
+[shared XFMD contract](06--Container-Design/06-02--XFMD-Host-Contract.md),
+[parallel packages and stop gate](08--Realization/08-02--Delivery-Plan.md),
+[SDL structure](07--Detailed-Design/SDL/BoxUi.design),
+[practical Markdown fixture](09--Verification/fixtures/activity.md).
+
+XFMD is the required native interactive host. No HTML page is being built.
+G-PARALLEL-REVIEW is a review checkpoint, not authorization to start implementation.
+
 ## Numbered document index
 
 | ID | Document | Status |
@@ -42,11 +53,13 @@ No current SDL compiler or SDP-Analyzer compatibility is implied.
 | SDP-10-04 | [Frame and input interaction blueprint](10--Blueprints/10-04--Frame-Interaction.md) | planned |
 | SDP-11-01 | [Decision log](11--Decisions-and-Traceability/11-01--Decision-Log.md) | pilot |
 | SDP-11-02 | [Traceability and change impact](11--Decisions-and-Traceability/11-02--Traceability.md) | pilot |
+| SDP-06-02 | [XFMD host contract](06--Container-Design/06-02--XFMD-Host-Contract.md) | draft |
+| SDP-09-03 | [Acceptance catalog](09--Verification/09-03--Acceptance-Catalog.md) | draft |
 | SDP-12-01 | [Delivery and compatibility](12--Delivery/12-01--Delivery-and-Compatibility.md) | planned |
 
 ## Current scope
 
-Only the mandate and pilot records are delivered here. BoxUI and its widget
+The draft1 design handoff, structural SDL and contract fixtures are delivered here. BoxUI and its widget
 library are not implemented. The existing renderer library has a declared Cargo
 test target; it was not run for this authoring task. All new compile/run/generation
 targets disclose missing bindings. See [evidence](09--Verification/09-02--Evidence.md).

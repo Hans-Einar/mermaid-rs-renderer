@@ -1,0 +1,47 @@
+{
+  "valid": false,
+  "diagnostics": [
+    {
+      "code": "SUBJECT_TYPE_MISMATCH",
+      "message": "subject ParseBoxUi expects unit, received functionality",
+      "span": {
+        "start": 1139,
+        "end": 1149,
+        "line": 39,
+        "column": 1,
+        "end_line": 39,
+        "end_column": 11,
+        "node": "Span"
+      },
+      "node": "Diagnostic"
+    },
+    {
+      "code": "OBJECT_TYPE_MISMATCH",
+      "message": "object BoxUiParser expects functionality, received unit",
+      "span": {
+        "start": 1155,
+        "end": 1166,
+        "line": 39,
+        "column": 17,
+        "end_line": 39,
+        "end_column": 28,
+        "node": "Span"
+      },
+      "node": "Diagnostic"
+    },
+    {
+      "code": "OWNERSHIP_CARDINALITY",
+      "message": "ParseBoxUi has no valid immediate owner",
+      "span": {
+        "start": 350,
+        "end": 360,
+        "line": 14,
+        "column": 15,
+        "end_line": 14,
+        "end_column": 25,
+        "node": "Span"
+      },
+      "node": "Diagnostic"
+    }
+  ]
+}

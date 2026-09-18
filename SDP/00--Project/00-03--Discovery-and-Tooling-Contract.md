@@ -47,8 +47,8 @@ prose headings as a replacement for a missing structured declaration.
 ## Listing and execution are separate
 
 Listing must show **all** registered targets with readiness and reasons, including
-planned and blocked targets. Only the existing renderer test target has a runner
-binding in this pilot; its availability is not evidence that its tests pass.
+planned and blocked targets. The existing renderer test and scoped design-artifact checker have runner
+bindings in this pilot; its availability is not evidence that its tests pass.
 
 A native runner uses an argv array and an explicit working-root identity, never
 shell interpolation inferred from Markdown. Discovery and Analyzer rendering
@@ -69,8 +69,8 @@ Source identities/revisions and generator/profile versions must be attached to
 generated results. A pretty diagram is not evidence of model conformance.
 
 Initial descriptors cover system responsibilities, widget layout and input/frame
-interaction. All generation targets are blocked pending source and generator
-bindings. Hand-authored explanatory diagrams are labelled as such, not generated.
+interaction. All generation targets remain blocked: structural SDL exists, but behavioral/widget
+semantics and projection/generator bindings are still missing. Hand-authored explanatory diagrams are labelled as such, not generated.
 
 ## Proposed SDP-Analyzer adaptation
 
@@ -90,3 +90,9 @@ Render source content inertly. Do not auto-run target commands or confuse a
 `verifies` relation with a passed result. Evidence needs its exact subject,
 revision, check, observed outcome and artifact reference.
 
+
+## XFMD versus future Analyzer UI
+
+The future Analyzer site discussed above is separate tooling. It is not the BoxUI
+prototype host. The required host is native FOX/XFMD displaying interactive
+BoxUI inside Markdown; HTML/CSS/browser implementation is not this delivery.

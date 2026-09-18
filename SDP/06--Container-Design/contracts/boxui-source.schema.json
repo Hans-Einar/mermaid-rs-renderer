@@ -1,0 +1,459 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "profile": {
+      "const": "boxui/0.1"
+    },
+    "documentId": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+    },
+    "bindings": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+          },
+          "role": {
+            "enum": [
+              "value",
+              "command"
+            ]
+          },
+          "type": {
+            "enum": [
+              "string",
+              "number",
+              "boolean",
+              "none"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "type"
+        ]
+      }
+    },
+    "root": {
+      "$ref": "#/$defs/node"
+    }
+  },
+  "required": [
+    "profile",
+    "documentId",
+    "bindings",
+    "root"
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+        },
+        "kind": {
+          "enum": [
+            "row",
+            "column",
+            "text",
+            "value",
+            "button",
+            "input",
+            "diagram"
+          ]
+        },
+        "version": {
+          "const": 1
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 4096
+        },
+        "size": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "min": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 8192
+            },
+            "max": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 8192
+            },
+            "grow": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000
+            }
+          },
+          "required": []
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/node"
+          }
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 4096
+        },
+        "valueBinding": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+        },
+        "commandBinding": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+        },
+        "source": {
+          "type": "string",
+          "maxLength": 65536
+        },
+        "family": {
+          "enum": [
+            "flowchart",
+            "sequenceDiagram",
+            "stateDiagram-v2"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "version"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "row"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "children"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "commandBinding"
+                  ]
+                },
+                {
+                  "required": [
+                    "family"
+                  ]
+                },
+                {
+                  "required": [
+                    "label"
+                  ]
+                },
+                {
+                  "required": [
+                    "source"
+                  ]
+                },
+                {
+                  "required": [
+                    "text"
+                  ]
+                },
+                {
+                  "required": [
+                    "valueBinding"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "column"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "children"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "commandBinding"
+                  ]
+                },
+                {
+                  "required": [
+                    "family"
+                  ]
+                },
+                {
+                  "required": [
+                    "label"
+                  ]
+                },
+                {
+                  "required": [
+                    "source"
+                  ]
+                },
+                {
+                  "required": [
+                    "text"
+                  ]
+                },
+                {
+                  "required": [
+                    "valueBinding"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "text"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "text"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "children"
+                  ]
+                },
+                {
+                  "required": [
+                    "commandBinding"
+                  ]
+                },
+                {
+                  "required": [
+                    "family"
+                  ]
+                },
+                {
+                  "required": [
+                    "label"
+                  ]
+                },
+                {
+                  "required": [
+                    "source"
+                  ]
+                },
+                {
+                  "required": [
+                    "valueBinding"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "value"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "label",
+              "valueBinding"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "children"
+                  ]
+                },
+                {
+                  "required": [
+                    "commandBinding"
+                  ]
+                },
+                {
+                  "required": [
+                    "family"
+                  ]
+                },
+                {
+                  "required": [
+                    "source"
+                  ]
+                },
+                {
+                  "required": [
+                    "text"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "button"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "label",
+              "commandBinding"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "children"
+                  ]
+                },
+                {
+                  "required": [
+                    "family"
+                  ]
+                },
+                {
+                  "required": [
+                    "source"
+                  ]
+                },
+                {
+                  "required": [
+                    "text"
+                  ]
+                },
+                {
+                  "required": [
+                    "valueBinding"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "input"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "label",
+              "valueBinding",
+              "commandBinding"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "children"
+                  ]
+                },
+                {
+                  "required": [
+                    "family"
+                  ]
+                },
+                {
+                  "required": [
+                    "source"
+                  ]
+                },
+                {
+                  "required": [
+                    "text"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "diagram"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "label",
+              "source",
+              "family"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "children"
+                  ]
+                },
+                {
+                  "required": [
+                    "commandBinding"
+                  ]
+                },
+                {
+                  "required": [
+                    "text"
+                  ]
+                },
+                {
+                  "required": [
+                    "valueBinding"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "title": "BoxUI 0.1 draft1 authoring payload (after header)"
+}

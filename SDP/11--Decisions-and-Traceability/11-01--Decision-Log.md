@@ -24,3 +24,18 @@ IDs, decision authority, superseded position and verification consequences.
 Issue comments can be sources; the current decision and affected records belong
 here. Do not silently relabel a recommendation as owner-approved.
 
+
+## Additive decisions for draft1
+
+BX-D04 is superseded by the owner's relocation request: the canonical mandate
+now lives at 01--Mandate/01-01--Mandate.md; old root file/navigation stub removed.
+
+| ID | Choice | Status / alternative / consequence |
+|---|---|---|
+| BX-D08 | XFMD is the required native interactive host, in parallel with fork work | Owner direction 2026-09-18; supersedes optional-host/T05 wording. No HTML delivery. |
+| BX-D09 | Dedicated BoxUI tree and additive API | Design recommendation; Graph/treemap reuse would lose widget/binding semantics. |
+| BX-D10 | Strict JSON after version header; compiled widget registry | Review candidate; smaller parser surface than a fresh textual DSL, no document code. |
+| BX-D11 | SVG + typed control map + FOX text overlay | Review candidate; SVG-only cannot edit; browser conflicts with host direction. |
+| BX-D12 | In-process synthetic participant; no TCP first | Review candidate; exercises contracts without network lifecycle. |
+| BX-D13 | Real bounded design-core SDL plus explicit contract artifacts | Review candidate; unsupported behavior remains documented rather than masquerading as compiled SDL. |
+| BX-D14 | Stop at G-PARALLEL-REVIEW | Owner direction; recap/design iteration precedes XFMD implementation. |

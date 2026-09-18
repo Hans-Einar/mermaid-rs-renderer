@@ -1,0 +1,27 @@
+{
+  "status": "design-review-candidate",
+  "contract": "BX-HOST/0.1-draft1",
+  "sourceBaseline": "d1e70c4c52502a549fdde3081387643f0c498441",
+  "sdlRepositoryRevision": "40add14b55d8378aab89b0473d1f45c6ff3480c0",
+  "sdlParserSha256": "4df8fffa931a3f1d12d75d6fc5e6391c0dad254cfbbb0237e91e0344e19dbc83",
+  "artifacts": {
+    "SDP/06--Container-Design/06-02--XFMD-Host-Contract.md": "9eb0b629287349e4e2f849d0d3ab9f61b1e52d8fce64de1917e4c2b26d8a1a35",
+    "SDP/06--Container-Design/contracts/boxui-frame.schema.json": "2f0dcfc104298a6002cd815f72f2de58f4b262007f56bd41b1d62feff0cdea9c",
+    "SDP/06--Container-Design/contracts/boxui-intent.schema.json": "aa0a831d3a2b9cc64e0f0195059e40d988fc8cd3caed090e8ca21dc55dcbea8d",
+    "SDP/06--Container-Design/contracts/boxui-model.schema.json": "978431cf53fb400b2c096d999db3256139a71e75731f34a8019a3860601421bc",
+    "SDP/06--Container-Design/contracts/boxui-prepare.schema.json": "d6161914b7827a1f0b59b4b6602c753709e10df1d5e1571073105fe2ab8b63ca",
+    "SDP/06--Container-Design/contracts/boxui-result.schema.json": "e10b4267072c488c5e04b8bf581782af1a12d1ee6b525b411d0beb62edd0a76c",
+    "SDP/06--Container-Design/contracts/boxui-source.schema.json": "f9f91a28f5c8e9d9bc5a8d5087ae85de7f922295139b0c18ece82e917408d3a9",
+    "SDP/07--Detailed-Design/SDL/BoxUi.design": "2caa8fce494bc59646f3d2151b8655e7c2dc5adbffe1c6d254dde7baabe75e1f",
+    "SDP/09--Verification/check_design.py": "13e7eee6adad9e03deabf576f01bedac9814a99b3fead65e461ecb35bcbb5fad",
+    "SDP/09--Verification/fixtures/activity.boxui.json": "02991a7a7483d28ae9916d44e1144f408b1f8e5d4d8f6adb85fbcbe39fef3453",
+    "SDP/09--Verification/fixtures/activity.md": "f8c3d864c945948ad79874d6e90653d55d0617b5e4f887b5c0006e5a69dd134f",
+    "SDP/09--Verification/fixtures/frame.mock.json": "8814c36142d99082db8f49cd32f805ad81091582517d78f6e93497dfe7624d02",
+    "SDP/09--Verification/fixtures/intent-commit.json": "7c85cff880753c0824d236fcd664a6d335ec0ffeb1efad201c838068a44af109",
+    "SDP/09--Verification/fixtures/intent.json": "1c0bb2d85dd53a61ee4a4504b4628e86c3e734ae9f1b9aab44fbbe7688422717",
+    "SDP/09--Verification/fixtures/model.json": "94fcd98b9310e9eac615745102ac2a6fa9bbe400b6d32cadbf5bb5f9fb384d3c",
+    "SDP/09--Verification/fixtures/prepare.json": "cb5ba9607b072358b02dfd7928603a9face944243a49214a674524eec7b2803d",
+    "SDP/09--Verification/fixtures/result.json": "a6954cdf2b61e5dc0553a6e0da7443fd90ad82ce1e57868262582874d62aeb39"
+  },
+  "productExecutionTested": false
+}

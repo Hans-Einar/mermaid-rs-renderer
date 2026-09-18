@@ -1,0 +1,67 @@
+{
+  "contract": "BX-HOST/0.1-draft1",
+  "key": {
+    "session": "test-session",
+    "epoch": "1",
+    "blockId": "activity-demo",
+    "incarnation": "1",
+    "sourceRevision": "1",
+    "bindingRevision": "1",
+    "stateRevision": "1",
+    "viewportRevision": "1",
+    "themeRevision": "1",
+    "frameSequence": "1"
+  },
+  "width": 640,
+  "height": 480,
+  "staticSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"640\" height=\"480\"><text x=\"8\" y=\"20\">Mock frame — not rendered evidence</text></svg>",
+  "previewSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"640\" height=\"480\"><text x=\"8\" y=\"20\">Mock frame — not rendered evidence</text></svg>",
+  "controls": [
+    {
+      "id": "pause",
+      "kind": "button",
+      "version": 1,
+      "rect": {
+        "x": 8,
+        "y": 40,
+        "width": 100,
+        "height": 32
+      },
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 640,
+        "height": 480
+      },
+      "enabled": true,
+      "role": "button",
+      "accessibleName": "Suspend",
+      "commandBinding": "suspend",
+      "valueType": "none"
+    },
+    {
+      "id": "context-input",
+      "kind": "input",
+      "version": 1,
+      "rect": {
+        "x": 8,
+        "y": 80,
+        "width": 200,
+        "height": 32
+      },
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 640,
+        "height": 480
+      },
+      "enabled": true,
+      "role": "textbox",
+      "accessibleName": "Arbeidskontekst",
+      "commandBinding": "set-context",
+      "valueBinding": "context",
+      "valueType": "string"
+    }
+  ],
+  "diagnostics": []
+}

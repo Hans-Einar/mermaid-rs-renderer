@@ -1,0 +1,275 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract": {
+      "const": "BX-HOST/0.1-draft1"
+    },
+    "key": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "session": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "epoch": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,19})$"
+        },
+        "blockId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "incarnation": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,19})$"
+        },
+        "sourceRevision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,19})$"
+        },
+        "bindingRevision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,19})$"
+        },
+        "stateRevision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,19})$"
+        },
+        "viewportRevision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,19})$"
+        },
+        "themeRevision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,19})$"
+        },
+        "frameSequence": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,19})$"
+        }
+      },
+      "required": [
+        "session",
+        "epoch",
+        "blockId",
+        "incarnation",
+        "sourceRevision",
+        "bindingRevision",
+        "stateRevision",
+        "viewportRevision",
+        "themeRevision",
+        "frameSequence"
+      ]
+    },
+    "width": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 8192
+    },
+    "height": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 8192
+    },
+    "staticSvg": {
+      "type": "string",
+      "minLength": 1
+    },
+    "previewSvg": {
+      "type": "string",
+      "minLength": 1
+    },
+    "controls": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+          },
+          "kind": {
+            "enum": [
+              "button",
+              "input"
+            ]
+          },
+          "version": {
+            "const": 1
+          },
+          "rect": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "x": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 8192
+              },
+              "y": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 8192
+              },
+              "width": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 8192
+              },
+              "height": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 8192
+              }
+            },
+            "required": [
+              "x",
+              "y",
+              "width",
+              "height"
+            ]
+          },
+          "clip": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "x": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 8192
+              },
+              "y": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 8192
+              },
+              "width": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 8192
+              },
+              "height": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 8192
+              }
+            },
+            "required": [
+              "x",
+              "y",
+              "width",
+              "height"
+            ]
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "role": {
+            "enum": [
+              "button",
+              "textbox"
+            ]
+          },
+          "accessibleName": {
+            "type": "string",
+            "maxLength": 4096
+          },
+          "commandBinding": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+          },
+          "valueBinding": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+          },
+          "valueType": {
+            "enum": [
+              "string",
+              "number",
+              "boolean",
+              "none"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "version",
+          "rect",
+          "clip",
+          "enabled",
+          "role",
+          "accessibleName",
+          "commandBinding",
+          "valueType"
+        ]
+      }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 4096
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 4096
+          },
+          "severity": {
+            "enum": [
+              "info",
+              "warning",
+              "error"
+            ]
+          },
+          "nodeId": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+          },
+          "sourceStart": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sourceEnd": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "severity"
+        ],
+        "dependentRequired": {
+          "sourceStart": [
+            "sourceEnd"
+          ],
+          "sourceEnd": [
+            "sourceStart"
+          ]
+        }
+      }
+    }
+  },
+  "required": [
+    "contract",
+    "key",
+    "width",
+    "height",
+    "staticSvg",
+    "previewSvg",
+    "controls",
+    "diagnostics"
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

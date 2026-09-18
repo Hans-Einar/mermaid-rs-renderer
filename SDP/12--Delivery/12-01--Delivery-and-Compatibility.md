@@ -7,24 +7,33 @@ updated: 2026-09-18
 
 # Delivery and compatibility
 
-## Current deliverable
+## Delivery at this checkpoint
 
-This delivery is the mandate and pilot document/catalog structure.
-No BoxUI language/profile release, ABI, package, host integration or shared SDP
-standard is released by creating these documents.
+Design handoff BX-HOST/0.1-draft1: Markdown source profile, structural SDL model,
+contract schemas, manual boundary fixtures, role allocation, acceptance catalog
+and a separate XFMD implementation task. Ready for recap, not a BoxUI release.
+No runtime, new library API, interpreter or native widget behavior is delivered.
 
-## Future release record
+## Review questions before parallel start
 
-Record BoxUI profile version, renderer API and widget-definition compatibility,
-host/interaction protocol versions, dependencies, supported feature flags,
-supported child diagram profiles, migration instructions and exact evidence.
-Keep library, language, widget and SDP profile versions separate.
+1. Keep strict JSON under `boxui 0.1` for the bounded first authoring profile,
+   or invest in concise textual syntax before implementation? JSON minimizes
+   grammar work; it is not proposed as final SDL syntax.
+2. Accept native single-line string input plus buttons/value/text/diagram panes,
+   with tabs/collapse/grid deferred? Concept1 has more UIBox behavior than this.
+3. Accept static accepted-value PDF snapshots and explicit built-in synthetic
+   mode, without remote stream or executable scenario DSL in this increment?
+4. Confirm numeric resource limits and native accessibility/IME scope after the
+   first real FOX spike. Design includes failure behavior if those limits cannot hold.
 
-Existing Mermaid documents must retain their established semantics. A new widget
-or layout policy requires an explicit compatibility assessment. Support matrices
-must distinguish implemented syntax from future ambitions.
+These are bounded recommendations, not missing ownership/event semantics. If a
+choice changes the shared boundary, revise schemas/fixtures and both work packages
+before implementation. No schema promotion or SDP-wide vocabulary decision occurs here.
 
-Publishing a shared SDP profile requires reusable templates, tooling support and
-a migration contract. Do not copy this project's BoxUI-specific content into
-every consuming project; standardize document slots/schema, not project facts.
+## Release conditions later
 
+Record exact fork/XFMD commits, ABI/profile/registry versions, child capability
+matrix, source snapshot, build dependencies, GUI/PDF evidence, sanitizer results
+and known limitations. Publish one authoring guide tied to the supported subset.
+Review profile changes without reinterpreting standard Mermaid/treemap. Native
+implementation, simulation and unbound parts remain separately labelled.

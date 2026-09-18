@@ -15,8 +15,7 @@ Inspected HEAD: `225a5a28632bbfd36c78fa522327f5dbe177d78e`.
 The workspace note records integrated renderer baseline `afab5e982aead4d4cdec7c88455095733805ed36`.
 
 The owner authorizes a distinct **boxui** extension in the renderer fork, a widget
-library, and this pilot for the new **System Development Process**. The present
-delivery establishes the mandate and document/discovery structure. It does not
+library, and this pilot for the new **System Development Process**. The current delivery adds a draft parallel-design handoff with structural SDL and host contracts. It does not
 implement BoxUI, an SDL compiler/interpreter or an Analyzer integration.
 
 ## Start here
@@ -32,13 +31,13 @@ implement BoxUI, an SDL compiler/interpreter or an Analyzer integration.
 
 Document IDs are stable slots qualified by project ID. A filename, status label
 or diagram is not proof of behavior. The manifest resolves each ID to one
-canonical document; an unnumbered mandate filename is an explicit pilot override.
+canonical document; the mandate uses the standard numbered location.
 
 ## Current discovery summary
 
 - Renderer Rust crate: present; inspected, not tested in this delivery.
 - BoxUI parser/model/layout/widgets/interaction support: planned.
-- SDL source entry points and executable sequence sources: none declared yet.
+- SDL structural source: BoxUi.design, design-core 0.1. Executable scenario sources: none.
 - Renderer library test target: existing Cargo invocation, not run here.
 - BoxUI compile/run/test and blueprint generation targets: declared, blocked.
 - SDP-Analyzer: future adapter required for this pilot profile.

@@ -17,7 +17,9 @@
     "documents": [
       "SDP-07-02"
     ],
-    "sourceSets": []
+    "sourceSets": [
+      "BX-SRC-STRUCTURE"
+    ]
   },
   "projection": {
     "format": "boxui-source",
@@ -29,7 +31,7 @@
   "output": "blueprints/BX-BP02.boxui",
   "state": "blocked",
   "blockers": [
-    "Canonical model source is not declared",
+    "Structural source exists; behavioral/widget contract facts are not executable SDL",
     "Projection profile and generator implementation are not bound"
   ],
   "provenanceRequired": [
@@ -38,4 +40,3 @@
     "unresolved links and simulated bindings"
   ]
 }
-

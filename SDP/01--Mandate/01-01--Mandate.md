@@ -45,7 +45,7 @@ verified production behavior.
   widgets; supported Mermaid diagram types can be embedded as diagram content.
 - A widget contract covering appearance, values, interactions, focus and lifecycle.
 - Static output usable in documentation and a host-facing interaction contract
-  usable by XFMD or another renderer host.
+  implemented in XFMD as the required first interactive host for BoxUI inside `.md` files.
 - Explicit Value/Representation and Command bindings suitable for future SDL
   interpreter use, without placing domain logic in the graphics library.
 - A discoverable SDP project with standardized numbered entry documents,
@@ -92,7 +92,7 @@ not be accidental consequences of embedding.
 Expose typed input events and geometry/binding information sufficient for hit
 testing, keyboard focus and editing. SVG alone is not an interactive text-control
 implementation. Determine which responsibilities belong to the library and which
-to the host; demonstrate that boundary with a real host adapter or minimal host.
+to the host; demonstrate that boundary with the native FOX/XFMD host adapter.
 
 Keep visuals, input regions and bindings at the same frame revision. Preserve
 stable controls, focus and unsubmitted input where the contract says they survive.
@@ -100,8 +100,7 @@ An old-frame event must not accidentally invoke a new widget's binding.
 
 ### SDL execution and stream integration
 
-Define integration contracts for a sequencer/SDL execution slice and an optional
-XFMD renderer connection. Scenario scripts supply inputs or explicitly simulated
+Define integration contracts for a sequencer/SDL execution slice and the required local XFMD host integration; remote streaming is optional. Scenario scripts supply inputs or explicitly simulated
 participants; assertions check obligations independently of scripted output.
 
 Study staged content, render readiness and frame publication. A stream protocol
@@ -162,7 +161,7 @@ Acceptance must cover:
 4. Embedded diagram success/failure without corrupting sibling controls.
 5. Mouse and keyboard input, focus and draft preservation.
 6. Event/frame correlation, stale result handling and no duplicate committed intent.
-7. Static SVG output and a declared interactive-host witness.
+7. Static SVG/PDF output and a real interactive XFMD Markdown witness.
 8. Existing Mermaid regression checks appropriate to changed code.
 9. Discoverable project records and blueprint descriptions with no invented
    runnable targets or successful evidence.
@@ -184,6 +183,18 @@ during it. Reopen earlier design explicitly when needed.
 The extension is complete only for its declared version/profile when its contract,
 implementation, regression evidence, authoring examples and host boundaries agree.
 A standard SDP release and a complete SDL interpreter remain separate outcomes.
+
+## 8.1 Owner clarification — 2026-09-18
+
+XFMD must be extended to render and interact with BoxUI widgets embedded in a
+Markdown document. We are not delivering an HTML page, CSS renderer, browser or
+web-host prototype in this project. HTML/CSS references are comparative study
+or future Analyzer-site work only. Native FOX remains the application toolkit.
+
+Renderer and XFMD have separate implementation workstreams. This assignment
+advances the design through a concrete parallel-development handoff, then stops
+for owner recap and another design iteration before XFMD implementation starts.
+Preparing contracts, fixtures and the XFMD task does not authorize runtime work.
 
 ## 9. Open design decisions
 

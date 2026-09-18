@@ -29,3 +29,13 @@ Include cross-cutting ownership, identity, viewport, lifecycle and compatibility
 obligations. Keep accepted, proposed, implemented, observed and unknown facts
 distinct. Do not use complete file counts as design-completion evidence.
 
+
+## Draft1 tracing and change rules
+
+Use Cases/requirements -> feature table -> named SDL Functionality -> detailed
+function table -> contract section -> BX-ATxx. The structural SDL source preserves
+ownership/capability facts only; requirement/temporal references remain in these
+records. Binding/type change affects both parser and host; geometry change affects
+layout, hit tests, overlay and PDF; session identity change affects ledger, drafts,
+worker cancellation and synthetic oracle. Update both tasks before parallel edits.
+All product source bindings are still Planned. No trace link means proof of test.
