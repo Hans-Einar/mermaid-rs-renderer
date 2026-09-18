@@ -380,6 +380,7 @@ fn render_svg_internal(
             color, color
         ));
         if is_sequence {
+            svg.push_str(&format!("<marker id=\"arrow-async-{idx}\" viewBox=\"0 0 12 12\" refX=\"11\" refY=\"6\" markerWidth=\"12\" markerHeight=\"12\" markerUnits=\"userSpaceOnUse\" orient=\"auto\"><path d=\"M 1 1 L 11 6 L 1 11\" fill=\"none\" stroke=\"{}\" stroke-width=\"1.5\"/></marker>", color));
             svg.push_str(&format!(
                 "<marker id=\"arrow-seq-{idx}\" viewBox=\"-1 0 12 10\" refX=\"7.9\" refY=\"5\" markerUnits=\"userSpaceOnUse\" markerWidth=\"12\" markerHeight=\"12\" orient=\"auto-start-reverse\"><path d=\"M -1 0 L 10 5 L 0 10 z\" fill=\"{}\" stroke=\"{}\" stroke-width=\"1\" stroke-dasharray=\"1,0\"/></marker>",
                 color,
@@ -838,7 +839,11 @@ fn render_svg_internal(
             let (endpoint_pad_x, endpoint_pad_y) = endpoint_label_padding(layout.kind);
             let marker_id = color_ids.get(&stroke).copied().unwrap_or(0);
             let marker_end = if edge.arrow_end {
-                format!("marker-end=\"url(#arrow-seq-{marker_id})\"")
+                if edge.arrow_end_kind == Some(crate::ir::EdgeArrowhead::OpenV) {
+                    format!("marker-end=\"url(#arrow-async-{marker_id})\"")
+                } else {
+                    format!("marker-end=\"url(#arrow-seq-{marker_id})\"")
+                }
             } else {
                 String::new()
             };
@@ -1114,7 +1119,10 @@ fn render_svg_internal(
                         Some(crate::ir::EdgeArrowhead::OpenTriangle) => {
                             format!("marker-end=\"url(#arrow-class-open-{marker_id})\"")
                         }
-                        Some(crate::ir::EdgeArrowhead::ClassDependency) => {
+                        Some(
+                            crate::ir::EdgeArrowhead::ClassDependency
+                            | crate::ir::EdgeArrowhead::OpenV,
+                        ) => {
                             format!("marker-end=\"url(#arrow-class-dep-{marker_id})\"")
                         }
                         None => format!("marker-end=\"url(#arrow-{marker_id})\""),
@@ -1133,7 +1141,10 @@ fn render_svg_internal(
                         Some(crate::ir::EdgeArrowhead::OpenTriangle) => {
                             format!("marker-start=\"url(#arrow-class-open-start-{marker_id})\"")
                         }
-                        Some(crate::ir::EdgeArrowhead::ClassDependency) => {
+                        Some(
+                            crate::ir::EdgeArrowhead::ClassDependency
+                            | crate::ir::EdgeArrowhead::OpenV,
+                        ) => {
                             format!("marker-start=\"url(#arrow-class-dep-start-{marker_id})\"")
                         }
                         None => format!("marker-start=\"url(#arrow-start-{marker_id})\""),

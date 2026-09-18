@@ -19,6 +19,7 @@ mod ranking;
 mod routing;
 mod sankey;
 mod sequence;
+mod sequence_events;
 mod subgraphs;
 mod text;
 mod timeline;
@@ -218,11 +219,16 @@ pub fn compute_layout_with_metrics(
         }
     };
 
+    if !graph.sequence_events.is_empty() {
+        sequence_events::apply(graph, &mut layout, theme, config);
+    }
     apply_preferred_aspect_ratio_layout(&mut layout, config);
 
     // Final pass: resolve all edge label positions using collision avoidance.
     let label_start = Instant::now();
-    label_placement::resolve_all_label_positions(&mut layout, theme, config);
+    if graph.sequence_events.is_empty() {
+        label_placement::resolve_all_label_positions(&mut layout, theme, config);
+    }
     if matches!(layout.diagram, DiagramData::Sequence(_)) {
         sequence::finalize_sequence_layout_bounds(&mut layout);
     } else if matches!(layout.diagram, DiagramData::Graph { .. }) {

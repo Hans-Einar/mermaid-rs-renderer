@@ -1207,7 +1207,7 @@ fn parse_sequence_message(
 )> {
     let tokens = [
         "-->>+", "->>+", "-->+", "->+", "-->>-", "->>-", "-->-", "->-", "<--+", "<-+", "<--", "<-",
-        "-->>", "->>", "-->", "->",
+        "-->>", "->>", "--)", "-)", "-->", "->",
     ];
     for token in tokens {
         if let Some(pos) = line.find(token) {
@@ -5416,7 +5416,15 @@ fn parse_sequence_diagram(input: &str) -> Result<ParseOutput> {
                 arrow_start: false,
                 arrow_end: true,
                 arrow_start_kind: None,
-                arrow_end_kind: None,
+                arrow_end_kind: if line
+                    .split_once(':')
+                    .map(|(a, _)| a.contains("-)"))
+                    .unwrap_or(false)
+                {
+                    Some(crate::ir::EdgeArrowhead::OpenV)
+                } else {
+                    None
+                },
                 start_decoration: None,
                 end_decoration: None,
                 style,

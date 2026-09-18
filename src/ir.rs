@@ -65,6 +65,18 @@ pub enum SequenceActivationKind {
     Deactivate,
 }
 
+/// Explicit event order for clients preserving note/fragment boundary scope.
+#[derive(Debug, Clone)]
+pub enum SequenceEvent {
+    Message(usize),
+    Note(usize),
+    Activate(String),
+    Deactivate(String),
+    Start(SequenceFrameKind, String),
+    Branch(String),
+    End,
+}
+
 #[derive(Debug, Clone)]
 pub struct SequenceActivation {
     pub participant: String,
@@ -413,6 +425,7 @@ pub enum EdgeDecoration {
 pub enum EdgeArrowhead {
     OpenTriangle,
     ClassDependency,
+    OpenV,
 }
 
 #[derive(Debug, Clone)]
@@ -433,6 +446,7 @@ pub struct Graph {
     pub edges: Vec<Edge>,
     pub subgraphs: Vec<Subgraph>,
     pub sequence_participants: Vec<String>,
+    pub sequence_events: Vec<SequenceEvent>,
     pub sequence_frames: Vec<SequenceFrame>,
     pub sequence_notes: Vec<SequenceNote>,
     pub sequence_activations: Vec<SequenceActivation>,
@@ -625,6 +639,7 @@ impl Graph {
             edges: Vec::new(),
             subgraphs: Vec::new(),
             sequence_participants: Vec::new(),
+            sequence_events: Vec::new(),
             sequence_frames: Vec::new(),
             sequence_notes: Vec::new(),
             sequence_activations: Vec::new(),

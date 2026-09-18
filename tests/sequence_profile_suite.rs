@@ -97,3 +97,34 @@ fn measured_multiline_labels_fit_fragment_scope() {
         panic!("Missing sequence")
     }
 }
+#[test]
+fn explicit_event_order_preserves_nested_scope() {
+    use mermaid_rs_renderer::ir::{SequenceEvent as E, SequenceFrameKind as F};
+    use mermaid_rs_renderer::layout::DiagramData;
+    let mut graph = parse_mermaid_strict(
+        "sequenceDiagram\nparticipant A\nparticipant B\nA-)B: Request\nB--)A: Reply",
+    )
+    .unwrap()
+    .graph;
+    graph.sequence_events = vec![
+        E::Start(F::Alt, "outer".into()),
+        E::Start(F::Opt, "inner".into()),
+        E::Message(0),
+        E::End,
+        E::Branch("other".into()),
+        E::Message(1),
+        E::End,
+    ];
+    let layout = compute_layout(&graph, &Theme::modern(), &LayoutConfig::default());
+    let DiagramData::Sequence(s) = &layout.diagram else {
+        panic!("sequence")
+    };
+    assert_eq!(s.frames.len(), 2);
+    assert!(
+        s.frames[1].y > s.frames[0].y
+            && s.frames[1].y + s.frames[1].height < s.frames[0].dividers[0]
+    );
+    assert!(layout.edges[0].points[0].1 < layout.edges[1].points[0].1);
+    let svg = render_svg(&layout, &Theme::modern(), &LayoutConfig::default());
+    assert_eq!(svg.matches("marker-end=\"url(#arrow-async-").count(), 2);
+}

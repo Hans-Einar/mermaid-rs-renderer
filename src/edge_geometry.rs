@@ -9,7 +9,7 @@ pub(crate) fn arrowhead_inset(kind: DiagramKind, arrow_kind: Option<EdgeArrowhea
     match kind {
         DiagramKind::Class => match arrow_kind {
             Some(EdgeArrowhead::OpenTriangle) => 17.0,
-            Some(EdgeArrowhead::ClassDependency) => 5.0,
+            Some(EdgeArrowhead::ClassDependency | EdgeArrowhead::OpenV) => 5.0,
             None => 4.0,
         },
         _ => 0.0,
