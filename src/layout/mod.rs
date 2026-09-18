@@ -12,6 +12,7 @@ mod kanban;
 pub(crate) mod label_placement;
 pub mod measurements;
 mod mindmap;
+mod packet;
 mod pie;
 mod quadrant;
 pub(crate) mod radar;
@@ -209,11 +210,11 @@ pub fn compute_layout_with_metrics(
         crate::ir::DiagramKind::XYChart => compute_xychart_layout(graph, theme, config),
         crate::ir::DiagramKind::Timeline => compute_timeline_layout(graph, theme, config),
         crate::ir::DiagramKind::Journey => compute_journey_layout(graph, theme, config),
+        crate::ir::DiagramKind::Packet => packet::compute(graph, theme, config),
         crate::ir::DiagramKind::Class
         | crate::ir::DiagramKind::State
         | crate::ir::DiagramKind::Er
         | crate::ir::DiagramKind::Requirement
-        | crate::ir::DiagramKind::Packet
         | crate::ir::DiagramKind::Flowchart => {
             compute_flowchart_layout(graph, theme, config, Some(&mut stage_metrics), true)
         }
