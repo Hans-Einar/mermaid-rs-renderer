@@ -3973,60 +3973,17 @@ fn parse_block_diagram(input: &str) -> Result<ParseOutput> {
 }
 
 fn parse_packet_diagram(input: &str) -> Result<ParseOutput> {
-    let mut graph = Graph::new();
-    graph.kind = DiagramKind::Packet;
-    graph.direction = Direction::LeftRight;
-    let (lines, init_config) = preprocess_input(input)?;
-    let mut last_node: Option<String> = None;
-
-    for raw_line in lines {
-        let line = raw_line.trim();
-        if line.is_empty() {
-            continue;
-        }
-        let lower = line.to_ascii_lowercase();
-        if lower.starts_with("packet") || lower.starts_with("title") {
-            continue;
-        }
-        if let Some((range, label)) = line.split_once(':') {
-            let range = range.trim();
-            let label = strip_quotes(label.trim());
-            if range.is_empty() {
-                continue;
-            }
-            let node_id = format!("packet_{}", graph.nodes.len());
-            let node_label = if label.is_empty() {
-                range.to_string()
-            } else {
-                format!("{}\n{}", range, label)
-            };
-            graph.ensure_node(
-                &node_id,
-                Some(node_label),
-                Some(crate::ir::NodeShape::Rectangle),
-            );
-            if let Some(prev) = last_node.take() {
-                graph.edges.push(crate::ir::Edge {
-                    from: prev,
-                    to: node_id.clone(),
-                    label: None,
-                    start_label: None,
-                    end_label: None,
-                    directed: false,
-                    arrow_start: false,
-                    arrow_end: false,
-                    arrow_start_kind: None,
-                    arrow_end_kind: None,
-                    start_decoration: None,
-                    end_decoration: None,
-                    style: crate::ir::EdgeStyle::Solid,
-                });
-            }
-            last_node = Some(node_id);
-        }
-    }
-
-    Ok(ParseOutput { graph, init_config })
+ let mut graph=Graph::new();graph.kind=DiagramKind::Packet;
+ let (lines,init_config)=preprocess_input(input)?;let mut next=0u32;
+ for raw in lines {let line=raw.trim();if line.is_empty()||line=="packet"||line=="packet-beta"{continue;}
+ let (range,label)=line.split_once(':').ok_or_else(||anyhow::anyhow!("unsupported packet statement"))?;
+ let range=range.trim();let (start,end)=if let Some(count)=range.strip_prefix('+'){let count:u32=count.parse()?;if count==0||count>4096{anyhow::bail!("packet field size");}(next,next+count-1)}else if let Some((a,b))=range.split_once('-'){(a.trim().parse()?,b.trim().parse()?)}else{let bit=range.parse()?;(bit,bit)};
+ if start<next||end<start||end>=4096||graph.packet_fields.len()>=128{anyhow::bail!("packet range/overlap limit");}
+ let label=label.trim().strip_prefix('"').and_then(|s|s.strip_suffix('"')).ok_or_else(||anyhow::anyhow!("packet label requires quotes"))?;
+ graph.packet_fields.push(crate::ir::PacketField{start,end,label:label.into()});next=end+1;
+ }
+ if graph.packet_fields.is_empty(){anyhow::bail!("empty packet");}
+ Ok(ParseOutput{graph,init_config})
 }
 
 fn parse_kanban_diagram(input: &str) -> Result<ParseOutput> {
@@ -7329,8 +7286,9 @@ A["foo & bar"] & B --> C"#;
         let input = "packet\n  0-7: \"Type\"\n  8-15: \"Len\"";
         let parsed = parse_mermaid(input).unwrap();
         assert_eq!(parsed.graph.kind, DiagramKind::Packet);
-        assert_eq!(parsed.graph.nodes.len(), 2);
-        assert_eq!(parsed.graph.edges.len(), 1);
+        assert_eq!(parsed.graph.packet_fields.len(), 2);
+        assert_eq!(parsed.graph.packet_fields[1].start, 8);
+        assert!(parsed.graph.edges.is_empty());
     }
 
     #[test]
