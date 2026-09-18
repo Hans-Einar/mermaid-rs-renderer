@@ -66,3 +66,63 @@ pub fn with_measurements<T>(
     CHECKPOINTS.with(|count| count.set(0));
     operation()
 }
+
+/// A synchronous, borrowed measurer. No reference survives the scoped call.
+/// Each callback returns layout pixels; failure is propagated through the
+/// embedding application's unwind boundary, never through a C ABI callback.
+pub type MeasureCallback = fn(usize, &str, f32, f32, bool) -> TextBlock;
+thread_local! { static MEASURER: Cell<Option<(usize, MeasureCallback)>> = const { Cell::new(None) }; }
+pub fn dynamic_lookup(text: &str, font_size: f32, max_width: f32, wrap: bool) -> Option<TextBlock> {
+    checkpoint();
+    MEASURER.with(|slot| {
+        slot.get()
+            .map(|(context, callback)| callback(context, text, font_size, max_width, wrap))
+    })
+}
+pub fn with_measurer<T>(
+    context: usize,
+    callback: MeasureCallback,
+    budget: Duration,
+    operation: impl FnOnce() -> T,
+) -> T {
+    struct Restore(Option<(usize, MeasureCallback)>, Option<Instant>);
+    impl Drop for Restore {
+        fn drop(&mut self) {
+            MEASURER.with(|slot| slot.set(self.0));
+            DEADLINE.with(|slot| *slot.borrow_mut() = self.1.take());
+        }
+    }
+    let _restore = Restore(
+        MEASURER.with(|slot| slot.replace(Some((context, callback)))),
+        DEADLINE.with(|slot| slot.replace(Some(Instant::now() + budget))),
+    );
+    CHECKPOINTS.with(|count| count.set(0));
+    operation()
+}
+
+#[cfg(test)]
+mod dynamic_tests {
+    use super::*;
+    fn measure(context: usize, text: &str, size: f32, _: f32, _: bool) -> TextBlock {
+        TextBlock {
+            lines: vec![text.into()],
+            width: context as f32,
+            height: size,
+        }
+    }
+    #[test]
+    fn borrowed_measurer_is_scoped_and_restored_after_unwind() {
+        assert!(dynamic_lookup("x", 16., 200., true).is_none());
+        with_measurer(40, measure, Duration::from_secs(1), || {
+            assert_eq!(dynamic_lookup("x", 20., 200., true).unwrap().width, 40.);
+            let _ = std::panic::catch_unwind(|| {
+                with_measurer(70, measure, Duration::from_secs(1), || {
+                    assert_eq!(dynamic_lookup("x", 20., 200., true).unwrap().height, 20.);
+                    panic!("test");
+                })
+            });
+            assert_eq!(dynamic_lookup("x", 20., 200., true).unwrap().width, 40.);
+        });
+        assert!(dynamic_lookup("x", 16., 200., true).is_none());
+    }
+}
