@@ -2271,14 +2271,24 @@ fn render_sankey(layout: &SankeyLayout, theme: &Theme, _config: &LayoutConfig) -
             let prev_idx = pair[0];
             let cur_idx = pair[1];
             let min_gap = label_half_heights[prev_idx] + label_half_heights[cur_idx] + gap;
-            label_y[cur_idx] = label_y[prev_idx] + min_gap;
+            // Keep the preferred band centre when it already has clearance.
+            label_y[cur_idx] = label_y[cur_idx].max(label_y[prev_idx] + min_gap);
+        }
+        label_y[last_idx] = label_y[last_idx].min(bottom);
+        for pair in indices.windows(2).rev() {
+            let prev_idx = pair[0];
+            let cur_idx = pair[1];
+            let min_gap = label_half_heights[prev_idx] + label_half_heights[cur_idx] + gap;
+            label_y[prev_idx] = label_y[prev_idx].min(label_y[cur_idx] - min_gap);
         }
     }
 
     let labels_start = svg.len();
     svg.push_str(&format!(
         "<g class=\"node-labels\" font-family=\"{}\" font-size=\"{}\" fill=\"{}\">",
-        escape_xml(&normalize_font_family(&theme.font_family)), label_font_size, theme.primary_text_color
+        escape_xml(&normalize_font_family(&theme.font_family)),
+        label_font_size,
+        theme.primary_text_color
     ));
     for (idx, node) in layout.nodes.iter().enumerate() {
         let align_left_of_node = node.rank > 0;
