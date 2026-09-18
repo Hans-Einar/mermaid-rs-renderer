@@ -230,11 +230,23 @@ pub(super) fn compute_sankey_layout(graph: &Graph, theme: &Theme, config: &Layou
     let num_ranks = max_rank + 1;
     // Source captions face right; the next rank faces left. Reserve both
     // measured captions rather than forcing every graph into a fixed canvas.
-    let caption_width = graph.nodes.values().map(|n|
-        super::text::measure_label_with_font_size(&n.label,14.,config,false,theme.font_family.as_str()).width
-    ).fold(0.,f32::max);
+    let caption_width = graph
+        .nodes
+        .values()
+        .map(|n| {
+            super::text::measure_label_with_font_size(
+                &n.label,
+                14.,
+                config,
+                false,
+                theme.font_family.as_str(),
+            )
+            .width
+        })
+        .fold(0., f32::max);
     let sankey_width = (num_ranks.saturating_sub(1) as f32 * (caption_width * 2. + 96.)
-        + num_ranks as f32 * SANKEY_NODE_WIDTH).max(SANKEY_MIN_WIDTH);
+        + num_ranks as f32 * SANKEY_NODE_WIDTH)
+        .max(SANKEY_MIN_WIDTH);
     let gap_x = if num_ranks > 1 {
         ((sankey_width - SANKEY_NODE_WIDTH * num_ranks as f32) / (num_ranks - 1) as f32).max(0.0)
     } else {

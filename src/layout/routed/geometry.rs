@@ -33,8 +33,14 @@ pub(super) fn input(layout: &Layout) -> Result<RoutingInput, RoutingError> {
                 let point = (p.0 as f64, p.1 as f64);
                 // Small pseudostates have no tangential port span. Do not
                 // register multiple exclusive pins at the same location.
-                if !ports.iter().any(|port: &Port| port.point == point && port.directions == dir) {
-                    ports.push(Port { point, directions: dir });
+                if !ports
+                    .iter()
+                    .any(|port: &Port| port.point == point && port.directions == dir)
+                {
+                    ports.push(Port {
+                        point,
+                        directions: dir,
+                    });
                 }
             }
         }

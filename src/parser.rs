@@ -3973,17 +3973,50 @@ fn parse_block_diagram(input: &str) -> Result<ParseOutput> {
 }
 
 fn parse_packet_diagram(input: &str) -> Result<ParseOutput> {
- let mut graph=Graph::new();graph.kind=DiagramKind::Packet;
- let (lines,init_config)=preprocess_input(input)?;let mut next=0u32;
- for raw in lines {let line=raw.trim();if line.is_empty()||line=="packet"||line=="packet-beta"{continue;}
- let (range,label)=line.split_once(':').ok_or_else(||anyhow::anyhow!("unsupported packet statement"))?;
- let range=range.trim();let (start,end)=if let Some(count)=range.strip_prefix('+'){let count:u32=count.parse()?;if count==0||count>4096{anyhow::bail!("packet field size");}(next,next+count-1)}else if let Some((a,b))=range.split_once('-'){(a.trim().parse()?,b.trim().parse()?)}else{let bit=range.parse()?;(bit,bit)};
- if start<next||end<start||end>=4096||graph.packet_fields.len()>=128{anyhow::bail!("packet range/overlap limit");}
- let label=label.trim().strip_prefix('"').and_then(|s|s.strip_suffix('"')).ok_or_else(||anyhow::anyhow!("packet label requires quotes"))?;
- graph.packet_fields.push(crate::ir::PacketField{start,end,label:label.into()});next=end+1;
- }
- if graph.packet_fields.is_empty(){anyhow::bail!("empty packet");}
- Ok(ParseOutput{graph,init_config})
+    let mut graph = Graph::new();
+    graph.kind = DiagramKind::Packet;
+    let (lines, init_config) = preprocess_input(input)?;
+    let mut next = 0u32;
+    for raw in lines {
+        let line = raw.trim();
+        if line.is_empty() || line == "packet" || line == "packet-beta" {
+            continue;
+        }
+        let (range, label) = line
+            .split_once(':')
+            .ok_or_else(|| anyhow::anyhow!("unsupported packet statement"))?;
+        let range = range.trim();
+        let (start, end) = if let Some(count) = range.strip_prefix('+') {
+            let count: u32 = count.parse()?;
+            if count == 0 || count > 4096 {
+                anyhow::bail!("packet field size");
+            }
+            (next, next + count - 1)
+        } else if let Some((a, b)) = range.split_once('-') {
+            (a.trim().parse()?, b.trim().parse()?)
+        } else {
+            let bit = range.parse()?;
+            (bit, bit)
+        };
+        if start < next || end < start || end >= 4096 || graph.packet_fields.len() >= 128 {
+            anyhow::bail!("packet range/overlap limit");
+        }
+        let label = label
+            .trim()
+            .strip_prefix('"')
+            .and_then(|s| s.strip_suffix('"'))
+            .ok_or_else(|| anyhow::anyhow!("packet label requires quotes"))?;
+        graph.packet_fields.push(crate::ir::PacketField {
+            start,
+            end,
+            label: label.into(),
+        });
+        next = end + 1;
+    }
+    if graph.packet_fields.is_empty() {
+        anyhow::bail!("empty packet");
+    }
+    Ok(ParseOutput { graph, init_config })
 }
 
 fn parse_kanban_diagram(input: &str) -> Result<ParseOutput> {
