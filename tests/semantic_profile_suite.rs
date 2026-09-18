@@ -71,6 +71,19 @@ fn cyclic_currentness_and_locked_self_loop_ports() {
             assert!((p[0].0 - p[1].0).abs() < 0.01 || (p[0].1 - p[1].1).abs() < 0.01);
         }
     }
+    // Native pin competition can choose another equally valid route. Verify
+    // semantic and geometric invariants, not byte-identical SVG (known gap).
+    for _ in 0..8 {
+        let (again, _) = compute_semantic_layout(&graph, &Theme::modern(), &config,
+            &RoutingControl { deadline: Instant::now() + Duration::from_secs(10), cancelled: &|| false }).unwrap();
+        assert_eq!(again.edges.len(), layout.edges.len());
+        for (a, b) in again.edges.iter().zip(&layout.edges) {
+            assert_eq!((&a.from, &a.to, a.label.as_ref().map(|l| &l.lines)), (&b.from, &b.to, b.label.as_ref().map(|l| &l.lines)));
+            for p in a.points.windows(2) {
+                assert!((p[0].0-p[1].0).abs()<0.01 || (p[0].1-p[1].1).abs()<0.01);
+            }
+        }
+    }
     assert!(
         layout.width < 1800.,
         "unbounded empty rank bands: {} {diagnostics:?}",
