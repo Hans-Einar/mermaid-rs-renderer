@@ -9,7 +9,7 @@ pub(super) fn compute(graph:&Graph,theme:&Theme,config:&LayoutConfig)->Layout{
   }
   for (index,start,end,width,label) in cells {let x=24.+(start%32) as f32*bit;
    let id=format!("packet_{index}_{row}");nodes.insert(id.clone(),NodeLayout{id,x,y:y+20.,width,height,label,shape:crate::ir::NodeShape::Rectangle,style:Default::default(),link:None,anchor_subgraph:None,hidden:false,icon:None});
-   for (suffix,value,x) in [("start",start,x),("end",end,x+width-20.)] {if suffix=="end"&&start==end{continue;}let id=format!("bit_{index}_{row}_{suffix}");let label=measure_label_with_font_size(&value.to_string(),theme.font_size*0.7,config,false,theme.font_family.as_str());nodes.insert(id.clone(),NodeLayout{id,x,y,width:20.,height:18.,label,shape:crate::ir::NodeShape::Text,style:Default::default(),link:None,anchor_subgraph:None,hidden:false,icon:None});}
+   for (suffix,value,x) in [("start",start,x),("end",end,x+width-20.)] {if suffix=="end"&&start==end{continue;}let id=format!("bit_{index}_{row}_{suffix}");let label=measure_label_with_font_size(&value.to_string(),theme.font_size*0.7,config,false,theme.font_family.as_str());nodes.insert(id.clone(),NodeLayout{id,x,y,width:20.,height:18.,label,shape:crate::ir::NodeShape::Text,style:crate::ir::NodeStyle{fill:Some("none".into()),stroke:Some("none".into()),..Default::default()},link:None,anchor_subgraph:None,hidden:false,icon:None});}
   }y+=height+40.;
  }
  Layout{kind:graph.kind,nodes,edges:vec![],subgraphs:vec![],width:32.*bit+48.,height:y,diagram:DiagramData::Graph{state_notes:vec![]}}
