@@ -1,0 +1,42 @@
+{
+  "$schema": "../00--Project/sdp-project.schema.json#/$defs/blueprint",
+  "schemaVersion": "0.1",
+  "id": "BX-BP01",
+  "title": "System responsibilities",
+  "document": "SDP-10-02",
+  "scope": {
+    "abstractionLevel": "system-architecture",
+    "rootModule": "BX-MOD-BOXUI",
+    "requirements": [
+      "BX-R01",
+      "BX-R04",
+      "BX-R09"
+    ]
+  },
+  "sources": {
+    "documents": [
+      "SDP-05-01",
+      "SDP-06-01"
+    ],
+    "sourceSets": []
+  },
+  "projection": {
+    "format": "mermaid",
+    "diagramFamily": "flowchart",
+    "profile": null,
+    "rulesDocument": "SDP-10-02"
+  },
+  "target": "BX-TGT-BP01",
+  "output": "blueprints/BX-BP01.mmd",
+  "state": "blocked",
+  "blockers": [
+    "Canonical model source is not declared",
+    "Projection profile and generator implementation are not bound"
+  ],
+  "provenanceRequired": [
+    "source identities and revisions",
+    "profile and generator versions",
+    "unresolved links and simulated bindings"
+  ]
+}
+

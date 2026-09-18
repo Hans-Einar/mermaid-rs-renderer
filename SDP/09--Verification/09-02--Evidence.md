@@ -1,0 +1,53 @@
+---
+document_id: SDP-09-02
+profile: sdp-system-development-pilot/0.1
+status: evidence
+updated: 2026-09-18
+---
+
+# Verification evidence
+
+## Delivery record BX-E01
+
+Scope: mandate and numbered SDP discovery pilot, 2026-09-18.
+No BoxUI source, product behavior, SDL parser or Analyzer implementation changed.
+
+The authoring checks below were run against the uncommitted pilot records after
+creation. The inspected repository HEAD remains the baseline, not a claim that
+these new files are committed or published.
+
+No renderer/Cargo tests, interactive-host checks, network runs or independent
+implementation review are claimed. This evidence does not satisfy BX-R01–BX-R10
+or BX-R12. It covers a bounded authoring instance of BX-R11, not an implemented
+discovery tool or standard adoption.
+
+## Authoring checks performed
+
+Environment: local Python 3 with the installed `jsonschema` package;
+`Draft202012Validator.check_schema` and `Draft202012Validator.validate`.
+Additional read-only Python checks resolved identities, paths and local links.
+The checks were executed during authoring, not installed as a new project CLI.
+
+| Check | Observed result |
+|---|---|
+| Manifest schema and three blueprint descriptor schemas | Passed. |
+| Canonical document IDs, paths, metadata and status | 25 resolved, no duplicate registered IDs. |
+| Module and target references | Six modules and ten targets resolved. |
+| Runner readiness distinction | One bound existing test invocation; nine blocked targets with null runners. |
+| Target dependencies and blueprint outputs | References resolve; dependency graph acyclic; descriptor outputs match their targets. |
+| Typed catalog relations | Eight resolve to registered identities. |
+| Repository source binding paths | Existing renderer paths resolve inside repository root. |
+| Local Markdown links | 60 resolve, including explicit sibling-repository study references. |
+| Markdown fences | Paired. |
+| Invalid schema version and unknown root field | Rejected in negative schema checks. |
+| Blocked target with runner; bound target without runner | Both rejected in negative schema checks. |
+| Document path containing parent traversal | Rejected in negative schema check. |
+
+Manifest SHA-256 at check:
+`c1851a4d89c70b7a5d02519d92666face9493f456695d00766f9c43e88fb1d75`.
+Schema SHA-256 at check:
+`9a5590d9ae6febff7e0f8556a7bd1baa387323c79665c3102bce75e461628ba6`.
+
+These checks establish consistency of this authoring snapshot. They are not a
+general validator implementation, a passed Cargo test suite, executable SDL
+coverage or evidence that the proposed structure is optimal for other projects.

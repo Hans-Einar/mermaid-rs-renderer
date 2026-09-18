@@ -1,0 +1,454 @@
+{
+  "$schema": "00--Project/sdp-project.schema.json",
+  "schemaVersion": "0.1",
+  "profile": {
+    "id": "sdp-system-development-pilot",
+    "version": "0.1",
+    "status": "pilot"
+  },
+  "project": {
+    "id": "mermaid-boxui",
+    "title": "Mermaid BoxUI extension",
+    "repository": "https://github.com/Hans-Einar/mermaid-rs-renderer",
+    "branchAtCapture": "feature/boxui-extension",
+    "headAtCapture": "225a5a28632bbfd36c78fa522327f5dbe177d78e"
+  },
+  "generatedRoot": "generated",
+  "documents": [
+    {
+      "id": "SDP-00-01",
+      "path": "00--Project/00-01--Project-Index.md",
+      "title": "Project index",
+      "status": "pilot"
+    },
+    {
+      "id": "SDP-00-02",
+      "path": "00--Project/00-02--SDP-Structure.md",
+      "title": "Numbered SDP structure profile",
+      "status": "pilot"
+    },
+    {
+      "id": "SDP-00-03",
+      "path": "00--Project/00-03--Discovery-and-Tooling-Contract.md",
+      "title": "Discovery and tooling contract",
+      "status": "pilot"
+    },
+    {
+      "id": "SDP-01-01",
+      "path": "01--Mandate/01-01--Mandate.md",
+      "title": "Mermaid BoxUI extension mandate",
+      "status": "authorized-direction"
+    },
+    {
+      "id": "SDP-02-01",
+      "path": "02--Study/02-01--Study.md",
+      "title": "Study and evidence baseline",
+      "status": "draft"
+    },
+    {
+      "id": "SDP-03-01",
+      "path": "03--Requirements/03-01--User-Needs-and-Use-Cases.md",
+      "title": "User needs and use cases",
+      "status": "draft"
+    },
+    {
+      "id": "SDP-03-02",
+      "path": "03--Requirements/03-02--Requirements.md",
+      "title": "Requirements",
+      "status": "draft"
+    },
+    {
+      "id": "SDP-04-01",
+      "path": "04--Functional-Design/04-01--Features-and-Functionalities.md",
+      "title": "Features and functionalities",
+      "status": "draft"
+    },
+    {
+      "id": "SDP-04-02",
+      "path": "04--Functional-Design/04-02--Activities-and-State.md",
+      "title": "Activities and state",
+      "status": "draft"
+    },
+    {
+      "id": "SDP-05-01",
+      "path": "05--System-Architecture/05-01--Containers-and-Channels.md",
+      "title": "System boundaries and channels",
+      "status": "draft"
+    },
+    {
+      "id": "SDP-06-01",
+      "path": "06--Container-Design/06-01--Layers-and-Contracts.md",
+      "title": "Internal layers and contracts",
+      "status": "draft"
+    },
+    {
+      "id": "SDP-07-01",
+      "path": "07--Detailed-Design/07-01--Units-Functions-and-Data.md",
+      "title": "Units functions and data",
+      "status": "draft"
+    },
+    {
+      "id": "SDP-07-02",
+      "path": "07--Detailed-Design/07-02--Presentation-and-Widgets.md",
+      "title": "Presentation and widgets",
+      "status": "draft"
+    },
+    {
+      "id": "SDP-08-01",
+      "path": "08--Realization/08-01--Modules-and-Bindings.md",
+      "title": "Modules and bindings",
+      "status": "inventory"
+    },
+    {
+      "id": "SDP-08-02",
+      "path": "08--Realization/08-02--Delivery-Plan.md",
+      "title": "Vertical delivery plan",
+      "status": "planned"
+    },
+    {
+      "id": "SDP-09-01",
+      "path": "09--Verification/09-01--Verification-Plan.md",
+      "title": "Verification plan",
+      "status": "planned"
+    },
+    {
+      "id": "SDP-09-02",
+      "path": "09--Verification/09-02--Evidence.md",
+      "title": "Verification evidence",
+      "status": "evidence"
+    },
+    {
+      "id": "SDP-10-01",
+      "path": "10--Blueprints/10-01--Blueprint-Catalog.md",
+      "title": "Blueprint catalog",
+      "status": "planned"
+    },
+    {
+      "id": "SDP-10-02",
+      "path": "10--Blueprints/10-02--System-Responsibilities.md",
+      "title": "System responsibilities blueprint",
+      "status": "planned"
+    },
+    {
+      "id": "SDP-10-03",
+      "path": "10--Blueprints/10-03--Widget-Layout.md",
+      "title": "Widget layout blueprint",
+      "status": "planned"
+    },
+    {
+      "id": "SDP-10-04",
+      "path": "10--Blueprints/10-04--Frame-Interaction.md",
+      "title": "Frame and input interaction blueprint",
+      "status": "planned"
+    },
+    {
+      "id": "SDP-11-01",
+      "path": "11--Decisions-and-Traceability/11-01--Decision-Log.md",
+      "title": "Decision log",
+      "status": "pilot"
+    },
+    {
+      "id": "SDP-11-02",
+      "path": "11--Decisions-and-Traceability/11-02--Traceability.md",
+      "title": "Traceability and change impact",
+      "status": "pilot"
+    },
+    {
+      "id": "SDP-12-01",
+      "path": "12--Delivery/12-01--Delivery-and-Compatibility.md",
+      "title": "Delivery and compatibility",
+      "status": "planned"
+    },
+    {
+      "id": "SDP-02-02",
+      "path": "02--Study/02-02--Workspace-Provenance.md",
+      "title": "Workspace provenance",
+      "status": "inventory"
+    }
+  ],
+  "modules": [
+    {
+      "id": "BX-MOD-RENDERER",
+      "title": "Existing renderer Rust library",
+      "kind": "library",
+      "implementation": "existing",
+      "document": "SDP-08-01",
+      "bindings": [
+        {
+          "root": "repository",
+          "path": "Cargo.toml"
+        },
+        {
+          "root": "repository",
+          "path": "src/lib.rs"
+        },
+        {
+          "root": "repository",
+          "path": "src/ir.rs"
+        },
+        {
+          "root": "repository",
+          "path": "src/parser.rs"
+        },
+        {
+          "root": "repository",
+          "path": "src/layout/mod.rs"
+        }
+      ],
+      "evidence": []
+    },
+    {
+      "id": "BX-MOD-BOXUI",
+      "title": "BoxUI model layout and widgets",
+      "kind": "library-extension",
+      "implementation": "planned",
+      "document": "SDP-07-02",
+      "bindings": [],
+      "evidence": []
+    },
+    {
+      "id": "BX-MOD-HOST",
+      "title": "Host interaction adapter",
+      "kind": "adapter",
+      "implementation": "planned",
+      "document": "SDP-06-01",
+      "bindings": [],
+      "evidence": []
+    },
+    {
+      "id": "BX-MOD-SCENARIO",
+      "title": "Synthetic scenario participant and driver",
+      "kind": "test-support",
+      "implementation": "planned",
+      "document": "SDP-04-02",
+      "bindings": [],
+      "evidence": []
+    },
+    {
+      "id": "BX-MOD-SDL",
+      "title": "SDL project toolchain integration",
+      "kind": "external-tool",
+      "implementation": "planned",
+      "document": "SDP-00-03",
+      "bindings": [],
+      "evidence": []
+    },
+    {
+      "id": "BX-MOD-ANALYZER",
+      "title": "SDP-Analyzer profile adapter",
+      "kind": "external-tool",
+      "implementation": "planned",
+      "document": "SDP-00-03",
+      "bindings": [],
+      "evidence": []
+    }
+  ],
+  "sourceSets": [],
+  "targets": [
+    {
+      "id": "BX-TGT-RENDERER-TEST",
+      "title": "Existing renderer library tests",
+      "kind": "test",
+      "module": "BX-MOD-RENDERER",
+      "state": "bound",
+      "reason": "Existing Cargo invocation; toolchain and dependency readiness must be checked at invocation. Not run for this mandate.",
+      "runner": {
+        "root": "repository",
+        "argv": [
+          "cargo",
+          "test",
+          "--locked",
+          "--lib"
+        ]
+      },
+      "requires": [],
+      "outputs": [],
+      "evidence": []
+    },
+    {
+      "id": "BX-TGT-BOXUI-RENDER",
+      "title": "Render BoxUI source",
+      "kind": "generate",
+      "module": "BX-MOD-BOXUI",
+      "state": "blocked",
+      "reason": "BoxUI profile, parser/model and renderer binding are not implemented.",
+      "runner": null,
+      "requires": [],
+      "outputs": [],
+      "evidence": []
+    },
+    {
+      "id": "BX-TGT-BOXUI-TEST",
+      "title": "BoxUI conformance tests",
+      "kind": "test",
+      "module": "BX-MOD-BOXUI",
+      "state": "blocked",
+      "reason": "BoxUI fixtures and test entry points are not implemented.",
+      "runner": null,
+      "requires": [],
+      "outputs": [],
+      "evidence": []
+    },
+    {
+      "id": "BX-TGT-PROTOTYPE-RUN",
+      "title": "Run interactive synthetic Activity",
+      "kind": "run",
+      "module": "BX-MOD-SCENARIO",
+      "state": "blocked",
+      "reason": "Scenario source, participant and host bindings are not implemented.",
+      "runner": null,
+      "requires": [
+        "BX-TGT-BOXUI-RENDER"
+      ],
+      "outputs": [],
+      "evidence": []
+    },
+    {
+      "id": "BX-TGT-SDL-PARSE",
+      "title": "Parse linked SDL project sources",
+      "kind": "parse",
+      "module": "BX-MOD-SDL",
+      "state": "blocked",
+      "reason": "No compatible SDL profile or explicit source set/entry point is bound.",
+      "runner": null,
+      "requires": [],
+      "outputs": [],
+      "evidence": []
+    },
+    {
+      "id": "BX-TGT-SDL-COMPILE",
+      "title": "Compile selected SDL execution slice",
+      "kind": "compile",
+      "module": "BX-MOD-SDL",
+      "state": "blocked",
+      "reason": "Execution profile and transitive realization bindings are missing.",
+      "runner": null,
+      "requires": [
+        "BX-TGT-SDL-PARSE"
+      ],
+      "outputs": [],
+      "evidence": []
+    },
+    {
+      "id": "BX-TGT-SDL-RUN",
+      "title": "Interpret selected SDL execution slice",
+      "kind": "run",
+      "module": "BX-MOD-SDL",
+      "state": "blocked",
+      "reason": "Executable IR, runtime and adapter bindings are missing.",
+      "runner": null,
+      "requires": [
+        "BX-TGT-SDL-COMPILE"
+      ],
+      "outputs": [],
+      "evidence": []
+    },
+    {
+      "id": "BX-TGT-BP01",
+      "title": "Generate System responsibilities",
+      "kind": "blueprint",
+      "module": "BX-MOD-BOXUI",
+      "state": "blocked",
+      "reason": "Canonical model source and projection/generator bindings are not implemented.",
+      "runner": null,
+      "requires": [],
+      "outputs": [
+        "blueprints/BX-BP01.mmd"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "BX-TGT-BP02",
+      "title": "Generate Widget layout",
+      "kind": "blueprint",
+      "module": "BX-MOD-BOXUI",
+      "state": "blocked",
+      "reason": "Canonical model source and projection/generator bindings are not implemented.",
+      "runner": null,
+      "requires": [],
+      "outputs": [
+        "blueprints/BX-BP02.boxui"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "BX-TGT-BP03",
+      "title": "Generate Frame and input interaction",
+      "kind": "blueprint",
+      "module": "BX-MOD-HOST",
+      "state": "blocked",
+      "reason": "Canonical model source and projection/generator bindings are not implemented.",
+      "runner": null,
+      "requires": [],
+      "outputs": [
+        "blueprints/BX-BP03.mmd"
+      ],
+      "evidence": []
+    }
+  ],
+  "blueprints": [
+    {
+      "id": "BX-BP01",
+      "path": "10--Blueprints/10-02--System-Responsibilities.blueprint.json"
+    },
+    {
+      "id": "BX-BP02",
+      "path": "10--Blueprints/10-03--Widget-Layout.blueprint.json"
+    },
+    {
+      "id": "BX-BP03",
+      "path": "10--Blueprints/10-04--Frame-Interaction.blueprint.json"
+    }
+  ],
+  "relations": [
+    {
+      "from": "SDP-01-01",
+      "type": "motivates",
+      "to": "SDP-03-02",
+      "status": "declared"
+    },
+    {
+      "from": "SDP-04-01",
+      "type": "explains",
+      "to": "SDP-03-02",
+      "status": "declared"
+    },
+    {
+      "from": "SDP-09-01",
+      "type": "plans-verification-for",
+      "to": "SDP-03-02",
+      "status": "planned"
+    },
+    {
+      "from": "SDP-09-02",
+      "type": "records-authoring-evidence-for",
+      "to": "SDP-00-03",
+      "status": "declared"
+    },
+    {
+      "from": "BX-MOD-BOXUI",
+      "type": "extends",
+      "to": "BX-MOD-RENDERER",
+      "status": "planned"
+    },
+    {
+      "from": "BX-BP01",
+      "type": "projects",
+      "to": "BX-MOD-BOXUI",
+      "status": "planned"
+    },
+    {
+      "from": "BX-BP02",
+      "type": "projects",
+      "to": "BX-MOD-BOXUI",
+      "status": "planned"
+    },
+    {
+      "from": "BX-BP03",
+      "type": "projects",
+      "to": "BX-MOD-HOST",
+      "status": "planned"
+    }
+  ]
+}
+

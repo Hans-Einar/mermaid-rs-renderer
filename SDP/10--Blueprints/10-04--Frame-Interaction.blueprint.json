@@ -1,0 +1,42 @@
+{
+  "$schema": "../00--Project/sdp-project.schema.json#/$defs/blueprint",
+  "schemaVersion": "0.1",
+  "id": "BX-BP03",
+  "title": "Frame and input interaction",
+  "document": "SDP-10-04",
+  "scope": {
+    "abstractionLevel": "behavior",
+    "rootModule": "BX-MOD-HOST",
+    "requirements": [
+      "BX-R05",
+      "BX-R06",
+      "BX-R07"
+    ]
+  },
+  "sources": {
+    "documents": [
+      "SDP-04-02",
+      "SDP-07-02"
+    ],
+    "sourceSets": []
+  },
+  "projection": {
+    "format": "mermaid",
+    "diagramFamily": "sequenceDiagram",
+    "profile": null,
+    "rulesDocument": "SDP-10-04"
+  },
+  "target": "BX-TGT-BP03",
+  "output": "blueprints/BX-BP03.mmd",
+  "state": "blocked",
+  "blockers": [
+    "Canonical model source is not declared",
+    "Projection profile and generator implementation are not bound"
+  ],
+  "provenanceRequired": [
+    "source identities and revisions",
+    "profile and generator versions",
+    "unresolved links and simulated bindings"
+  ]
+}
+

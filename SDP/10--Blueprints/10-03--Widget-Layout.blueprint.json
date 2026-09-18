@@ -1,0 +1,41 @@
+{
+  "$schema": "../00--Project/sdp-project.schema.json#/$defs/blueprint",
+  "schemaVersion": "0.1",
+  "id": "BX-BP02",
+  "title": "Widget layout",
+  "document": "SDP-10-03",
+  "scope": {
+    "abstractionLevel": "detailed-design",
+    "rootModule": "BX-MOD-BOXUI",
+    "requirements": [
+      "BX-R02",
+      "BX-R03",
+      "BX-R05"
+    ]
+  },
+  "sources": {
+    "documents": [
+      "SDP-07-02"
+    ],
+    "sourceSets": []
+  },
+  "projection": {
+    "format": "boxui-source",
+    "diagramFamily": "boxui",
+    "profile": null,
+    "rulesDocument": "SDP-10-03"
+  },
+  "target": "BX-TGT-BP02",
+  "output": "blueprints/BX-BP02.boxui",
+  "state": "blocked",
+  "blockers": [
+    "Canonical model source is not declared",
+    "Projection profile and generator implementation are not bound"
+  ],
+  "provenanceRequired": [
+    "source identities and revisions",
+    "profile and generator versions",
+    "unresolved links and simulated bindings"
+  ]
+}
+
