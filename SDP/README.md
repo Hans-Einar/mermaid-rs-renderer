@@ -16,7 +16,7 @@ No current SDL compiler or SDP-Analyzer compatibility is implied.
 
 ## Current review entry
 
-[Delivery/recap](12--Delivery/12-01--Delivery-and-Compatibility.md),
+[Recap og reviewvalg](12--Delivery/12-02--Parallel-Readiness-Recap.md),
 [shared XFMD contract](06--Container-Design/06-02--XFMD-Host-Contract.md),
 [parallel packages and stop gate](08--Realization/08-02--Delivery-Plan.md),
 [SDL structure](07--Detailed-Design/SDL/BoxUi.design),
@@ -56,6 +56,8 @@ G-PARALLEL-REVIEW is a review checkpoint, not authorization to start implementat
 | SDP-06-02 | [XFMD host contract](06--Container-Design/06-02--XFMD-Host-Contract.md) | draft |
 | SDP-09-03 | [Acceptance catalog](09--Verification/09-03--Acceptance-Catalog.md) | draft |
 | SDP-12-01 | [Delivery and compatibility](12--Delivery/12-01--Delivery-and-Compatibility.md) | planned |
+
+| SDP-12-02 | [Parallel readiness recap](12--Delivery/12-02--Parallel-Readiness-Recap.md) | draft |
 
 ## Current scope
 

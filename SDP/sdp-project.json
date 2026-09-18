@@ -176,6 +176,12 @@
       "path": "09--Verification/09-03--Acceptance-Catalog.md",
       "title": "Acceptance catalog",
       "status": "draft"
+    },
+    {
+      "id": "SDP-12-02",
+      "path": "12--Delivery/12-02--Parallel-Readiness-Recap.md",
+      "title": "Parallel readiness recap",
+      "status": "draft"
     }
   ],
   "modules": [

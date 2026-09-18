@@ -8,6 +8,6 @@ REJECT: commit without value/revision
 REJECT: negative frame extent
 REJECT: missing binding revision
 REJECT: duplicate JSON key
-PASS: 27 documents, 1 SDL source set, 11 targets, 78 local links, 6 schemas/fixtures, 10 negative checks.
+PASS: 28 documents, 1 SDL source set, 11 targets, 83 local links, 6 schemas/fixtures, 10 negative checks.
 No product parser, layout, input, SVG safety, PDF or SDL behavioral execution tested.
-Manifest SHA256: 4d8840e77c9bbcf0254c87aaced389677a9b83789c0b93ecd1e0ab7ceac1a1fa
+Manifest SHA256: 31cefbb4fce6a302b18fe61959525523de9ce586532a68c20cfee0902b7b864a

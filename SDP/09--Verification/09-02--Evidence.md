@@ -58,8 +58,8 @@ coverage or evidence that the proposed structure is optimal for other projects.
 This additive record supersedes BX-E01 counts/current-path inventory; BX-E01
 remains historical authoring evidence from before mandate relocation.
 
-Checked draft1: 27 documents, one real design-core 0.1 source set, 11 targets,
-78 local Markdown links, six contract schemas/positive fixtures, ten negative
+Checked draft1: 28 documents, one real design-core 0.1 source set, 11 targets,
+local Markdown links (count in log), six contract schemas/positive fixtures, ten negative
 artifact cases. Source/model/prepare fixture consistency is checked separately
 from rendering. [Actual checker output](evidence/design-check.txt).
 
