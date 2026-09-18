@@ -79,3 +79,11 @@ not an independent verifier or owner approval.
 
 Gate G-PARALLEL-REVIEW: design package available for recap. No implementation gate
 has passed. Remaining bounded choices are recorded in SDP-12-01.
+# Phase 046 implementation evidence
+
+R1: strict versioned source parsing, normalized typed models, child-source byte
+ranges, immutable built-in registry and semantic validation implemented. The
+command `cargo test --locked --no-default-features --test boxui` passed 3 tests
+covering the shared source/model fixture, duplicate keys/IDs, forbidden/null
+fields, incompatible bindings, unsupported versions, trailing bytes and UTF-8.
+This is parser evidence, not native-host interaction evidence.

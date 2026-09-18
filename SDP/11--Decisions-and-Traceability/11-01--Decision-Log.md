@@ -39,3 +39,20 @@ now lives at 01--Mandate/01-01--Mandate.md; old root file/navigation stub remove
 | BX-D12 | In-process synthetic participant; no TCP first | Review candidate; exercises contracts without network lifecycle. |
 | BX-D13 | Real bounded design-core SDL plus explicit contract artifacts | Review candidate; unsupported behavior remains documented rather than masquerading as compiled SDL. |
 | BX-D14 | Stop at G-PARALLEL-REVIEW | Owner direction; recap/design iteration precedes XFMD implementation. |
+
+## Implementation authorization
+
+BX-D15, 2026-09-18: the owner accepts the proposed design, explicitly waives
+another design iteration and requests renderer implementation with phase branches
+and milestone commits. This supersedes BX-D14's stop gate for implementation.
+XFMD is assigned to a separate agent; this phase does not edit XFMD.
+
+Phase 046 uses `phase/boxui-046-implementation` in an isolated worktree because
+the original worktree already contained uncommitted phase-045 source. Those
+files are preserved, not overwritten or assumed verified. This phase starts
+from reviewed handoff `7076cac` and follows BX-HOST/0.1-draft1.
+
+Terminology clarification: `boxui 0.1` is this extension's new source profile,
+not a confirmed version of Concept1's React UIBox. Concept1 uses JSX/props/CSS;
+shared source definitions require a compatible adapter, not execution of JSX
+inside Rust. Existing Concept1 code and layout behavior remain unchanged.
