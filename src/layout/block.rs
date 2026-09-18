@@ -3,8 +3,8 @@ use super::*;
 pub(super) fn compute_block_layout(graph: &Graph, theme: &Theme, config: &LayoutConfig) -> Layout {
     let mut nodes = build_graph_node_layouts(graph, theme, config);
 
-    let node_gap = (theme.font_size * 0.4).max(4.0);
-    let column_gap = (theme.font_size * 0.45).max(6.0);
+    let node_gap = (theme.font_size * 0.4).max(24.0);
+    let column_gap = (theme.font_size * 0.45).max(24.0);
     let origin_x = 6.0;
     let origin_y = 6.0;
 
@@ -161,7 +161,10 @@ pub(super) fn compute_block_layout(graph: &Graph, theme: &Theme, config: &Layout
             label_anchor: None,
             start_label_anchor: None,
             end_label_anchor: None,
-            points: vec![from_center, to_center],
+            points: vec![
+                boundary(from_layout, to_center),
+                boundary(to_layout, from_center),
+            ],
             directed: edge.directed,
             arrow_start: edge.arrow_start,
             arrow_end: edge.arrow_end,
@@ -310,4 +313,26 @@ fn infer_block_grid(graph: &Graph) -> (Vec<crate::ir::BlockNode>, usize) {
         }
     }
     (block_nodes, columns)
+}
+
+// Straight block connectors terminate on visible rectangles, not their centers.
+fn boundary(n: &NodeLayout, target: (f32, f32)) -> (f32, f32) {
+    let c = (n.x + n.width / 2., n.y + n.height / 2.);
+    let d = (target.0 - c.0, target.1 - c.1);
+    let tx = if d.0.abs() > 0.001 {
+        n.width / 2. / d.0.abs()
+    } else {
+        f32::INFINITY
+    };
+    let ty = if d.1.abs() > 0.001 {
+        n.height / 2. / d.1.abs()
+    } else {
+        f32::INFINITY
+    };
+    let t = tx.min(ty);
+    if !t.is_finite() {
+        c
+    } else {
+        (c.0 + d.0 * t, c.1 + d.1 * t)
+    }
 }

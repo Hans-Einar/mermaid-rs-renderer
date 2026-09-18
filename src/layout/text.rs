@@ -44,6 +44,9 @@ pub(super) fn measure_label_with_max_width(
     wrap: bool,
     font_family: &str,
 ) -> TextBlock {
+    if let Some(measured) = super::measurements::dynamic_lookup(text, font_size, max_width, wrap) {
+        return measured;
+    }
     if let Some(measured) = super::measurements::lookup(text) {
         return measured;
     }

@@ -3073,7 +3073,7 @@ fn flowchart_center_label_refine_cost(
 }
 
 /// Resolve start/end label positions for all edges.
-fn resolve_endpoint_labels(
+pub(super) fn resolve_endpoint_labels(
     edges: &mut [EdgeLayout],
     nodes: &BTreeMap<String, NodeLayout>,
     subgraphs: &[SubgraphLayout],
@@ -3136,7 +3136,7 @@ fn resolve_endpoint_labels(
     }
 
     let end_label_offset = match kind {
-        DiagramKind::Class => (theme.font_size * 0.18).max(2.8),
+        DiagramKind::Class => (theme.font_size * 1.0).max(16.0),
         DiagramKind::Flowchart => (theme.font_size * 0.75).max(9.0),
         _ => (theme.font_size * 0.6).max(8.0),
     };
@@ -4217,7 +4217,7 @@ fn edge_endpoint_label_position_with_avoid(
         _ => &[0.0, 0.8, -0.8, 1.6, -1.6],
     };
     let perp_steps: &[f32] = match kind {
-        DiagramKind::Class => &[0.0, 0.35, -0.35, 0.7, -0.7, 1.05, -1.05, 1.5, -1.5],
+        DiagramKind::Class => &[1.0, -1.0, 1.5, -1.5, 2.0, -2.0],
         _ => &[
             1.0, -1.0, 1.7, -1.7, 2.4, -2.4, 3.2, -3.2, 3.9, -3.9, 4.6, -4.6,
         ],
