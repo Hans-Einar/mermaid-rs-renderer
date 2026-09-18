@@ -7,6 +7,16 @@ updated: 2026-09-18
 
 # Parallel delivery and stop gate
 
+## Phase 046 implementation update
+
+The owner accepted draft1 and authorized renderer implementation and milestone
+commits (BX-D15), superseding the stop gate below. R1/R2 now have implementation
+commits and runnable fixtures. R3/R4 evidence and the exact integration seam are
+recorded in [the handoff](08-03--Renderer-API-and-XFMD-Handoff.md) and
+[verification evidence](../09--Verification/09-02--Evidence.md). XFMD runs in a
+separate workstream. The following gate text preserves the original design
+handoff history; it is not a renewed implementation stop instruction.
+
 ## Current assignment and milestones
 
 BX-M01: preserve supplied mandate/structure as a traceable baseline (`d1e70c4`).

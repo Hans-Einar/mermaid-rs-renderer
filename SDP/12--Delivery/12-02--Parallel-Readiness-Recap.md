@@ -7,6 +7,11 @@ updated: 2026-09-18
 
 # Recap — klar for designgjennomgang før parallell utvikling
 
+**Historical design recap.** BX-D15 supersedes the stop gate below: the owner
+accepted the proposed design and authorized implementation without another
+design iteration. Current renderer delivery and remaining XFMD integration
+are documented in [SDP-08-03](../08--Realization/08-03--Renderer-API-and-XFMD-Handoff.md).
+
 ## Hva som er konkretisert
 
 XFMD er den påkrevde interaktive verten for BoxUI i Markdown. Ingen HTML-side
@@ -60,4 +65,4 @@ referansekontroller, godkjent strukturell SDL og avvist reversert eierskap.
 XFMDs blueprint- og symbolkontroller består. Ingen BoxUI-produktkode, GUI/PDF-test,
 ny rendering, programbygg eller installasjon er gjort i denne designleveransen.
 
-**Stoppunkt nå: G-PARALLEL-REVIEW.** Ta recap og designiterasjonen før oppstart.
+Historical stop point: G-PARALLEL-REVIEW; superseded by BX-D15.

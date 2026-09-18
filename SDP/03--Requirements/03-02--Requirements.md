@@ -9,7 +9,8 @@ updated: 2026-09-18
 
 ## Status and classification
 
-The following are derived candidate requirements within the authorized mandate.
+The following are derived requirements within the owner-accepted draft1 scope
+(BX-D15).
 They are not tested claims. Scope/perspective and functional/quality/constraint
 nature are separate classifications. Changes retain IDs and rationale.
 
@@ -32,8 +33,9 @@ nature are separate classifications. Changes retain IDs and rationale.
 
 User cases BX-UC-01 through BX-UC-04 motivate these obligations. The functional
 and verification documents map contributions and checks. Draft1 now supplies proposed BX-R08 budgets, BX-R02 viewports and BX-R12
-input/accessibility scope below. They await owner review and real implementation
-evidence; specified values are not measured product results.
+input/accessibility scope below. BX-D15 accepted this design baseline; real
+implementation evidence is tracked separately. Specified values are not measured
+product results.
 
 Prototype checks do not establish native production-toolkit equivalence or
 physical machine suitability.
@@ -53,4 +55,4 @@ BX-R12 requires keyboard-only activation, focus traversal, Unicode editing and
 clipboard; role/name/disabled descriptors. Screen-reader integration and broad
 IME/platform equivalence are explicitly not established by the prototype.
 [Acceptance catalog](../09--Verification/09-03--Acceptance-Catalog.md) gives cases
-and expected outcomes. All obligations are design candidates, not passed product tests.
+and expected outcomes. Accepted obligations are not automatically passed product tests.

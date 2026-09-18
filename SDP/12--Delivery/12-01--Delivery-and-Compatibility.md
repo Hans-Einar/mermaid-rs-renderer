@@ -12,9 +12,16 @@ updated: 2026-09-18
 Design handoff BX-HOST/0.1-draft1: Markdown source profile, structural SDL model,
 contract schemas, manual boundary fixtures, role allocation, acceptance catalog
 and a separate XFMD implementation task. Ready for recap, not a BoxUI release.
-No runtime, new library API, interpreter or native widget behavior is delivered.
+That design-only checkpoint is superseded by BX-D15 for implementation. Phase
+046 now supplies a renderer-side parser, typed model, preparation API, SVG/control
+frames and runnable witnesses. See the
+[concrete API handoff](../08--Realization/08-03--Renderer-API-and-XFMD-Handoff.md).
+Native XFMD behavior and the final cross-repository join remain unverified here.
 
 ## Review questions before parallel start
+
+The owner accepted the following bounded recommendations and waived another
+design iteration. They remain recorded to explain the selected scope.
 
 1. Keep strict JSON under `boxui 0.1` for the bounded first authoring profile,
    or invest in concise textual syntax before implementation? JSON minimizes

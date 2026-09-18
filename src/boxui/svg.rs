@@ -103,6 +103,7 @@ pub fn prepare_boxui_cancellable(
         items,
         children,
         budget: &budget,
+        simulation_footer: layout.simulation_footer,
     };
     let static_svg = paint.render(false)?;
     let preview_svg = paint.render(true)?;
@@ -136,6 +137,7 @@ struct Painter<'a, 'b> {
     items: BTreeMap<&'a str, &'a LayoutItem>,
     children: BTreeMap<&'a str, ChildScene>,
     budget: &'a Budget<'b>,
+    simulation_footer: Option<(Rect, f64)>,
 }
 impl Painter<'_, '_> {
     fn rect(&self, s: &mut String, r: Rect, fill: &str, border: &str) {
@@ -169,11 +171,11 @@ impl Painter<'_, '_> {
             "none",
         );
         self.node(&self.r.model.root, &mut s, preview)?;
-        if self.r.snapshot.simulated() {
+        if let Some((rect, baseline)) = self.simulation_footer {
             write!(
                 s,
                 "<text x=\"8\" y=\"{}\" fill=\"{}\">simulated snapshot</text>",
-                self.r.viewport.height - 8.0,
+                rect.y + baseline,
                 self.r.palette.muted
             )
             .unwrap();

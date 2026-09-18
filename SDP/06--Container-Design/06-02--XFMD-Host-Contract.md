@@ -9,11 +9,14 @@ updated: 2026-09-18
 
 ## 1. Status and compatibility
 
-Review candidate, not released ABI or permission to implement. Both repositories
-implement this exact revision after review. Source schema, frame schema and
-fixtures in [contracts](contracts/README.md) are the shared artifact. Breaking
+The owner accepted this design and authorized implementation in BX-D15. This is
+still a draft contract, not a released C ABI. Both repositories implement this
+exact revision. Source schema, frame schema and fixtures in
+[contracts](contracts/README.md) are the shared artifact. Breaking
 changes before/after parallel start require an explicit revision and both tasks
-updated; never silently widen accepted input. No runtime structs exist yet.
+updated; never silently widen accepted input. The renderer's concrete Rust API
+and implemented subset are recorded in the
+[phase-046 handoff](../08--Realization/08-03--Renderer-API-and-XFMD-Handoff.md).
 
 ## 2. Source and model
 

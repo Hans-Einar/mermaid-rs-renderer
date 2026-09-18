@@ -30,16 +30,7 @@ fn main() {
     let (output, status) = match result {
         Ok(v) => (v, 0),
         Err(e) => {
-            let code = e.diagnostic.code.as_str();
-            let status = if code == "cancelled" {
-                4
-            } else if code.contains("budget") {
-                3
-            } else if code.starts_with("unsupported") {
-                2
-            } else {
-                1
-            };
+            let status = e.status_code() as i32;
             (
                 serde_json::json!({"contract":CONTRACT,"diagnostics":[e.diagnostic]}),
                 status,

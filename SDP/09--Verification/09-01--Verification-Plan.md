@@ -25,9 +25,10 @@ A planned test, `verifies` link or static SVG is not a passed interaction test.
 
 ## Current limits
 
-No BoxUI product tests exist as part of this mandate delivery. Baseline renderer
-tests are declared but not rerun. This delivery checks the documentation and
-catalog, not layout, runtime input, networking or production correctness.
+Phase 046 has BoxUI product tests, a real static render witness and schema checks
+against actual Rust protocol output. Outcomes are in
+[the evidence record](09-02--Evidence.md). They cover the renderer subset;
+native XFMD input/publication/export, networking and production correctness
+are not established by these checks.
 An independent review of implementation can be planned with each Tier; this
 document does not imply it has occurred.
-

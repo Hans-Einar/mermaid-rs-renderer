@@ -182,6 +182,12 @@
       "path": "12--Delivery/12-02--Parallel-Readiness-Recap.md",
       "title": "Parallel readiness recap",
       "status": "draft"
+    },
+    {
+      "id": "SDP-08-03",
+      "path": "08--Realization/08-03--Renderer-API-and-XFMD-Handoff.md",
+      "title": "Renderer API and XFMD handoff",
+      "status": "inventory"
     }
   ],
   "modules": [
@@ -219,10 +225,14 @@
       "id": "BX-MOD-BOXUI",
       "title": "BoxUI model layout and widgets",
       "kind": "library-extension",
-      "implementation": "planned",
+      "implementation": "existing",
       "document": "SDP-07-02",
-      "bindings": [],
-      "evidence": []
+      "bindings": [
+        {"root": "repository", "path": "src/boxui/mod.rs"},
+        {"root": "repository", "path": "tests/boxui.rs"},
+        {"root": "repository", "path": "examples/boxui_demo.rs"}
+      ],
+      "evidence": ["SDP/09--Verification/09-02--Evidence.md#phase-046-implementation-evidence"]
     },
     {
       "id": "BX-MOD-HOST",
@@ -301,12 +311,12 @@
     },
     {
       "id": "BX-TGT-BOXUI-RENDER",
-      "title": "Render BoxUI source",
+      "title": "Render standalone BoxUI Activity witness",
       "kind": "generate",
       "module": "BX-MOD-BOXUI",
-      "state": "blocked",
-      "reason": "BoxUI profile, parser/model and renderer binding are not implemented.",
-      "runner": null,
+      "state": "bound",
+      "reason": "Phase-046 standalone example; writes reproducible frame/SVG files to target/boxui-demo. Approximate metrics; no native host.",
+      "runner": {"root": "repository", "argv": ["cargo", "run", "--locked", "--no-default-features", "--example", "boxui_demo"]},
       "requires": [],
       "outputs": [],
       "evidence": []
@@ -316,9 +326,9 @@
       "title": "BoxUI conformance tests",
       "kind": "test",
       "module": "BX-MOD-BOXUI",
-      "state": "blocked",
-      "reason": "BoxUI fixtures and test entry points are not implemented.",
-      "runner": null,
+      "state": "bound",
+      "reason": "Phase-046 source/model/frame, measured layout and failure conformance; does not establish native interaction.",
+      "runner": {"root": "repository", "argv": ["cargo", "test", "--locked", "--no-default-features", "--test", "boxui"]},
       "requires": [],
       "outputs": [],
       "evidence": []

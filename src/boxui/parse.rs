@@ -36,11 +36,11 @@ pub fn parse_boxui(source: &str) -> Result<ParsedBoxUi> {
     let (mut value, spans) = strict_json(&source[offset..], offset)?;
     let mut children = Vec::new();
     if let Some(root) = value.get_mut("root") {
-        extract(root, "/root", &spans, &mut children)?;
+        extract(root, "/root", &spans, &mut children).map_err(|e| e.span(offset, source.len()))?;
     }
-    validate::raw_model(&value)?;
+    validate::raw_model(&value).map_err(|e| e.span(offset, source.len()))?;
     let model: BoxUiDocument = serde_json::from_value(value)
-        .map_err(|e| BoxUiError::new("source-shape", e.to_string()))?;
+        .map_err(|e| BoxUiError::new("source-shape", e.to_string()).span(offset, source.len()))?;
     validate_boxui(&model).map_err(|mut e| {
         if let Some(id) = &e.diagnostic.node_id {
             if let Some(path) = find_node_path(&model.root, id, "/root") {
@@ -48,6 +48,9 @@ pub fn parse_boxui(source: &str) -> Result<ParsedBoxUi> {
                     e = e.span(a, b);
                 }
             }
+        }
+        if e.diagnostic.source_start.is_none() {
+            e = e.span(offset, source.len());
         }
         e
     })?;
@@ -168,7 +171,7 @@ impl Json<'_> {
             let c = self.s.as_bytes()[self.pos];
             self.pos += 1;
             if c == b'\\' {
-                self.pos += 1;
+                self.pos = (self.pos + 1).min(self.s.len());
             } else if c == b'"' {
                 return serde_json::from_str(&self.s[start..self.pos])
                     .map_err(|e| self.error(&e.to_string()));

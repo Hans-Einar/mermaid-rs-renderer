@@ -5,9 +5,12 @@ status: draft
 updated: 2026-09-18
 ---
 
-# Acceptance catalog — planned product checks
+# Acceptance catalog
 
-None of these product checks has run. Schema/parser authoring checks are separate.
+Phase 046 supplies renderer-side evidence for BX-AT02/03 and parts of
+BX-AT11/12. It does not close the combined host cases. Concrete commands and
+outcomes are in [the evidence record](09-02--Evidence.md). The table remains the
+acceptance specification; a partial witness is not a passed end-to-end case.
 
 | Case | Requirements | Stimulus and expected observation | Primary owner |
 |---|---|---|---|

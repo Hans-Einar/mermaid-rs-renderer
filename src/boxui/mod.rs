@@ -48,6 +48,16 @@ pub struct BoxUiError {
 pub type Result<T> = std::result::Result<T, BoxUiError>;
 
 impl BoxUiError {
+    /// Draft1 host status category; local child diagnostics still produce a successful frame.
+    pub fn status_code(&self) -> u32 {
+        match self.diagnostic.code.as_str() {
+            "cancelled" => 4,
+            "unsupported-profile" | "unsupported-contract" | "widget-version" | "child-family" => 2,
+            "frame-encoding" => 5,
+            code if code.contains("budget") => 3,
+            _ => 1,
+        }
+    }
     pub(crate) fn new(code: &str, message: impl Into<String>) -> Self {
         Self {
             diagnostic: Diagnostic {

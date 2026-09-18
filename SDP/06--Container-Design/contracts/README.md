@@ -1,8 +1,10 @@
 # BX-HOST/0.1-draft1 contract artifacts
 
-Schemas are review candidates for authoring payload, typed model, prepare request, prepared frame, intent and result.
-They are not implemented Rust/C++ interfaces or a transport protocol. All fixture
-frames are hand-authored boundary examples, not renderer output. Source JSON follows
+Schemas define the owner-accepted draft1 authoring payload, typed model, prepare
+request, prepared frame, intent and result. The phase-046 Rust implementation
+conforms to the renderer subset; C++/FFI integration is separately verified.
+The fixture frame in `fixtures/frame.mock.json` remains hand-authored. Real
+generated frames are checked by `check_boxui_runtime.py`. Source JSON follows
 the `boxui 0.1` header; it is not executable SDL.
 
 Schema checks cover shape and field types. The host contract additionally requires

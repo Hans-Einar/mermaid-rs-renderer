@@ -48,6 +48,8 @@ pub struct LayoutItem {
 pub struct BoxUiLayout {
     pub items: Vec<LayoutItem>,
     pub diagnostics: Vec<Diagnostic>,
+    /// Rectangle and baseline offset for the simulation marker, measured with the frame.
+    pub simulation_footer: Option<(Rect, f64)>,
 }
 
 pub fn layout_boxui(request: &PrepareRequest, metrics: &dyn TextMetrics) -> Result<BoxUiLayout> {
@@ -187,7 +189,7 @@ impl Engine<'_, '_> {
         Ok(min)
     }
     fn wrap(&mut self, n: &Node, text: &str, width: f64) -> Result<(Vec<String>, TextExtent)> {
-        let metric = self.extent("Mg")?;
+        let mut metric = self.extent("Mg")?;
         let mut lines = Vec::new();
         for paragraph in text.split('\n') {
             let mut line = String::new();
@@ -216,6 +218,23 @@ impl Engine<'_, '_> {
             }
             lines.push(line);
         }
+        // Fallback fonts may have a different ascent/descent than Latin "Mg".
+        let mut ascent = metric.baseline;
+        let mut descent = metric.height - metric.baseline;
+        for line in &lines {
+            let extent = self.extent(line)?;
+            ascent = ascent.max(extent.baseline);
+            descent = descent.max(extent.height - extent.baseline);
+        }
+        if n.kind == Kind::Input {
+            let extent = self.extent(&value_text(
+                self.r.snapshot.value(n.value_binding.as_ref().unwrap()),
+            ))?;
+            ascent = ascent.max(extent.baseline);
+            descent = descent.max(extent.height - extent.baseline);
+        }
+        metric.baseline = ascent;
+        metric.height = ascent + descent;
         Ok((lines, metric))
     }
     fn allocate(&mut self, n: &Node, rect: Rect, final_pass: bool) -> Result<()> {
@@ -363,6 +382,7 @@ pub(crate) fn layout(
     if !m.font_size().is_finite()
         || !(1.0..=512.0).contains(&m.font_size())
         || m.font_family().len() > 256
+        || m.font_family().is_empty()
     {
         return Err(BoxUiError::new(
             "invalid-metrics",
@@ -378,11 +398,32 @@ pub(crate) fn layout(
         items: vec![],
         diagnostics: vec![],
     };
+    let simulation_footer = if r.snapshot.simulated() {
+        let extent = e.extent("simulated snapshot")?;
+        let height = (extent.height + 8.0).max(24.0);
+        if extent.width + 16.0 > r.viewport.width || height >= r.viewport.height {
+            return Err(BoxUiError::new(
+                "layout-no-space",
+                "Simulation marker cannot fit the viewport",
+            ));
+        }
+        Some((
+            Rect {
+                x: 0.0,
+                y: r.viewport.height - height,
+                width: r.viewport.width,
+                height,
+            },
+            4.0 + extent.baseline,
+        ))
+    } else {
+        None
+    };
     let rect = Rect {
         x: 0.0,
         y: 0.0,
         width: r.viewport.width,
-        height: r.viewport.height - if r.snapshot.simulated() { 24.0 } else { 0.0 },
+        height: simulation_footer.map_or(r.viewport.height, |(rect, _)| rect.y),
     };
     e.intrinsic(&r.model.root)?;
     e.allocate(&r.model.root, rect, false)?;
@@ -393,5 +434,6 @@ pub(crate) fn layout(
     Ok(BoxUiLayout {
         items: e.items,
         diagnostics: e.diagnostics,
+        simulation_footer,
     })
 }

@@ -56,3 +56,18 @@ Terminology clarification: `boxui 0.1` is this extension's new source profile,
 not a confirmed version of Concept1's React UIBox. Concept1 uses JSX/props/CSS;
 shared source definitions require a compatible adapter, not execution of JSX
 inside Rust. Existing Concept1 code and layout behavior remain unchanged.
+
+BX-D16, phase 046 implementation detail: input labels/status and native edit
+interiors receive separate rectangles; the edit surface grows with host line
+height, with a 32 px floor. Simulated frames reserve a measured footer with a
+24 px floor. Wrapped lines include fallback-font ascent/descent; fixed Latin
+metrics must not silently clip Unicode text when the host changes fonts.
+These realize the accepted native-overlay and simulation-marker obligations
+without adding wire fields. Shared draft1 schemas remain unchanged. Exact
+geometry now has executable witnesses and must be used by XFMD, not recalculated.
+
+BX-D17, phase 046 implementation detail: embedded SVG uses a conservative
+allowlist and XML parser, rather than copying raw SVG or claiming general SVG
+sanitization. Unsupported child constructs produce a local pane error. Existing
+flowchart, sequence and state outputs are exercised; other constructs require
+new conformance evidence before widening this profile.

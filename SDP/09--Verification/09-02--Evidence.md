@@ -7,6 +7,10 @@ updated: 2026-09-18
 
 # Verification evidence
 
+Current renderer implementation evidence is under **Phase 046 implementation
+evidence** below. BX-E01 and the draft1 design checks are preserved historical
+records; their design-only statements do not describe the current source tree.
+
 ## Delivery record BX-E01
 
 Scope: mandate and numbered SDP discovery pilot, 2026-09-18.
@@ -102,3 +106,26 @@ transitively in the lockfile). It rejects DTDs and non-profile elements/attribut
 rewrites local ID references and isolates child failures. No raw child XML is
 copied unchecked. Inline CSS is a restricted property/value subset; style blocks,
 links, images, filters, animation and foreignObject are unsupported.
+
+R3: 18 BoxUI integration tests pass both with default Cargo features and with
+`--no-default-features`. They now cover exact byte/node/depth/text/child limits,
+wrong/missing/duplicate snapshot entries, XML rejection and ID rewriting, all
+three real child families, bounded frame size, deadlines, cancellation, parallel
+session isolation, font fallback and truncated-source diagnostic ranges.
+
+`python3 SDP/09--Verification/check_boxui_runtime.py` passed against freshly
+built `boxui_host` and `boxui_demo`: real Rust model/frame payloads validate
+against the unchanged draft1 schemas, replay deterministically and preserve
+source byte ranges/frame keys. Three error envelopes also pass the expected
+status checks. Approximate demo metrics do not establish host font parity.
+
+`python3 SDP/09--Verification/check_design.py` passes with 29 registered
+documents, one structural SDL source set, 11 targets, six schemas and ten
+negative authoring checks. Two BoxUI targets now have actual runner bindings;
+native interaction and SDL execution retain explicit blockers. The historical
+design fingerprint files remain records of their earlier checkpoint.
+
+The available toolchain is Rust 1.92.0. `cargo clippy` is unavailable in this
+installation; no Clippy result is claimed. Scoped rustfmt and `git diff --check`
+pass. No independent reviewer, sanitizer, C ABI or native interaction result is
+claimed by this phase.
