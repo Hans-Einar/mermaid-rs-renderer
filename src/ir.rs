@@ -65,6 +65,18 @@ pub enum SequenceActivationKind {
     Deactivate,
 }
 
+/// Explicit event order for clients preserving note/fragment boundary scope.
+#[derive(Debug, Clone)]
+pub enum SequenceEvent {
+    Message(usize),
+    Note(usize),
+    Activate(String),
+    Deactivate(String),
+    Start(SequenceFrameKind, String),
+    Branch(String),
+    End,
+}
+
 #[derive(Debug, Clone)]
 pub struct SequenceActivation {
     pub participant: String,
@@ -78,6 +90,13 @@ pub struct SequenceNote {
     pub participants: Vec<String>,
     pub label: String,
     pub index: usize,
+}
+
+#[derive(Debug, Clone)]
+pub struct PacketField {
+    pub start: u32,
+    pub end: u32,
+    pub label: String,
 }
 
 #[derive(Debug, Clone)]
@@ -413,6 +432,7 @@ pub enum EdgeDecoration {
 pub enum EdgeArrowhead {
     OpenTriangle,
     ClassDependency,
+    OpenV,
 }
 
 #[derive(Debug, Clone)]
@@ -433,12 +453,14 @@ pub struct Graph {
     pub edges: Vec<Edge>,
     pub subgraphs: Vec<Subgraph>,
     pub sequence_participants: Vec<String>,
+    pub sequence_events: Vec<SequenceEvent>,
     pub sequence_frames: Vec<SequenceFrame>,
     pub sequence_notes: Vec<SequenceNote>,
     pub sequence_activations: Vec<SequenceActivation>,
     pub sequence_autonumber: Option<usize>,
     pub sequence_boxes: Vec<SequenceBox>,
     pub state_notes: Vec<StateNote>,
+    pub packet_fields: Vec<PacketField>,
     pub pie_slices: Vec<PieSlice>,
     pub pie_title: Option<String>,
     pub pie_show_data: bool,
@@ -625,12 +647,14 @@ impl Graph {
             edges: Vec::new(),
             subgraphs: Vec::new(),
             sequence_participants: Vec::new(),
+            sequence_events: Vec::new(),
             sequence_frames: Vec::new(),
             sequence_notes: Vec::new(),
             sequence_activations: Vec::new(),
             sequence_autonumber: None,
             sequence_boxes: Vec::new(),
             state_notes: Vec::new(),
+            packet_fields: Vec::new(),
             pie_slices: Vec::new(),
             pie_title: None,
             pie_show_data: false,

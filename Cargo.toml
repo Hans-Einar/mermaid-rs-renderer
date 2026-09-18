@@ -3,7 +3,7 @@ name = "mermaid-rs-renderer"
 version = "0.3.1"
 edition = "2024"
 description = "Fast Mermaid diagram renderer in pure Rust - 23 diagram types, 100-1400x faster than mermaid-cli"
-license = "MIT"
+license = "MIT AND LGPL-2.1-or-later"
 readme = "README.md"
 repository = "https://github.com/1jehuang/mermaid-rs-renderer"
 homepage = "https://github.com/1jehuang/mermaid-rs-renderer"
@@ -38,6 +38,7 @@ exclude = [
 ]
 
 [features]
+libavoid = ["dep:cc"]
 default = ["cli", "png"]
 # CLI support (adds clap dependency)
 cli = ["dep:clap"]
@@ -93,3 +94,6 @@ required-features = ["benchmark"]
 name = "mmdr"
 path = "src/main.rs"
 required-features = ["cli"]
+
+[build-dependencies]
+cc = { version = "1.2", optional = true }

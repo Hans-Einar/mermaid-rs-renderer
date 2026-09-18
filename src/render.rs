@@ -1,3 +1,5 @@
+mod crossing_jumps;
+mod label_leaders;
 use crate::config::LayoutConfig;
 #[cfg(feature = "png")]
 use crate::config::RenderConfig;
@@ -11,6 +13,8 @@ use crate::layout::{
 use crate::text_metrics;
 use crate::theme::{Theme, adjust_color, parse_color_to_hsl};
 use anyhow::Result;
+pub use crossing_jumps::CrossingJumps;
+pub use label_leaders::add_label_leaders;
 use serde::Serialize;
 use std::cmp::Ordering;
 use std::collections::HashMap;
@@ -209,6 +213,31 @@ pub fn render_svg_with_dimensions(
     config: &LayoutConfig,
     dimensions: Option<(f32, f32)>,
 ) -> String {
+    render_svg_internal(layout, theme, config, dimensions, None)
+}
+/// Optional crossing bridges computed from the final logical routes.
+pub fn render_svg_with_crossings(
+    layout: &Layout,
+    theme: &Theme,
+    config: &LayoutConfig,
+    options: CrossingJumps,
+) -> String {
+    render_svg_internal(layout, theme, config, None, Some(options))
+}
+fn render_svg_internal(
+    layout: &Layout,
+    theme: &Theme,
+    config: &LayoutConfig,
+    dimensions: Option<(f32, f32)>,
+    jumps: Option<CrossingJumps>,
+) -> String {
+    let jump_paths = if layout.kind == crate::ir::DiagramKind::Flowchart {
+        jumps
+            .map(|o| crossing_jumps::paths(layout, o))
+            .unwrap_or_default()
+    } else {
+        std::collections::BTreeMap::new()
+    };
     let mut svg = String::new();
     let state_font_size = if layout.kind == crate::ir::DiagramKind::State {
         theme.font_size * 0.85
@@ -351,6 +380,7 @@ pub fn render_svg_with_dimensions(
             color, color
         ));
         if is_sequence {
+            svg.push_str(&format!("<marker id=\"arrow-async-{idx}\" viewBox=\"0 0 12 12\" refX=\"11\" refY=\"6\" markerWidth=\"12\" markerHeight=\"12\" markerUnits=\"userSpaceOnUse\" orient=\"auto\"><path d=\"M 1 1 L 11 6 L 1 11\" fill=\"none\" stroke=\"{}\" stroke-width=\"1.5\"/></marker>", color));
             svg.push_str(&format!(
                 "<marker id=\"arrow-seq-{idx}\" viewBox=\"-1 0 12 10\" refX=\"7.9\" refY=\"5\" markerUnits=\"userSpaceOnUse\" markerWidth=\"12\" markerHeight=\"12\" orient=\"auto-start-reverse\"><path d=\"M -1 0 L 10 5 L 0 10 z\" fill=\"{}\" stroke=\"{}\" stroke-width=\"1\" stroke-dasharray=\"1,0\"/></marker>",
                 color,
@@ -370,19 +400,19 @@ pub fn render_svg_with_dimensions(
         }
         if is_class {
             svg.push_str(&format!(
-                "<marker id=\"arrow-class-open-{idx}\" viewBox=\"0 0 20 14\" refX=\"1\" refY=\"7\" markerUnits=\"userSpaceOnUse\" markerWidth=\"20\" markerHeight=\"14\" orient=\"auto\"><path d=\"M 1 7 L 18 13 V 1 Z\" fill=\"none\" stroke=\"{}\" stroke-width=\"1\" stroke-dasharray=\"1,0\"/></marker>",
-                color
+                "<marker id=\"arrow-class-open-{idx}\" viewBox=\"0 0 20 14\" refX=\"18\" refY=\"7\" markerUnits=\"userSpaceOnUse\" markerWidth=\"20\" markerHeight=\"14\" orient=\"auto\"><path d=\"M 18 7 L 1 13 V 1 Z\" fill=\"{}\" stroke=\"{}\" stroke-width=\"1\" stroke-dasharray=\"1,0\"/></marker>",
+                theme.background, color
             ));
             svg.push_str(&format!(
-                "<marker id=\"arrow-class-open-start-{idx}\" viewBox=\"0 0 20 14\" refX=\"18\" refY=\"7\" markerUnits=\"userSpaceOnUse\" markerWidth=\"20\" markerHeight=\"14\" orient=\"auto\"><path d=\"M 1 7 L 18 13 V 1 Z\" fill=\"none\" stroke=\"{}\" stroke-width=\"1\" stroke-dasharray=\"1,0\"/></marker>",
-                color
+                "<marker id=\"arrow-class-open-start-{idx}\" viewBox=\"0 0 20 14\" refX=\"1\" refY=\"7\" markerUnits=\"userSpaceOnUse\" markerWidth=\"20\" markerHeight=\"14\" orient=\"auto\"><path d=\"M 1 7 L 18 13 V 1 Z\" fill=\"{}\" stroke=\"{}\" stroke-width=\"1\" stroke-dasharray=\"1,0\"/></marker>",
+                theme.background, color
             ));
             svg.push_str(&format!(
-                "<marker id=\"arrow-class-dep-{idx}\" viewBox=\"0 0 20 14\" refX=\"13\" refY=\"7\" markerUnits=\"userSpaceOnUse\" markerWidth=\"20\" markerHeight=\"14\" orient=\"auto\"><path d=\"M 18 7 L 9 13 L 14 7 L 9 1 Z\" fill=\"{}\" stroke=\"{}\" stroke-width=\"1\" stroke-dasharray=\"1,0\"/></marker>",
+                "<marker id=\"arrow-class-dep-{idx}\" viewBox=\"0 0 20 14\" refX=\"18\" refY=\"7\" markerUnits=\"userSpaceOnUse\" markerWidth=\"20\" markerHeight=\"14\" orient=\"auto\"><path d=\"M 18 7 L 9 13 L 14 7 L 9 1 Z\" fill=\"{}\" stroke=\"{}\" stroke-width=\"1\" stroke-dasharray=\"1,0\"/></marker>",
                 color, color
             ));
             svg.push_str(&format!(
-                "<marker id=\"arrow-class-dep-start-{idx}\" viewBox=\"0 0 20 14\" refX=\"6\" refY=\"7\" markerUnits=\"userSpaceOnUse\" markerWidth=\"20\" markerHeight=\"14\" orient=\"auto\"><path d=\"M 5 7 L 9 13 L 1 7 L 9 1 Z\" fill=\"{}\" stroke=\"{}\" stroke-width=\"1\" stroke-dasharray=\"1,0\"/></marker>",
+                "<marker id=\"arrow-class-dep-start-{idx}\" viewBox=\"0 0 20 14\" refX=\"1\" refY=\"7\" markerUnits=\"userSpaceOnUse\" markerWidth=\"20\" markerHeight=\"14\" orient=\"auto\"><path d=\"M 5 7 L 9 13 L 1 7 L 9 1 Z\" fill=\"{}\" stroke=\"{}\" stroke-width=\"1\" stroke-dasharray=\"1,0\"/></marker>",
                 color, color
             ));
         }
@@ -809,7 +839,11 @@ pub fn render_svg_with_dimensions(
             let (endpoint_pad_x, endpoint_pad_y) = endpoint_label_padding(layout.kind);
             let marker_id = color_ids.get(&stroke).copied().unwrap_or(0);
             let marker_end = if edge.arrow_end {
-                format!("marker-end=\"url(#arrow-seq-{marker_id})\"")
+                if edge.arrow_end_kind == Some(crate::ir::EdgeArrowhead::OpenV) {
+                    format!("marker-end=\"url(#arrow-async-{marker_id})\"")
+                } else {
+                    format!("marker-end=\"url(#arrow-seq-{marker_id})\"")
+                }
             } else {
                 String::new()
             };
@@ -1053,7 +1087,9 @@ pub fn render_svg_with_dimensions(
             _ => 2.0,
         };
         for (edge_idx, edge) in layout.edges.iter().enumerate() {
-            let d = if layout.kind == crate::ir::DiagramKind::Flowchart && edge.points.len() > 2 {
+            let d = if let Some(path) = jump_paths.get(&edge_idx) {
+                path.path.clone()
+            } else if layout.kind == crate::ir::DiagramKind::Flowchart && edge.points.len() > 2 {
                 rounded_polyline_path(&edge.points, 10.0)
             } else if layout.kind == crate::ir::DiagramKind::Mindmap && edge.points.len() > 2 {
                 basis_curve_path(&edge.points)
@@ -1083,7 +1119,10 @@ pub fn render_svg_with_dimensions(
                         Some(crate::ir::EdgeArrowhead::OpenTriangle) => {
                             format!("marker-end=\"url(#arrow-class-open-{marker_id})\"")
                         }
-                        Some(crate::ir::EdgeArrowhead::ClassDependency) => {
+                        Some(
+                            crate::ir::EdgeArrowhead::ClassDependency
+                            | crate::ir::EdgeArrowhead::OpenV,
+                        ) => {
                             format!("marker-end=\"url(#arrow-class-dep-{marker_id})\"")
                         }
                         None => format!("marker-end=\"url(#arrow-{marker_id})\""),
@@ -1102,7 +1141,10 @@ pub fn render_svg_with_dimensions(
                         Some(crate::ir::EdgeArrowhead::OpenTriangle) => {
                             format!("marker-start=\"url(#arrow-class-open-start-{marker_id})\"")
                         }
-                        Some(crate::ir::EdgeArrowhead::ClassDependency) => {
+                        Some(
+                            crate::ir::EdgeArrowhead::ClassDependency
+                            | crate::ir::EdgeArrowhead::OpenV,
+                        ) => {
                             format!("marker-start=\"url(#arrow-class-dep-start-{marker_id})\"")
                         }
                         None => format!("marker-start=\"url(#arrow-start-{marker_id})\""),
@@ -1117,6 +1159,10 @@ pub fn render_svg_with_dimensions(
             }
             if let Some(dash_override) = &edge.override_style.dasharray {
                 dash = format!("stroke-dasharray=\"{}\"", dash_override);
+            }
+            if let Some(path) = jump_paths.get(&edge_idx) {
+                svg.push_str(&format!("<path class=\"crossingHalo\" d=\"{}\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\" stroke-linecap=\"round\"/>",
+                    path.halo, theme.background, stroke_width + 3.0));
             }
             svg.push_str(&format!(
                 "<path id=\"{edge_id}\" class=\"edgePath\" data-edge-id=\"{edge_id}\" d=\"{}\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\" {} {} {} stroke-linecap=\"round\" stroke-linejoin=\"round\" />",
@@ -1562,17 +1608,15 @@ pub fn render_svg_with_dimensions(
                     svg.push_str(&format!("<title>{}</title>", escape_xml(title)));
                 }
             }
-            svg.push_str(&format!(
-                "<rect x=\"{:.2}\" y=\"{:.2}\" width=\"{:.2}\" height=\"{:.2}\" rx=\"3\" ry=\"3\" fill=\"{}\" stroke=\"{}\" stroke-width=\"1.0\"/>",
-                node.x,
-                node.y,
-                node.width,
-                node.height,
-                theme.sequence_actor_fill,
-                theme.sequence_actor_border
-            ));
             let center_x = node.x + node.width / 2.0;
-            let center_y = node.y + node.height / 2.0;
+            let mut center_y = node.y + node.height / 2.0;
+            if node.shape == crate::ir::NodeShape::ActorBox {
+                svg.push_str(&sequence_actor_svg(node, theme));
+                center_y = node.y + node.height - 12.0 - node.label.height / 2.0;
+            } else {
+                svg.push_str(&format!("<rect x=\"{:.2}\" y=\"{:.2}\" width=\"{:.2}\" height=\"{:.2}\" rx=\"3\" fill=\"{}\" stroke=\"{}\"/>",
+                    node.x, node.y, node.width, node.height, theme.sequence_actor_fill, theme.sequence_actor_border));
+            }
             let hide_label = node.label.lines.iter().all(|line| line.trim().is_empty())
                 || node.id.starts_with("__start_")
                 || node.id.starts_with("__end_");
@@ -1599,17 +1643,15 @@ pub fn render_svg_with_dimensions(
                     svg.push_str(&format!("<title>{}</title>", escape_xml(title)));
                 }
             }
-            svg.push_str(&format!(
-                "<rect x=\"{:.2}\" y=\"{:.2}\" width=\"{:.2}\" height=\"{:.2}\" rx=\"3\" ry=\"3\" fill=\"{}\" stroke=\"{}\" stroke-width=\"1.0\"/>",
-                footbox.x,
-                footbox.y,
-                footbox.width,
-                footbox.height,
-                theme.sequence_actor_fill,
-                theme.sequence_actor_border
-            ));
             let center_x = footbox.x + footbox.width / 2.0;
-            let center_y = footbox.y + footbox.height / 2.0;
+            let mut center_y = footbox.y + footbox.height / 2.0;
+            if footbox.shape == crate::ir::NodeShape::ActorBox {
+                svg.push_str(&sequence_actor_svg(footbox, theme));
+                center_y = footbox.y + footbox.height - 12.0 - footbox.label.height / 2.0;
+            } else {
+                svg.push_str(&format!("<rect x=\"{:.2}\" y=\"{:.2}\" width=\"{:.2}\" height=\"{:.2}\" rx=\"3\" fill=\"{}\" stroke=\"{}\"/>",
+                    footbox.x, footbox.y, footbox.width, footbox.height, theme.sequence_actor_fill, theme.sequence_actor_border));
+            }
             let hide_label = footbox
                 .label
                 .lines
@@ -2229,13 +2271,24 @@ fn render_sankey(layout: &SankeyLayout, theme: &Theme, _config: &LayoutConfig) -
             let prev_idx = pair[0];
             let cur_idx = pair[1];
             let min_gap = label_half_heights[prev_idx] + label_half_heights[cur_idx] + gap;
-            label_y[cur_idx] = label_y[prev_idx] + min_gap;
+            // Keep the preferred band centre when it already has clearance.
+            label_y[cur_idx] = label_y[cur_idx].max(label_y[prev_idx] + min_gap);
+        }
+        label_y[last_idx] = label_y[last_idx].min(bottom);
+        for pair in indices.windows(2).rev() {
+            let prev_idx = pair[0];
+            let cur_idx = pair[1];
+            let min_gap = label_half_heights[prev_idx] + label_half_heights[cur_idx] + gap;
+            label_y[prev_idx] = label_y[prev_idx].min(label_y[cur_idx] - min_gap);
         }
     }
 
+    let labels_start = svg.len();
     svg.push_str(&format!(
-        "<g class=\"node-labels\" font-size=\"{}\" fill=\"{}\">",
-        label_font_size, theme.primary_text_color
+        "<g class=\"node-labels\" font-family=\"{}\" font-size=\"{}\" fill=\"{}\">",
+        escape_xml(&normalize_font_family(&theme.font_family)),
+        label_font_size,
+        theme.primary_text_color
     ));
     for (idx, node) in layout.nodes.iter().enumerate() {
         let align_left_of_node = node.rank > 0;
@@ -2261,6 +2314,7 @@ fn render_sankey(layout: &SankeyLayout, theme: &Theme, _config: &LayoutConfig) -
     }
     svg.push_str("</g>");
 
+    let labels = svg.split_off(labels_start);
     svg.push_str("<g class=\"links\" fill=\"none\" stroke-opacity=\"0.5\">");
     for link in &layout.links {
         let mid_x = (link.start.0 + link.end.0) / 2.0;
@@ -2296,6 +2350,7 @@ fn render_sankey(layout: &SankeyLayout, theme: &Theme, _config: &LayoutConfig) -
     }
     svg.push_str("</g>");
 
+    svg.push_str(&labels);
     svg
 }
 
@@ -6095,7 +6150,12 @@ fn edge_decoration_svg(
     let mut angle = angle_deg;
     if matches!(
         decoration,
-        crate::ir::EdgeDecoration::Diamond | crate::ir::EdgeDecoration::DiamondFilled
+        crate::ir::EdgeDecoration::Diamond
+            | crate::ir::EdgeDecoration::DiamondFilled
+            | crate::ir::EdgeDecoration::CrowsFootOne
+            | crate::ir::EdgeDecoration::CrowsFootZeroOne
+            | crate::ir::EdgeDecoration::CrowsFootMany
+            | crate::ir::EdgeDecoration::CrowsFootZeroMany
     ) && !at_start
     {
         angle += 180.0;
@@ -6126,19 +6186,19 @@ fn edge_decoration_svg(
         }
         // Crow's foot notation for ER diagrams
         crate::ir::EdgeDecoration::CrowsFootOne => format!(
-            "<path d=\"M 0 -6 L 0 6 M 5 -6 L 5 6\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"{join}/>",
+            "<path d=\"M 6 -6 L 6 6 M 12 -6 L 12 6\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"{join}/>",
             stroke, stroke_width
         ),
         crate::ir::EdgeDecoration::CrowsFootZeroOne => format!(
-            "<g><circle cx=\"-4\" cy=\"0\" r=\"4\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"/><path d=\"M 4 -6 L 4 6\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"{join}/></g>",
+            "<g><circle cx=\"18\" cy=\"0\" r=\"4\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"/><path d=\"M 6 -6 L 6 6\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"{join}/></g>",
             stroke, stroke_width, stroke, stroke_width
         ),
         crate::ir::EdgeDecoration::CrowsFootMany => format!(
-            "<path d=\"M 0 -6 L 0 6 M 0 0 L 8 -6 M 0 0 L 8 6\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"{join}/>",
+            "<path d=\"M 0 -6 L 10 0 L 0 6 M 16 -6 L 16 6\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"{join}/>",
             stroke, stroke_width
         ),
         crate::ir::EdgeDecoration::CrowsFootZeroMany => format!(
-            "<g><circle cx=\"-4\" cy=\"0\" r=\"4\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"/><path d=\"M 4 0 L 12 -6 M 4 0 L 12 6\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"{join}/></g>",
+            "<g><circle cx=\"18\" cy=\"0\" r=\"4\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"/><path d=\"M 0 -6 L 10 0 L 0 6\" fill=\"none\" stroke=\"{}\" stroke-width=\"{}\"{join}/></g>",
             stroke, stroke_width, stroke, stroke_width
         ),
     };
@@ -7187,4 +7247,27 @@ mod tests {
         assert_eq!(c.blue(), 0.0);
         assert_eq!(c.alpha(), 128.0 / 255.0);
     }
+}
+
+// Actor and participant remain distinct in sequence presentation. Labels fit
+// below the glyph inside the measured header/footer box.
+fn sequence_actor_svg(node: &crate::layout::NodeLayout, theme: &Theme) -> String {
+    let x = node.x + node.width / 2.0;
+    let y = node.y + 10.0;
+    format!(
+        "<g class=\"sequence-actor\" fill=\"none\" stroke=\"{}\" stroke-width=\"1.5\"><circle cx=\"{x}\" cy=\"{}\" r=\"7\"/><path d=\"M {x} {} V {} M {} {} H {} M {x} {} L {} {} M {x} {} L {} {}\"/></g>",
+        theme.line_color,
+        y + 7.0,
+        y + 14.0,
+        y + 30.0,
+        x - 12.0,
+        y + 21.0,
+        x + 12.0,
+        y + 30.0,
+        x - 12.0,
+        y + 42.0,
+        y + 30.0,
+        x + 12.0,
+        y + 42.0
+    )
 }

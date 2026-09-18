@@ -1,3 +1,11 @@
+> **Hans-Einar-fork:** valgfri `libavoid`-feature gir en utskiftbar ortogonal
+> rutemotor via en liten C++17/C-ABI-adapter. Denne profilen er ikke ren Rust.
+> Bruk `layout::routed::compute` med `Engine::Libavoid` eller eksplisitt `Legacy`;
+> nodeplassering velges separat. CLI-ens eksisterende standard er uendret.
+> Se [kontrakt, bygg og LGPL-krav](docs/libavoid-integration.md),
+> [målinger og begrensninger](docs/libavoid-review.md) og
+> [før/etter-SVG/PNG](docs/libavoid-preview/). Ingen Node eller nettleser kreves.
+
 <div align="center">
 
 # mmdr
@@ -560,3 +568,14 @@ has no dependency on `resvg` unless the separate `png` feature is enabled.
 `render_scene(input, RenderOptions)` returns `anyhow::Result<Scene>` and preserves
 strict `ParseError` diagnostics through `anyhow` downcasting. The scene types are
 available both at the crate root and in `mermaid_rs_renderer::scene`.
+
+### XFMD Sequence 1 integration (fork)
+
+`phase/sequence-foundation` distinguishes `actor` (ActorBox/stick figure) from
+`participant` (Rectangle), sizes participant boxes using measured labels, checks
+the cooperative deadline while measuring sequence text, and treats frame ends
+as exclusive when including notes. It does not claim full Mermaid sequence
+compatibility: async arrows and nested-frame/event-boundary fidelity still need
+work. XFMD exposes a validated subset and preserves ordered typed events.
+Verification: `cargo test --locked --no-default-features --features libavoid --lib
+--test sequence_profile_suite`. The budget is cooperative, not a hard timeout.

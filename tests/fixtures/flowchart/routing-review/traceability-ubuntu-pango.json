@@ -1,0 +1,212 @@
+{
+  "": {
+    "width": 0.0,
+    "height": 18.625,
+    "lines": [
+      ""
+    ]
+  },
+  "addresses": {
+    "width": 80.0,
+    "height": 18.625,
+    "lines": [
+      "addresses"
+    ]
+  },
+  "connects participant interfaces": {
+    "width": 250.66666666666666,
+    "height": 18.625,
+    "lines": [
+      "connects participant interfaces"
+    ]
+  },
+  "exposes access to": {
+    "width": 144.0,
+    "height": 18.625,
+    "lines": [
+      "exposes access to"
+    ]
+  },
+  "follows": {
+    "width": 53.333333333333336,
+    "height": 18.625,
+    "lines": [
+      "follows"
+    ]
+  },
+  "governs": {
+    "width": 64.0,
+    "height": 18.625,
+    "lines": [
+      "governs"
+    ]
+  },
+  "has acceptance examples": {
+    "width": 208.0,
+    "height": 18.625,
+    "lines": [
+      "has acceptance examples"
+    ]
+  },
+  "has source bindings": {
+    "width": 161.33333333333334,
+    "height": 18.625,
+    "lines": [
+      "has source bindings"
+    ]
+  },
+  "is governed by": {
+    "width": 118.66666666666667,
+    "height": 18.625,
+    "lines": [
+      "is governed by"
+    ]
+  },
+  "motivates": {
+    "width": 78.66666666666667,
+    "height": 18.625,
+    "lines": [
+      "motivates"
+    ]
+  },
+  "must satisfy": {
+    "width": 97.33333333333333,
+    "height": 18.625,
+    "lines": [
+      "must satisfy"
+    ]
+  },
+  "owns": {
+    "width": 41.333333333333336,
+    "height": 18.625,
+    "lines": [
+      "owns"
+    ]
+  },
+  "provides or requires at its boundary": {
+    "width": 288.0,
+    "height": 18.625,
+    "lines": [
+      "provides or requires at its boundary"
+    ]
+  },
+  "realizes": {
+    "width": 58.666666666666664,
+    "height": 18.625,
+    "lines": [
+      "realizes"
+    ]
+  },
+  "refines to local contributions": {
+    "width": 229.33333333333334,
+    "height": 18.625,
+    "lines": [
+      "refines to local contributions"
+    ]
+  },
+  "uses": {
+    "width": 36.0,
+    "height": 18.625,
+    "lines": [
+      "uses"
+    ]
+  },
+  "uses boundary interactions": {
+    "width": 218.66666666666666,
+    "height": 18.625,
+    "lines": [
+      "uses boundary interactions"
+    ]
+  },
+  "Activity / Subflow": {
+    "width": 141.33333333333334,
+    "height": 18.625,
+    "lines": [
+      "Activity / Subflow"
+    ]
+  },
+  "Capability": {
+    "width": 78.66666666666667,
+    "height": 18.625,
+    "lines": [
+      "Capability"
+    ]
+  },
+  "Channel": {
+    "width": 65.33333333333333,
+    "height": 18.625,
+    "lines": [
+      "Channel"
+    ]
+  },
+  "Contract": {
+    "width": 69.33333333333333,
+    "height": 18.625,
+    "lines": [
+      "Contract"
+    ]
+  },
+  "Decision and rationale": {
+    "width": 177.33333333333334,
+    "height": 18.625,
+    "lines": [
+      "Decision and rationale"
+    ]
+  },
+  "Feature": {
+    "width": 60.0,
+    "height": 18.625,
+    "lines": [
+      "Feature"
+    ]
+  },
+  "Functionality": {
+    "width": 102.66666666666667,
+    "height": 18.625,
+    "lines": [
+      "Functionality"
+    ]
+  },
+  "Implementation": {
+    "width": 128.0,
+    "height": 18.625,
+    "lines": [
+      "Implementation"
+    ]
+  },
+  "Interface": {
+    "width": 72.0,
+    "height": 18.625,
+    "lines": [
+      "Interface"
+    ]
+  },
+  "Requirement": {
+    "width": 104.0,
+    "height": 18.625,
+    "lines": [
+      "Requirement"
+    ]
+  },
+  "Scenario": {
+    "width": 69.33333333333333,
+    "height": 18.625,
+    "lines": [
+      "Scenario"
+    ]
+  },
+  "Unit / Container": {
+    "width": 126.66666666666667,
+    "height": 18.625,
+    "lines": [
+      "Unit / Container"
+    ]
+  },
+  "Use Case": {
+    "width": 72.0,
+    "height": 18.625,
+    "lines": [
+      "Use Case"
+    ]
+  }
+}

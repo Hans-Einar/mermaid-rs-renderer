@@ -38,10 +38,12 @@ pub(super) fn apply_subgraph_bands(
 
     let top_level = top_level_subgraph_indices(graph);
     for (pos, idx) in top_level.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         let group_idx = pos + 1;
         let sub = &graph.subgraphs[*idx];
         group_nodes.push(Vec::new());
         for node_id in &sub.nodes {
+            crate::layout::measurements::checkpoint();
             if nodes.contains_key(node_id) {
                 node_group.insert(node_id.clone(), group_idx);
             }
@@ -54,12 +56,14 @@ pub(super) fn apply_subgraph_bands(
     }
 
     for node_id in graph.nodes.keys() {
+        crate::layout::measurements::checkpoint();
         if !node_group.contains_key(node_id) {
             node_group.insert(node_id.clone(), 0);
         }
     }
 
     for (node_id, group_idx) in &node_group {
+        crate::layout::measurements::checkpoint();
         if let Some(bucket) = group_nodes.get_mut(*group_idx) {
             bucket.push(node_id.clone());
         }
@@ -67,6 +71,7 @@ pub(super) fn apply_subgraph_bands(
 
     let mut groups: Vec<(usize, f32, f32, f32, f32)> = Vec::new();
     for (idx, bucket) in group_nodes.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         if bucket.is_empty() {
             continue;
         }
@@ -75,6 +80,7 @@ pub(super) fn apply_subgraph_bands(
         let mut max_x = f32::MIN;
         let mut max_y = f32::MIN;
         for node_id in bucket {
+            crate::layout::measurements::checkpoint();
             if let Some(node) = nodes.get(node_id) {
                 min_x = min_x.min(node.x);
                 min_y = min_y.min(node.y);
@@ -91,6 +97,7 @@ pub(super) fn apply_subgraph_bands(
     let mut group_links: HashSet<(usize, usize)> = HashSet::new();
     let mut group_degree: HashMap<usize, usize> = HashMap::new();
     for edge in &graph.edges {
+        crate::layout::measurements::checkpoint();
         let from_group = node_group.get(&edge.from);
         let to_group = node_group.get(&edge.to);
         if let (Some(a), Some(b)) = (from_group, to_group)
@@ -133,8 +140,10 @@ pub(super) fn apply_subgraph_bands(
         if align_cross && !groups.is_empty() {
             let target_y = groups.iter().map(|group| group.2).fold(f32::MAX, f32::min);
             for (group_idx, _min_x, min_y, _max_x, _max_y) in &groups {
+                crate::layout::measurements::checkpoint();
                 let offset_y = target_y - *min_y;
                 for node_id in &group_nodes[*group_idx] {
+                    crate::layout::measurements::checkpoint();
                     if let Some(node) = nodes.get_mut(node_id) {
                         node.y += offset_y;
                     }
@@ -143,6 +152,7 @@ pub(super) fn apply_subgraph_bands(
         } else if grid_pack && groups.len() > 1 {
             let mut bounds: HashMap<usize, (f32, f32, f32, f32)> = HashMap::new();
             for (group_idx, min_x, min_y, max_x, max_y) in &groups {
+                crate::layout::measurements::checkpoint();
                 bounds.insert(*group_idx, (*min_x, *min_y, max_x - min_x, max_y - min_y));
             }
             let origin_x = groups.iter().map(|group| group.1).fold(f32::MAX, f32::min);
@@ -151,11 +161,14 @@ pub(super) fn apply_subgraph_bands(
             let mut best_area = f32::MAX;
             let mut best_rows: Vec<Vec<usize>> = Vec::new();
             for cols in 1..=groups.len() {
+                crate::layout::measurements::checkpoint();
                 let mut rows: Vec<Vec<usize>> = Vec::new();
                 let mut idx = 0usize;
                 while idx < groups.len() {
+                    crate::layout::measurements::checkpoint();
                     let mut row = Vec::new();
                     for _ in 0..cols {
+                        crate::layout::measurements::checkpoint();
                         if idx >= groups.len() {
                             break;
                         }
@@ -167,9 +180,11 @@ pub(super) fn apply_subgraph_bands(
                 let mut max_row_width = 0.0f32;
                 let mut total_height = 0.0f32;
                 for row in &rows {
+                    crate::layout::measurements::checkpoint();
                     let mut row_width = 0.0f32;
                     let mut row_height = 0.0f32;
                     for (pos, group_idx) in row.iter().enumerate() {
+                        crate::layout::measurements::checkpoint();
                         if let Some((_, _, width, height)) = bounds.get(group_idx) {
                             row_width += *width;
                             if pos + 1 < row.len() {
@@ -193,15 +208,18 @@ pub(super) fn apply_subgraph_bands(
 
             let mut cursor_y = origin_y;
             for row in best_rows {
+                crate::layout::measurements::checkpoint();
                 let mut row_height = 0.0f32;
                 let mut cursor_x = origin_x;
                 for group_idx in row {
+                    crate::layout::measurements::checkpoint();
                     let Some((min_x, min_y, width, height)) = bounds.get(&group_idx) else {
                         continue;
                     };
                     let offset_x = cursor_x - min_x;
                     let offset_y = cursor_y - min_y;
                     for node_id in &group_nodes[group_idx] {
+                        crate::layout::measurements::checkpoint();
                         if let Some(node) = nodes.get_mut(node_id) {
                             node.x += offset_x;
                             node.y += offset_y;
@@ -220,12 +238,14 @@ pub(super) fn apply_subgraph_bands(
                 .unwrap_or(0.0)
                 + spacing;
             for (group_idx, min_x, _min_y, max_x, _max_y) in groups {
+                crate::layout::measurements::checkpoint();
                 if group_idx == 0 {
                     continue;
                 }
                 let width = max_x - min_x;
                 let offset = cursor - min_x;
                 for node_id in &group_nodes[group_idx] {
+                    crate::layout::measurements::checkpoint();
                     if let Some(node) = nodes.get_mut(node_id) {
                         node.x += offset;
                     }
@@ -236,8 +256,10 @@ pub(super) fn apply_subgraph_bands(
     } else if align_cross && !groups.is_empty() {
         let target_x = groups.iter().map(|group| group.1).fold(f32::MAX, f32::min);
         for (group_idx, min_x, _min_y, _max_x, _max_y) in &groups {
+            crate::layout::measurements::checkpoint();
             let offset_x = target_x - *min_x;
             for node_id in &group_nodes[*group_idx] {
+                crate::layout::measurements::checkpoint();
                 if let Some(node) = nodes.get_mut(node_id) {
                     node.x += offset_x;
                 }
@@ -246,6 +268,7 @@ pub(super) fn apply_subgraph_bands(
     } else if grid_pack && groups.len() > 1 {
         let mut bounds: HashMap<usize, (f32, f32, f32, f32)> = HashMap::new();
         for (group_idx, min_x, min_y, max_x, max_y) in &groups {
+            crate::layout::measurements::checkpoint();
             bounds.insert(*group_idx, (*min_x, *min_y, max_x - min_x, max_y - min_y));
         }
         let origin_x = groups.iter().map(|group| group.1).fold(f32::MAX, f32::min);
@@ -254,12 +277,15 @@ pub(super) fn apply_subgraph_bands(
         let mut best_rows = Vec::new();
         let mut best_area = f32::MAX;
         for rows in 1..=groups.len() {
+            crate::layout::measurements::checkpoint();
             let cols = groups.len().div_ceil(rows);
             let mut grid: Vec<Vec<usize>> = Vec::new();
             let mut idx = 0usize;
             for _ in 0..rows {
+                crate::layout::measurements::checkpoint();
                 let mut col = Vec::new();
                 for _ in 0..cols {
+                    crate::layout::measurements::checkpoint();
                     if idx >= groups.len() {
                         break;
                     }
@@ -271,9 +297,11 @@ pub(super) fn apply_subgraph_bands(
             let mut max_col_height = 0.0f32;
             let mut total_width = 0.0f32;
             for col in &grid {
+                crate::layout::measurements::checkpoint();
                 let mut col_height = 0.0f32;
                 let mut col_width = 0.0f32;
                 for (pos, group_idx) in col.iter().enumerate() {
+                    crate::layout::measurements::checkpoint();
                     if let Some((_, _, width, height)) = bounds.get(group_idx) {
                         col_height += *height;
                         if pos + 1 < col.len() {
@@ -297,15 +325,18 @@ pub(super) fn apply_subgraph_bands(
 
         let mut cursor_x = origin_x;
         for col in best_rows {
+            crate::layout::measurements::checkpoint();
             let mut col_width = 0.0f32;
             let mut cursor_y = origin_y;
             for group_idx in col {
+                crate::layout::measurements::checkpoint();
                 let Some((min_x, min_y, width, height)) = bounds.get(&group_idx) else {
                     continue;
                 };
                 let offset_x = cursor_x - min_x;
                 let offset_y = cursor_y - min_y;
                 for node_id in &group_nodes[group_idx] {
+                    crate::layout::measurements::checkpoint();
                     if let Some(node) = nodes.get_mut(node_id) {
                         node.x += offset_x;
                         node.y += offset_y;
@@ -324,12 +355,14 @@ pub(super) fn apply_subgraph_bands(
             .unwrap_or(0.0)
             + spacing;
         for (group_idx, _min_x, min_y, _max_x, max_y) in groups {
+            crate::layout::measurements::checkpoint();
             if group_idx == 0 {
                 continue;
             }
             let height = max_y - min_y;
             let offset = cursor - min_y;
             for node_id in &group_nodes[group_idx] {
+                crate::layout::measurements::checkpoint();
                 if let Some(node) = nodes.get_mut(node_id) {
                     node.y += offset;
                 }
@@ -346,6 +379,7 @@ pub(super) fn apply_orthogonal_region_bands(
 ) {
     let mut region_indices = Vec::new();
     for (idx, sub) in graph.subgraphs.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         if is_region_subgraph(sub) {
             region_indices.push(idx);
         }
@@ -362,9 +396,11 @@ pub(super) fn apply_orthogonal_region_bands(
 
     let mut parent_map: HashMap<usize, Vec<usize>> = HashMap::new();
     for region_idx in region_indices {
+        crate::layout::measurements::checkpoint();
         let region_set = &sets[region_idx];
         let mut parent: Option<usize> = None;
         for (idx, set) in sets.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             if idx == region_idx || set.len() <= region_set.len() || !region_set.is_subset(set) {
                 continue;
             }
@@ -389,13 +425,16 @@ pub(super) fn apply_orthogonal_region_bands(
     let stack_along_x = is_horizontal(graph.direction);
 
     for region_list in parent_map.values() {
+        crate::layout::measurements::checkpoint();
         let mut region_boxes: Vec<(usize, f32, f32, f32, f32)> = Vec::new();
         for &region_idx in region_list {
+            crate::layout::measurements::checkpoint();
             let mut min_x = f32::MAX;
             let mut min_y = f32::MAX;
             let mut max_x = f32::MIN;
             let mut max_y = f32::MIN;
             for node_id in &graph.subgraphs[region_idx].nodes {
+                crate::layout::measurements::checkpoint();
                 if let Some(node) = nodes.get(node_id) {
                     min_x = min_x.min(node.x);
                     min_y = min_y.min(node.y);
@@ -415,8 +454,10 @@ pub(super) fn apply_orthogonal_region_bands(
             region_boxes.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(Ordering::Equal));
             let mut cursor = region_boxes.first().map(|entry| entry.1).unwrap_or(0.0);
             for (region_idx, min_x, _min_y, max_x, _max_y) in region_boxes {
+                crate::layout::measurements::checkpoint();
                 let offset = cursor - min_x;
                 for node_id in &graph.subgraphs[region_idx].nodes {
+                    crate::layout::measurements::checkpoint();
                     if let Some(node) = nodes.get_mut(node_id) {
                         node.x += offset;
                     }
@@ -427,8 +468,10 @@ pub(super) fn apply_orthogonal_region_bands(
             region_boxes.sort_by(|a, b| a.2.partial_cmp(&b.2).unwrap_or(Ordering::Equal));
             let mut cursor = region_boxes.first().map(|entry| entry.2).unwrap_or(0.0);
             for (region_idx, _min_x, min_y, _max_x, max_y) in region_boxes {
+                crate::layout::measurements::checkpoint();
                 let offset = cursor - min_y;
                 for node_id in &graph.subgraphs[region_idx].nodes {
+                    crate::layout::measurements::checkpoint();
                     if let Some(node) = nodes.get_mut(node_id) {
                         node.y += offset;
                     }
@@ -462,7 +505,9 @@ impl SubgraphTree {
         let mut children: Vec<Vec<usize>> = vec![Vec::new(); n];
 
         for (pos, &i) in by_size.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             for &j in &by_size[pos + 1..] {
+                crate::layout::measurements::checkpoint();
                 if sets[j].len() > sets[i].len() && sets[i].is_subset(&sets[j]) {
                     parent[i] = Some(j);
                     children[j].push(i);
@@ -483,6 +528,7 @@ impl SubgraphTree {
     fn is_ancestor(&self, ancestor: usize, descendant: usize) -> bool {
         let mut cur = descendant;
         loop {
+            crate::layout::measurements::checkpoint();
             match self.parent[cur] {
                 Some(p) if p == ancestor => return true,
                 Some(p) => cur = p,
@@ -538,6 +584,7 @@ pub(super) fn apply_subgraph_direction_overrides(
     skip_indices: &HashSet<usize>,
 ) {
     for (idx, sub) in graph.subgraphs.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         if skip_indices.contains(&idx) {
             continue;
         }
@@ -560,6 +607,7 @@ pub(super) fn apply_subgraph_direction_overrides(
         let mut min_x = f32::MAX;
         let mut min_y = f32::MAX;
         for node_id in &sub.nodes {
+            crate::layout::measurements::checkpoint();
             if let Some(node) = nodes.get(node_id) {
                 min_x = min_x.min(node.x);
                 min_y = min_y.min(node.y);
@@ -571,6 +619,7 @@ pub(super) fn apply_subgraph_direction_overrides(
 
         let mut temp_nodes: BTreeMap<String, NodeLayout> = BTreeMap::new();
         for node_id in &sub.nodes {
+            crate::layout::measurements::checkpoint();
             if let Some(node) = nodes.get(node_id) {
                 let mut clone = node.clone();
                 clone.x = 0.0;
@@ -592,6 +641,7 @@ pub(super) fn apply_subgraph_direction_overrides(
         let mut temp_min_x = f32::MAX;
         let mut temp_min_y = f32::MAX;
         for node_id in &sub.nodes {
+            crate::layout::measurements::checkpoint();
             if let Some(node) = temp_nodes.get(node_id) {
                 temp_min_x = temp_min_x.min(node.x);
                 temp_min_y = temp_min_y.min(node.y);
@@ -601,6 +651,7 @@ pub(super) fn apply_subgraph_direction_overrides(
             continue;
         }
         for node_id in &sub.nodes {
+            crate::layout::measurements::checkpoint();
             if let (Some(target), Some(source)) = (nodes.get_mut(node_id), temp_nodes.get(node_id))
             {
                 target.x = source.x - temp_min_x + min_x;
@@ -625,6 +676,7 @@ fn subgraph_is_anchorable(
     let anchor_id = subgraph_anchor_id(sub, nodes);
     let set: HashSet<&str> = sub.nodes.iter().map(|id| id.as_str()).collect();
     for edge in &graph.edges {
+        crate::layout::measurements::checkpoint();
         if let Some(anchor) = anchor_id
             && (edge.from == anchor || edge.to == anchor)
         {
@@ -678,6 +730,7 @@ pub(super) fn mark_subgraph_anchor_nodes_hidden(
 ) -> HashSet<String> {
     let mut anchor_ids = HashSet::new();
     for sub in &graph.subgraphs {
+        crate::layout::measurements::checkpoint();
         let Some(anchor_id) = subgraph_anchor_id(sub, nodes) else {
             continue;
         };
@@ -809,7 +862,7 @@ pub(super) fn subgraph_padding_from_label(
         let title_clearance = (theme.font_size * 0.75).max(10.0);
         pad_y.max(label_height + SUBGRAPH_LABEL_GAP_FLOWCHART + title_clearance)
     } else if graph.kind == crate::ir::DiagramKind::Kanban {
-        pad_y.max(label_height + SUBGRAPH_LABEL_GAP_KANBAN)
+        pad_y.max(label_height + SUBGRAPH_LABEL_GAP_KANBAN + 16.)
     } else if graph.kind == crate::ir::DiagramKind::State {
         // Header height (matches the rendered title band) plus a body inset
         // so the topmost child clears the title separator line instead of
@@ -838,6 +891,7 @@ fn estimate_subgraph_box_size(
     let direction = subgraph_layout_direction(graph, sub);
     let mut temp_nodes: BTreeMap<String, NodeLayout> = BTreeMap::new();
     for node_id in &sub.nodes {
+        crate::layout::measurements::checkpoint();
         if let Some(node) = nodes.get(node_id) {
             let mut clone = node.clone();
             clone.x = 0.0;
@@ -861,6 +915,7 @@ fn estimate_subgraph_box_size(
     let mut max_x = f32::MIN;
     let mut max_y = f32::MIN;
     for node_id in &sub.nodes {
+        crate::layout::measurements::checkpoint();
         if let Some(node) = temp_nodes.get(node_id) {
             min_x = min_x.min(node.x);
             min_y = min_y.min(node.y);
@@ -896,6 +951,7 @@ pub(super) fn apply_subgraph_anchor_sizes(
         return anchors;
     }
     for (idx, sub) in graph.subgraphs.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         if is_region_subgraph(sub) || !subgraph_should_anchor(sub, graph, nodes) {
             continue;
         }
@@ -937,9 +993,11 @@ pub(super) fn align_subgraphs_to_anchor_nodes(
     let sub_count = graph.subgraphs.len();
     let mut subgraph_depth: Vec<usize> = vec![0; sub_count];
     for idx in 0..sub_count {
+        crate::layout::measurements::checkpoint();
         let mut depth = 0usize;
         let mut cur = idx;
         while let Some(parent_idx) = tree.parent.get(cur).and_then(|parent| *parent) {
+            crate::layout::measurements::checkpoint();
             depth += 1;
             cur = parent_idx;
             if depth > sub_count {
@@ -966,6 +1024,7 @@ pub(super) fn align_subgraphs_to_anchor_nodes(
     });
 
     for (anchor_id, info) in ordered_anchors {
+        crate::layout::measurements::checkpoint();
         let (anchor_x, anchor_y) = {
             let Some(anchor) = nodes.get(anchor_id) else {
                 continue;
@@ -1006,7 +1065,9 @@ pub(super) fn apply_state_subgraph_layouts(
     let mut parent_of: Vec<Option<usize>> = vec![None; sub_count];
 
     for (i, sub_a) in graph.subgraphs.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         for (j, sub_b) in graph.subgraphs.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             if i == j {
                 continue;
             }
@@ -1021,9 +1082,11 @@ pub(super) fn apply_state_subgraph_layouts(
     }
 
     for i in 0..sub_count {
+        crate::layout::measurements::checkpoint();
         let mut d = 0;
         let mut cur = i;
         while let Some(p) = parent_of[cur] {
+            crate::layout::measurements::checkpoint();
             d += 1;
             cur = p;
             if d > sub_count {
@@ -1039,6 +1102,7 @@ pub(super) fn apply_state_subgraph_layouts(
     let mut inner_boxes: HashMap<usize, (f32, f32, f32, f32)> = HashMap::new();
 
     for idx in order {
+        crate::layout::measurements::checkpoint();
         let sub = &graph.subgraphs[idx];
         if skip_indices.contains(&idx) || sub.nodes.len() <= 1 {
             continue;
@@ -1046,6 +1110,7 @@ pub(super) fn apply_state_subgraph_layouts(
         let mut min_x = f32::MAX;
         let mut min_y = f32::MAX;
         for node_id in &sub.nodes {
+            crate::layout::measurements::checkpoint();
             if let Some(node) = nodes.get(node_id) {
                 min_x = min_x.min(node.x);
                 min_y = min_y.min(node.y);
@@ -1058,7 +1123,9 @@ pub(super) fn apply_state_subgraph_layouts(
         let mut saved_sizes: Vec<(String, f32, f32)> = Vec::new();
         let mut inner_anchor_ids: Vec<String> = Vec::new();
         for node_id in &sub.nodes {
+            crate::layout::measurements::checkpoint();
             for (j, inner_sub) in graph.subgraphs.iter().enumerate() {
+                crate::layout::measurements::checkpoint();
                 if let Some((_, _, w, h)) = inner_boxes.get(&j) {
                     let inner_id = inner_sub.id.as_deref().unwrap_or("");
                     if node_id == inner_id || node_id == &inner_sub.label {
@@ -1090,6 +1157,7 @@ pub(super) fn apply_state_subgraph_layouts(
 
         let nested_anchor_min_y = min_y + (config.node_spacing * 0.4).max(20.0);
         for anchor_id in &inner_anchor_ids {
+            crate::layout::measurements::checkpoint();
             if let Some(anchor) = nodes.get_mut(anchor_id)
                 && anchor.y < nested_anchor_min_y
             {
@@ -1098,6 +1166,7 @@ pub(super) fn apply_state_subgraph_layouts(
         }
 
         for (id, w, h) in saved_sizes {
+            crate::layout::measurements::checkpoint();
             if let Some(node) = nodes.get_mut(&id) {
                 node.width = w;
                 node.height = h;
@@ -1105,6 +1174,7 @@ pub(super) fn apply_state_subgraph_layouts(
         }
 
         for (j, inner_sub) in graph.subgraphs.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             if let Some(&(old_x, old_y, _, _)) = inner_boxes.get(&j) {
                 let inner_id = inner_sub.id.as_deref().unwrap_or("");
                 if !sub
@@ -1124,6 +1194,7 @@ pub(super) fn apply_state_subgraph_layouts(
                     let dy = anchor.y - old_y;
                     if dx.abs() > 0.01 || dy.abs() > 0.01 {
                         for inner_node_id in &inner_sub.nodes {
+                            crate::layout::measurements::checkpoint();
                             if let Some(inner_node) = nodes.get_mut(inner_node_id) {
                                 inner_node.x += dx;
                                 inner_node.y += dy;
@@ -1139,6 +1210,7 @@ pub(super) fn apply_state_subgraph_layouts(
         let mut bmax_x = f32::MIN;
         let mut bmax_y = f32::MIN;
         for node_id in &sub.nodes {
+            crate::layout::measurements::checkpoint();
             if let Some(node) = nodes.get(node_id) {
                 bmin_x = bmin_x.min(node.x);
                 bmin_y = bmin_y.min(node.y);
@@ -1147,6 +1219,7 @@ pub(super) fn apply_state_subgraph_layouts(
             }
         }
         for (j, inner_sub) in graph.subgraphs.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             if inner_boxes.contains_key(&j) {
                 let inner_id = inner_sub.id.as_deref().unwrap_or("");
                 if sub
@@ -1155,6 +1228,7 @@ pub(super) fn apply_state_subgraph_layouts(
                     .any(|n| n == inner_id || n == &inner_sub.label)
                 {
                     for inner_node_id in &inner_sub.nodes {
+                        crate::layout::measurements::checkpoint();
                         if let Some(node) = nodes.get(inner_node_id) {
                             bmin_x = bmin_x.min(node.x);
                             bmin_y = bmin_y.min(node.y);
@@ -1191,10 +1265,12 @@ pub(super) fn apply_subgraph_anchors(
 
     let mut label_to_index: HashMap<&str, usize> = HashMap::new();
     for (idx, sub) in subgraphs.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         label_to_index.insert(sub.label.as_str(), idx);
     }
 
     for sub in &graph.subgraphs {
+        crate::layout::measurements::checkpoint();
         let Some(&layout_idx) = label_to_index.get(sub.label.as_str()) else {
             continue;
         };
@@ -1206,6 +1282,7 @@ pub(super) fn apply_subgraph_anchors(
         anchor_ids.insert(sub.label.as_str());
 
         for anchor_id in anchor_ids {
+            crate::layout::measurements::checkpoint();
             if sub.nodes.iter().any(|node_id| node_id == anchor_id) {
                 continue;
             }
@@ -1297,6 +1374,7 @@ pub(super) fn anchor_layout_for_edge_towards(
     let mut best = candidates[0];
     let mut best_score = f32::INFINITY;
     for (side, point) in candidates {
+        crate::layout::measurements::checkpoint();
         let manhattan = (point.0 - remote_center.0).abs() + (point.1 - remote_center.1).abs();
         let tie_bias = if side == preferred_side { -0.01 } else { 0.0 };
         let score = manhattan + tie_bias;
@@ -1341,6 +1419,7 @@ fn mirror_subgraph_nodes(
     let mut max_y = f32::MIN;
 
     for node_id in node_ids {
+        crate::layout::measurements::checkpoint();
         if let Some(node) = nodes.get(node_id) {
             min_x = min_x.min(node.x);
             min_y = min_y.min(node.y);
@@ -1355,6 +1434,7 @@ fn mirror_subgraph_nodes(
 
     if matches!(direction, Direction::RightLeft) {
         for node_id in node_ids {
+            crate::layout::measurements::checkpoint();
             if let Some(node) = nodes.get_mut(node_id) {
                 node.x = min_x + (max_x - (node.x + node.width));
             }
@@ -1362,6 +1442,7 @@ fn mirror_subgraph_nodes(
     }
     if matches!(direction, Direction::BottomTop) {
         for node_id in node_ids {
+            crate::layout::measurements::checkpoint();
             if let Some(node) = nodes.get_mut(node_id) {
                 node.y = min_y + (max_y - (node.y + node.height));
             }
@@ -1380,6 +1461,7 @@ pub(super) fn resolve_subgraph_style(
 
     if let Some(classes) = graph.subgraph_classes.get(id) {
         for class_name in classes {
+            crate::layout::measurements::checkpoint();
             if let Some(class_style) = graph.class_defs.get(class_name) {
                 merge_node_style(&mut style, class_style);
             }
@@ -1403,12 +1485,14 @@ pub(super) fn build_subgraph_layouts(
     // Maps graph.subgraphs index -> local subgraphs index (None if skipped).
     let mut graph_to_local: Vec<Option<usize>> = Vec::with_capacity(graph.subgraphs.len());
     for sub in &graph.subgraphs {
+        crate::layout::measurements::checkpoint();
         let mut min_x = f32::MAX;
         let mut min_y = f32::MAX;
         let mut max_x = f32::MIN;
         let mut max_y = f32::MIN;
 
         for node_id in &sub.nodes {
+            crate::layout::measurements::checkpoint();
             if let Some(node) = nodes.get(node_id) {
                 min_x = min_x.min(node.x);
                 min_y = min_y.min(node.y);
@@ -1465,19 +1549,23 @@ pub(super) fn build_subgraph_layouts(
         let mut stack: Vec<(usize, bool)> =
             tree.top_level.iter().rev().map(|&i| (i, false)).collect();
         while let Some((idx, visited)) = stack.pop() {
+            crate::layout::measurements::checkpoint();
             if visited {
                 order.push(idx);
                 continue;
             }
             stack.push((idx, true));
             for &child in tree.children[idx].iter().rev() {
+                crate::layout::measurements::checkpoint();
                 stack.push((child, false));
             }
         }
 
         for &idx in &order {
+            crate::layout::measurements::checkpoint();
             let mut descs = Vec::new();
             for &child in &tree.children[idx] {
+                crate::layout::measurements::checkpoint();
                 descs.push(child);
                 descs.extend(all_descendants[child].iter().copied());
             }
@@ -1485,10 +1573,12 @@ pub(super) fn build_subgraph_layouts(
         }
 
         for &i in &order {
+            crate::layout::measurements::checkpoint();
             let Some(local_i) = graph_to_local[i] else {
                 continue;
             };
             for &j in &all_descendants[i] {
+                crate::layout::measurements::checkpoint();
                 if is_region_subgraph(&graph.subgraphs[j]) {
                     continue;
                 }

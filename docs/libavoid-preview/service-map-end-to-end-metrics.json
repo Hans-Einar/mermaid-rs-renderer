@@ -1,0 +1,28 @@
+{
+  "diagnostics": [
+    "libavoid transaction 1: 11.701769ms"
+  ],
+  "legacy": {
+    "bends": 12,
+    "close_parallel_segments": 0,
+    "crossings": 0,
+    "label_collisions": 8,
+    "length": 1996.9850234985352,
+    "node_traversals": 0,
+    "parallel_overlaps": 0
+  },
+  "legacy_route_ms": 1551.211,
+  "legacy_total_ms": 2065.007348,
+  "libavoid": {
+    "bends": 6,
+    "close_parallel_segments": 0,
+    "crossings": 0,
+    "label_collisions": 0,
+    "length": 2289.8484420776367,
+    "node_traversals": 0,
+    "parallel_overlaps": 0
+  },
+  "libavoid_route_ms": 11.701769,
+  "libavoid_total_ms": 18.353237,
+  "mode": "end to end"
+}

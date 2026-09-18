@@ -400,7 +400,7 @@ pub(super) fn compute_gantt_layout(graph: &Graph, theme: &Theme, config: &Layout
             section_label_width,
             task_label_x,
             task_label_width,
-            title_y: chart_y - row_height * 0.6,
+            title_y: title_height / 2. + padding / 2.,
             ticks,
             compact,
         }),

@@ -130,6 +130,7 @@ pub(in crate::layout) fn apply_aspect_ratio_band_fold(
         HashMap<String, usize>,
     )> = None;
     for band_count in candidate_band_counts(natural_ratio, goal, ranks.len()) {
+        crate::layout::measurements::checkpoint();
         let ranges = plan_band_ranges(&extents, band_count, &allowed_boundaries);
         if ranges.len() != band_count {
             continue;
@@ -201,6 +202,7 @@ fn layout_bounds(nodes: &BTreeMap<String, NodeLayout>) -> Option<(f32, f32, f32,
     let mut max_x = f32::MIN;
     let mut max_y = f32::MIN;
     for node in nodes.values() {
+        crate::layout::measurements::checkpoint();
         if node.hidden {
             continue;
         }
@@ -241,7 +243,9 @@ fn straight_line_crossings(
         .collect();
     let mut crossings = 0usize;
     for i in 0..segments.len() {
+        crate::layout::measurements::checkpoint();
         for j in (i + 1)..segments.len() {
+            crate::layout::measurements::checkpoint();
             let (a_from, a_to, a1, a2) = segments[i];
             let (b_from, b_to, b1, b2) = segments[j];
             if a_from == b_from || a_from == b_to || a_to == b_from || a_to == b_to {
@@ -287,6 +291,7 @@ fn rank_extents(ranks: &[Vec<String>], nodes: &BTreeMap<String, NodeLayout>) -> 
             let mut main_start = f32::MAX;
             let mut main_end = f32::MIN;
             for id in bucket {
+                crate::layout::measurements::checkpoint();
                 if let Some(node) = nodes.get(id) {
                     main_start = main_start.min(node.x);
                     main_end = main_end.max(node.x + node.width);
@@ -310,11 +315,14 @@ fn subgraph_safe_boundaries(graph: &Graph, ranks: &[Vec<String>]) -> Vec<bool> {
     let mut allowed = vec![true; ranks.len()];
     let mut node_rank: HashMap<&str, usize> = HashMap::new();
     for (idx, bucket) in ranks.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         for id in bucket {
+            crate::layout::measurements::checkpoint();
             node_rank.insert(id.as_str(), idx);
         }
     }
     for sub in &graph.subgraphs {
+        crate::layout::measurements::checkpoint();
         let member_ranks = sub
             .nodes
             .iter()
@@ -324,6 +332,7 @@ fn subgraph_safe_boundaries(graph: &Graph, ranks: &[Vec<String>]) -> Vec<bool> {
         let mut min_rank = usize::MAX;
         let mut max_rank = 0usize;
         for rank in member_ranks {
+            crate::layout::measurements::checkpoint();
             min_rank = min_rank.min(rank);
             max_rank = max_rank.max(rank);
         }
@@ -331,6 +340,7 @@ fn subgraph_safe_boundaries(graph: &Graph, ranks: &[Vec<String>]) -> Vec<bool> {
             continue;
         }
         for flag in allowed.iter_mut().take(max_rank + 1).skip(min_rank + 1) {
+            crate::layout::measurements::checkpoint();
             *flag = false;
         }
     }
@@ -357,6 +367,7 @@ fn plan_band_ranges(
     let mut ranges: Vec<Range<usize>> = Vec::with_capacity(band_count);
     let mut start = 0usize;
     for idx in 1..rank_count {
+        crate::layout::measurements::checkpoint();
         if !allowed_boundaries.get(idx).copied().unwrap_or(true) {
             continue;
         }
@@ -401,6 +412,7 @@ fn apply_fold_to_nodes(
     let mut cross_offset = 0.0f32;
     let mut prev_exit_center: Option<f32> = None;
     for (band_idx, range) in ranges.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         let reversed = band_idx % 2 == 1;
         let band_main_origin = extents[range.start].main_start;
         let band_main_span = extents[range.clone()]
@@ -412,7 +424,9 @@ fn apply_fold_to_nodes(
         let mut band_cross_min = f32::MAX;
         let mut band_cross_max = f32::MIN;
         for rank_idx in range.clone() {
+            crate::layout::measurements::checkpoint();
             for id in &ranks[rank_idx] {
+                crate::layout::measurements::checkpoint();
                 if let Some(node) = nodes.get(id) {
                     band_cross_min = band_cross_min.min(node.y);
                     band_cross_max = band_cross_max.max(node.y + node.height);
@@ -439,6 +453,7 @@ fn apply_fold_to_nodes(
             let mut min_main = f32::MAX;
             let mut max_main = f32::MIN;
             for id in &ranks[rank_idx] {
+                crate::layout::measurements::checkpoint();
                 if let Some(node) = nodes.get(id) {
                     let main = local_main(node);
                     min_main = min_main.min(main);
@@ -453,7 +468,9 @@ fn apply_fold_to_nodes(
         };
 
         for rank_idx in range.clone() {
+            crate::layout::measurements::checkpoint();
             for id in &ranks[rank_idx] {
+                crate::layout::measurements::checkpoint();
                 if let Some(node) = nodes.get_mut(id) {
                     let main = {
                         let rebased = node.x - band_main_origin;
@@ -473,6 +490,7 @@ fn apply_fold_to_nodes(
             let mut min_main = f32::MAX;
             let mut max_main = f32::MIN;
             for id in &ranks[range.end - 1] {
+                crate::layout::measurements::checkpoint();
                 if let Some(node) = nodes.get(id) {
                     min_main = min_main.min(node.x);
                     max_main = max_main.max(node.x + node.width);

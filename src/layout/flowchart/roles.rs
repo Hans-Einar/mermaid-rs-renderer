@@ -64,11 +64,14 @@ pub(in crate::layout) fn classify_edge_roles(graph: &Graph) -> Vec<FlowchartEdge
 fn node_subgraph_memberships(graph: &Graph) -> HashMap<&str, Vec<usize>> {
     let mut memberships: HashMap<&str, Vec<usize>> = HashMap::new();
     for (idx, subgraph) in graph.subgraphs.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         for node_id in &subgraph.nodes {
+            crate::layout::measurements::checkpoint();
             memberships.entry(node_id.as_str()).or_default().push(idx);
         }
     }
     for indexes in memberships.values_mut() {
+        crate::layout::measurements::checkpoint();
         indexes.sort_unstable();
         indexes.dedup();
     }
@@ -79,7 +82,9 @@ fn node_to_component(node_ids: &[String], edges: &[crate::ir::Edge]) -> HashMap<
     let components = strongly_connected_components(node_ids, edges);
     let mut mapping = HashMap::new();
     for (idx, component) in components.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         for node_id in component {
+            crate::layout::measurements::checkpoint();
             mapping.insert(node_id.clone(), idx);
         }
     }
@@ -93,6 +98,7 @@ fn strongly_connected_components(
     let mut adj: HashMap<&str, Vec<&str>> = HashMap::new();
     let mut rev: HashMap<&str, Vec<&str>> = HashMap::new();
     for edge in edges {
+        crate::layout::measurements::checkpoint();
         adj.entry(edge.from.as_str())
             .or_default()
             .push(edge.to.as_str());
@@ -104,21 +110,25 @@ fn strongly_connected_components(
     let mut visited: HashSet<&str> = HashSet::new();
     let mut finish_order = Vec::with_capacity(node_ids.len());
     for node_id in node_ids {
+        crate::layout::measurements::checkpoint();
         dfs_finish_order(node_id.as_str(), &adj, &mut visited, &mut finish_order);
     }
 
     let mut assigned: HashSet<&str> = HashSet::new();
     let mut components = Vec::new();
     while let Some(node_id) = finish_order.pop() {
+        crate::layout::measurements::checkpoint();
         if !assigned.insert(node_id) {
             continue;
         }
         let mut component = Vec::new();
         let mut stack = vec![node_id];
         while let Some(current) = stack.pop() {
+            crate::layout::measurements::checkpoint();
             component.push(current.to_string());
             if let Some(prevs) = rev.get(current) {
                 for prev in prevs {
+                    crate::layout::measurements::checkpoint();
                     if assigned.insert(prev) {
                         stack.push(prev);
                     }
@@ -142,6 +152,7 @@ fn dfs_finish_order<'a>(
     }
     if let Some(nexts) = adj.get(node_id) {
         for next in nexts {
+            crate::layout::measurements::checkpoint();
             dfs_finish_order(next, adj, visited, finish_order);
         }
     }

@@ -1,0 +1,404 @@
+{
+  "kind": "Flowchart",
+  "direction": "LeftRight",
+  "width": 1572.0293,
+  "height": 291.2534,
+  "nodes": [
+    {
+      "id": "BKS",
+      "shape": "Rectangle",
+      "x": 654.6282,
+      "y": 58.46553,
+      "width": 182.53023,
+      "height": 51.0,
+      "label_width": 122.53023,
+      "label_height": 21.0,
+      "label_lines": [
+        "Bucking Service"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "BLB",
+      "shape": "Rectangle",
+      "x": 966.9548,
+      "y": 8.0,
+      "width": 149.8555,
+      "height": 51.0,
+      "label_width": 89.8555,
+      "label_height": 21.0,
+      "label_lines": [
+        "Bucking Lab"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "BWEB",
+      "shape": "Rectangle",
+      "x": 966.9548,
+      "y": 109.10998,
+      "width": 207.03629,
+      "height": 51.0,
+      "label_width": 147.03629,
+      "label_height": 21.0,
+      "label_lines": [
+        "Browser adaptation"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "MCH",
+      "shape": "Rectangle",
+      "x": 291.51813,
+      "y": 108.89602,
+      "width": 182.53023,
+      "height": 51.0,
+      "label_width": 122.53023,
+      "label_height": 21.0,
+      "label_lines": [
+        "Machine Service"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "MLB",
+      "shape": "Rectangle",
+      "x": 654.6282,
+      "y": 159.46553,
+      "width": 149.8555,
+      "height": 51.0,
+      "label_width": 89.8555,
+      "label_height": 21.0,
+      "label_lines": [
+        "Machine Lab"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "OP",
+      "shape": "Rectangle",
+      "x": 1340.8243,
+      "y": 109.12938,
+      "width": 215.20496,
+      "height": 51.0,
+      "label_width": 155.20496,
+      "label_height": 21.0,
+      "label_lines": [
+        "Operator UI context"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "PGW",
+      "shape": "Rectangle",
+      "x": 8.0,
+      "y": 88.63596,
+      "width": 117.18077,
+      "height": 51.0,
+      "label_width": 57.180775,
+      "label_height": 21.0,
+      "label_lines": [
+        "Gateway"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "SIM",
+      "shape": "Rectangle",
+      "x": 8.0,
+      "y": 189.63596,
+      "width": 133.51814,
+      "height": 51.0,
+      "label_width": 73.51814,
+      "label_height": 21.0,
+      "label_lines": [
+        "Simulator"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "SU",
+      "shape": "Rectangle",
+      "x": 316.75336,
+      "y": 220.0442,
+      "width": 223.37364,
+      "height": 51.0,
+      "label_width": 163.37364,
+      "label_height": 21.0,
+      "label_lines": [
+        "Simulator UI context"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    }
+  ],
+  "edges": [
+    {
+      "from": "SIM",
+      "to": "MCH",
+      "directed": true,
+      "arrow_start": true,
+      "arrow_end": true,
+      "points": [
+        [
+          74.75907,
+          189.63596
+        ],
+        [
+          74.75907,
+          148.39603
+        ],
+        [
+          291.51813,
+          148.39603
+        ]
+      ],
+      "label_anchor": [
+        225.14899,
+        170.39603
+      ],
+      "label_width": 84.02074,
+      "label_height": 24.0,
+      "label_lines": [
+        "Target v1"
+      ]
+    },
+    {
+      "from": "PGW",
+      "to": "MCH",
+      "directed": true,
+      "arrow_start": true,
+      "arrow_end": true,
+      "points": [
+        [
+          125.18077,
+          117.26599
+        ],
+        [
+          291.51813,
+          117.26599
+        ]
+      ],
+      "label_anchor": [
+        208.34946,
+        95.26599
+      ],
+      "label_width": 84.02074,
+      "label_height": 24.0,
+      "label_lines": [
+        "Target v1"
+      ]
+    },
+    {
+      "from": "MCH",
+      "to": "BKS",
+      "directed": true,
+      "arrow_start": true,
+      "arrow_end": true,
+      "points": [
+        [
+          396.10565,
+          108.89602
+        ],
+        [
+          396.10565,
+          97.96553
+        ],
+        [
+          654.6282,
+          97.96553
+        ]
+      ],
+      "label_anchor": [
+        525.36694,
+        75.96553
+      ],
+      "label_width": 93.35637,
+      "label_height": 24.0,
+      "label_lines": [
+        "Machine v1"
+      ]
+    },
+    {
+      "from": "MCH",
+      "to": "MLB",
+      "directed": true,
+      "arrow_start": true,
+      "arrow_end": true,
+      "points": [
+        [
+          396.10565,
+          159.89603
+        ],
+        [
+          396.10565,
+          170.96553
+        ],
+        [
+          654.6282,
+          170.96553
+        ]
+      ],
+      "label_anchor": [
+        452.78384,
+        189.43079
+      ],
+      "label_width": 93.35637,
+      "label_height": 24.0,
+      "label_lines": [
+        "Machine v1"
+      ]
+    },
+    {
+      "from": "BKS",
+      "to": "BLB",
+      "directed": true,
+      "arrow_start": true,
+      "arrow_end": true,
+      "points": [
+        [
+          768.09735,
+          58.46553
+        ],
+        [
+          768.09735,
+          47.5
+        ],
+        [
+          966.9548,
+          47.5
+        ]
+      ],
+      "label_anchor": [
+        867.52606,
+        25.5
+      ],
+      "label_width": 93.35637,
+      "label_height": 24.0,
+      "label_lines": [
+        "Bucking v1"
+      ]
+    },
+    {
+      "from": "MCH",
+      "to": "BWEB",
+      "directed": true,
+      "arrow_start": true,
+      "arrow_end": true,
+      "points": [
+        [
+          474.04834,
+          130.76967
+        ],
+        [
+          966.9548,
+          130.76967
+        ]
+      ],
+      "label_anchor": [
+        890.4063,
+        152.76967
+      ],
+      "label_width": 93.35637,
+      "label_height": 24.0,
+      "label_lines": [
+        "Machine v1"
+      ]
+    },
+    {
+      "from": "BKS",
+      "to": "BWEB",
+      "directed": true,
+      "arrow_start": true,
+      "arrow_end": true,
+      "points": [
+        [
+          768.09735,
+          109.46553
+        ],
+        [
+          768.09735,
+          120.609985
+        ],
+        [
+          966.9548,
+          120.609985
+        ]
+      ],
+      "label_anchor": [
+        900.39087,
+        98.609985
+      ],
+      "label_width": 93.35637,
+      "label_height": 24.0,
+      "label_lines": [
+        "Bucking v1"
+      ]
+    },
+    {
+      "from": "BWEB",
+      "to": "OP",
+      "directed": true,
+      "arrow_start": true,
+      "arrow_end": true,
+      "points": [
+        [
+          1173.9911,
+          136.95302
+        ],
+        [
+          1340.8243,
+          136.95302
+        ]
+      ],
+      "label_anchor": [
+        1257.4077,
+        190.95302
+      ],
+      "label_width": 149.3702,
+      "label_height": 24.0,
+      "label_lines": [
+        "Browser contract"
+      ]
+    },
+    {
+      "from": "SIM",
+      "to": "SU",
+      "directed": true,
+      "arrow_start": true,
+      "arrow_end": true,
+      "points": [
+        [
+          74.75907,
+          240.63596
+        ],
+        [
+          74.75907,
+          245.5442
+        ],
+        [
+          316.75336,
+          245.5442
+        ]
+      ],
+      "label_anchor": [
+        164.11198,
+        269.05338
+      ],
+      "label_width": 158.70583,
+      "label_height": 24.0,
+      "label_lines": [
+        "Simulator-control"
+      ]
+    }
+  ],
+  "subgraphs": []
+}

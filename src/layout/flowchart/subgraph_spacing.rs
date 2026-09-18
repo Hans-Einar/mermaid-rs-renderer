@@ -77,7 +77,9 @@ pub(in crate::layout) fn evict_non_member_nodes_from_subgraphs(
     // here would tear their own box apart.
     let mut all_members: HashSet<&str> = HashSet::new();
     for sub in &graph.subgraphs {
+        crate::layout::measurements::checkpoint();
         for node_id in &sub.nodes {
+            crate::layout::measurements::checkpoint();
             all_members.insert(node_id.as_str());
         }
     }
@@ -92,9 +94,11 @@ pub(in crate::layout) fn evict_non_member_nodes_from_subgraphs(
     }
 
     for _ in 0..4 {
+        crate::layout::measurements::checkpoint();
         let rects = compute_rects(nodes);
         let mut moved = false;
         for id in &free_ids {
+            crate::layout::measurements::checkpoint();
             let Some(node) = nodes.get(id) else {
                 continue;
             };
@@ -118,6 +122,7 @@ pub(in crate::layout) fn evict_non_member_nodes_from_subgraphs(
             // the least displacement (cross-axis moves preferred slightly).
             let mut best: Option<(usize, f32, f32, f32)> = None;
             for [rx1, ry1, rx2, ry2] in &rects {
+                crate::layout::measurements::checkpoint();
                 let overlap_x = nx2.min(*rx2) - nx1.max(*rx1);
                 let overlap_y = ny2.min(*ry2) - ny1.max(*ry1);
                 if overlap_x <= 0.0 || overlap_y <= 0.0 {
@@ -130,6 +135,7 @@ pub(in crate::layout) fn evict_non_member_nodes_from_subgraphs(
                     (0.0, ry2 - ny1 + clearance),
                 ];
                 for (dx, dy) in candidates {
+                    crate::layout::measurements::checkpoint();
                     let remaining = overlaps_any(nx1 + dx, ny1 + dy, nx2 + dx, ny2 + dy);
                     let displacement = dx.abs() + dy.abs();
                     // Cross-axis moves keep rank ordering intact; give
@@ -171,6 +177,7 @@ pub(in crate::layout) fn debug_assert_flowchart_node_layout_invariants(
     }
 
     for node in nodes.values() {
+        crate::layout::measurements::checkpoint();
         debug_assert!(
             node.x.is_finite(),
             "flowchart node {} has non-finite x",
@@ -199,7 +206,9 @@ pub(in crate::layout) fn debug_assert_flowchart_node_layout_invariants(
 
     let mut seen = HashSet::new();
     for idx in top_level_subgraph_indices(graph) {
+        crate::layout::measurements::checkpoint();
         for node_id in &graph.subgraphs[idx].nodes {
+            crate::layout::measurements::checkpoint();
             if !seen.insert(node_id.as_str()) {
                 return;
             }
@@ -217,6 +226,7 @@ pub(in crate::layout) fn debug_assert_flowchart_node_layout_invariants(
 
     let mut bounds = Vec::new();
     for idx in top_level_subgraph_indices(graph) {
+        crate::layout::measurements::checkpoint();
         let sub = &graph.subgraphs[idx];
         if is_region_subgraph(sub) {
             continue;
@@ -227,6 +237,7 @@ pub(in crate::layout) fn debug_assert_flowchart_node_layout_invariants(
         let mut max_x = f32::MIN;
         let mut max_y = f32::MIN;
         for node_id in &sub.nodes {
+            crate::layout::measurements::checkpoint();
             if let Some(node) = nodes.get(node_id) {
                 min_x = min_x.min(node.x);
                 min_y = min_y.min(node.y);
@@ -247,7 +258,9 @@ pub(in crate::layout) fn debug_assert_flowchart_node_layout_invariants(
     }
 
     for (idx, left) in bounds.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         for right in bounds.iter().skip(idx + 1) {
+            crate::layout::measurements::checkpoint();
             let overlaps_x = left.min_x < right.max_x && right.min_x < left.max_x;
             let overlaps_y = left.min_y < right.max_y && right.min_y < left.max_y;
             debug_assert!(
@@ -272,6 +285,7 @@ pub(in crate::layout) fn compress_linear_subgraphs(
     let horizontal = is_horizontal(graph.direction);
 
     for sub in &graph.subgraphs {
+        crate::layout::measurements::checkpoint();
         if sub.nodes.len() < 3 {
             continue;
         }
@@ -282,11 +296,13 @@ pub(in crate::layout) fn compress_linear_subgraphs(
         let mut edges_in_sub = 0usize;
 
         for node_id in &sub.nodes {
+            crate::layout::measurements::checkpoint();
             in_deg.insert(node_id.clone(), 0);
             out_deg.insert(node_id.clone(), 0);
         }
 
         for edge in &graph.edges {
+            crate::layout::measurements::checkpoint();
             if !sub_set.contains(edge.from.as_str()) || !sub_set.contains(edge.to.as_str()) {
                 continue;
             }
@@ -322,6 +338,7 @@ pub(in crate::layout) fn compress_linear_subgraphs(
         let mut visited: HashSet<String> = HashSet::new();
         let mut current = starts[0].clone();
         while visited.insert(current.clone()) {
+            crate::layout::measurements::checkpoint();
             order.push(current.clone());
             if let Some(next) = next_map.get(&current) {
                 current = next.clone();
@@ -340,6 +357,7 @@ pub(in crate::layout) fn compress_linear_subgraphs(
             .fold(f32::MAX, f32::min);
         let mut cursor = min_main;
         for node_id in order {
+            crate::layout::measurements::checkpoint();
             if let Some(node) = nodes.get_mut(&node_id) {
                 if horizontal {
                     node.x = cursor;
@@ -370,7 +388,9 @@ pub(in crate::layout) fn enforce_top_level_subgraph_gap(
 
     let mut seen: HashSet<&str> = HashSet::new();
     for &idx in &top_level {
+        crate::layout::measurements::checkpoint();
         for node_id in &graph.subgraphs[idx].nodes {
+            crate::layout::measurements::checkpoint();
             if !seen.insert(node_id.as_str()) {
                 return;
             }
@@ -409,6 +429,7 @@ pub(in crate::layout) fn enforce_top_level_subgraph_gap(
     let mut bounds: Vec<Bounds> = Vec::new();
 
     for &idx in &top_level {
+        crate::layout::measurements::checkpoint();
         let sub = &graph.subgraphs[idx];
         if is_region_subgraph(sub) || sub.nodes.is_empty() {
             continue;
@@ -419,6 +440,7 @@ pub(in crate::layout) fn enforce_top_level_subgraph_gap(
         let mut max_x = f32::MIN;
         let mut max_y = f32::MIN;
         for node_id in &sub.nodes {
+            crate::layout::measurements::checkpoint();
             if let Some(node) = nodes.get(node_id) {
                 min_x = min_x.min(node.x);
                 min_y = min_y.min(node.y);
@@ -470,6 +492,7 @@ pub(in crate::layout) fn enforce_top_level_subgraph_gap(
 
     let mut prev_max_main: Option<f32> = None;
     for bound in &mut bounds {
+        crate::layout::measurements::checkpoint();
         let min_main = if horizontal { bound.min_x } else { bound.min_y };
         let mut max_main = if horizontal { bound.max_x } else { bound.max_y };
 
@@ -484,6 +507,7 @@ pub(in crate::layout) fn enforce_top_level_subgraph_gap(
         if delta > 0.0 {
             let sub = &graph.subgraphs[bound.idx];
             for node_id in &sub.nodes {
+                crate::layout::measurements::checkpoint();
                 if let Some(node) = nodes.get_mut(node_id) {
                     if horizontal {
                         node.x += delta;
@@ -522,6 +546,7 @@ pub(in crate::layout) fn separate_sibling_subgraphs(
     let mut assigned: HashSet<usize> = HashSet::new();
 
     for i in 0..graph.subgraphs.len() {
+        crate::layout::measurements::checkpoint();
         if assigned.contains(&i) {
             continue;
         }
@@ -529,6 +554,7 @@ pub(in crate::layout) fn separate_sibling_subgraphs(
         assigned.insert(i);
 
         for j in (i + 1)..graph.subgraphs.len() {
+            crate::layout::measurements::checkpoint();
             if assigned.contains(&j) {
                 continue;
             }
@@ -545,14 +571,17 @@ pub(in crate::layout) fn separate_sibling_subgraphs(
 
     let horizontal = is_horizontal(graph.direction);
     for group in sibling_groups {
+        crate::layout::measurements::checkpoint();
         let mut bounds: Vec<(usize, f32, f32, f32, f32)> = Vec::new();
         for &idx in &group {
+            crate::layout::measurements::checkpoint();
             let sub = &graph.subgraphs[idx];
             let mut min_x = f32::MAX;
             let mut min_y = f32::MAX;
             let mut max_x = f32::MIN;
             let mut max_y = f32::MIN;
             for node_id in &sub.nodes {
+                crate::layout::measurements::checkpoint();
                 if let Some(node) = nodes.get(node_id) {
                     min_x = min_x.min(node.x);
                     min_y = min_y.min(node.y);
@@ -592,9 +621,11 @@ pub(in crate::layout) fn separate_sibling_subgraphs(
 
         let mut placed: Vec<(usize, f32, f32, f32, f32)> = Vec::new();
         for (idx, min_x, min_y, max_x, max_y) in bounds {
+            crate::layout::measurements::checkpoint();
             let mut shift = 0.0f32;
 
             for &(_, px1, py1, px2, py2) in &placed {
+                crate::layout::measurements::checkpoint();
                 let other_axis_overlaps = if horizontal {
                     overlaps(min_x, max_x, px1, px2)
                 } else {
@@ -628,6 +659,7 @@ pub(in crate::layout) fn separate_sibling_subgraphs(
             if shift > 0.0 {
                 let sub = &graph.subgraphs[idx];
                 for node_id in &sub.nodes {
+                    crate::layout::measurements::checkpoint();
                     if let Some(node) = nodes.get_mut(node_id) {
                         if horizontal {
                             node.y += shift;
@@ -663,8 +695,10 @@ pub(in crate::layout) fn align_disconnected_top_level_subgraphs(
     let mut seen: HashSet<&str> = HashSet::new();
     let mut union_count = 0usize;
     for &idx in &top_level {
+        crate::layout::measurements::checkpoint();
         let sub = &graph.subgraphs[idx];
         for node_id in &sub.nodes {
+            crate::layout::measurements::checkpoint();
             if !seen.insert(node_id.as_str()) {
                 return;
             }
@@ -683,8 +717,10 @@ pub(in crate::layout) fn align_disconnected_top_level_subgraphs(
 
     let mut node_to_top_level: HashMap<&str, usize> = HashMap::new();
     for &idx in &top_level {
+        crate::layout::measurements::checkpoint();
         let sub = &graph.subgraphs[idx];
         for node_id in &sub.nodes {
+            crate::layout::measurements::checkpoint();
             node_to_top_level.insert(node_id.as_str(), idx);
         }
         if let Some(anchor_id) = subgraph_anchor_id(sub, nodes) {
@@ -712,6 +748,7 @@ pub(in crate::layout) fn align_disconnected_top_level_subgraphs(
 
     let mut bounds: Vec<Bounds> = Vec::new();
     for &idx in &top_level {
+        crate::layout::measurements::checkpoint();
         let sub = &graph.subgraphs[idx];
         if sub.nodes.is_empty() {
             continue;
@@ -721,6 +758,7 @@ pub(in crate::layout) fn align_disconnected_top_level_subgraphs(
         let mut max_x = f32::MIN;
         let mut max_y = f32::MIN;
         for node_id in &sub.nodes {
+            crate::layout::measurements::checkpoint();
             if let Some(node) = nodes.get(node_id) {
                 min_x = min_x.min(node.x);
                 min_y = min_y.min(node.y);
@@ -764,6 +802,7 @@ pub(in crate::layout) fn align_disconnected_top_level_subgraphs(
 
     let mut prev_max: Option<f32> = None;
     for bound in &bounds {
+        crate::layout::measurements::checkpoint();
         let min_main = if horizontal { bound.min_x } else { bound.min_y };
         let max_main = if horizontal { bound.max_x } else { bound.max_y };
         if let Some(prev) = prev_max
@@ -780,6 +819,7 @@ pub(in crate::layout) fn align_disconnected_top_level_subgraphs(
         .fold(f32::MAX, f32::min);
 
     for bound in bounds {
+        crate::layout::measurements::checkpoint();
         let current_cross = if horizontal { bound.min_y } else { bound.min_x };
         let delta = target_cross - current_cross;
         if delta.abs() < 0.5 {
@@ -787,6 +827,7 @@ pub(in crate::layout) fn align_disconnected_top_level_subgraphs(
         }
         let sub = &graph.subgraphs[bound.idx];
         for node_id in &sub.nodes {
+            crate::layout::measurements::checkpoint();
             if let Some(node) = nodes.get_mut(node_id) {
                 if horizontal {
                     node.y += delta;
@@ -820,6 +861,7 @@ pub(in crate::layout) fn align_single_entry_top_level_subgraphs(
     let shift_limit = (config.node_spacing * 0.75).max(10.0);
 
     for idx in top_level_subgraph_indices(graph) {
+        crate::layout::measurements::checkpoint();
         let sub = &graph.subgraphs[idx];
         if sub.nodes.is_empty() || is_region_subgraph(sub) {
             continue;
@@ -896,6 +938,7 @@ pub(in crate::layout) fn align_single_entry_top_level_subgraphs(
         }
 
         for node_id in &sub.nodes {
+            crate::layout::measurements::checkpoint();
             if let Some(node) = nodes.get_mut(node_id) {
                 if outer_horizontal {
                     node.y += delta;
@@ -937,9 +980,11 @@ pub(in crate::layout) fn align_disconnected_components(
 
     let mut adjacency: HashMap<String, Vec<String>> = HashMap::new();
     for node_id in &visible_nodes {
+        crate::layout::measurements::checkpoint();
         adjacency.entry(node_id.clone()).or_default();
     }
     for edge in &graph.edges {
+        crate::layout::measurements::checkpoint();
         if !adjacency.contains_key(&edge.from) || !adjacency.contains_key(&edge.to) {
             continue;
         }
@@ -956,6 +1001,7 @@ pub(in crate::layout) fn align_disconnected_components(
     let mut visited: HashSet<String> = HashSet::new();
     let mut components: Vec<Vec<String>> = Vec::new();
     for node_id in &visible_nodes {
+        crate::layout::measurements::checkpoint();
         if visited.contains(node_id) {
             continue;
         }
@@ -963,9 +1009,11 @@ pub(in crate::layout) fn align_disconnected_components(
         let mut component = Vec::new();
         visited.insert(node_id.clone());
         while let Some(current) = stack.pop() {
+            crate::layout::measurements::checkpoint();
             component.push(current.clone());
             if let Some(neighbors) = adjacency.get(&current) {
                 for next in neighbors {
+                    crate::layout::measurements::checkpoint();
                     if visited.insert(next.clone()) {
                         stack.push(next.clone());
                     }
@@ -992,11 +1040,13 @@ pub(in crate::layout) fn align_disconnected_components(
 
     let mut bounds: Vec<ComponentBounds> = Vec::new();
     for component in components {
+        crate::layout::measurements::checkpoint();
         let mut min_x = f32::MAX;
         let mut min_y = f32::MAX;
         let mut max_x = f32::MIN;
         let mut max_y = f32::MIN;
         for node_id in &component {
+            crate::layout::measurements::checkpoint();
             if let Some(node) = nodes.get(node_id) {
                 min_x = min_x.min(node.x);
                 min_y = min_y.min(node.y);
@@ -1045,12 +1095,14 @@ pub(in crate::layout) fn align_disconnected_components(
     };
 
     for bound in bounds {
+        crate::layout::measurements::checkpoint();
         let min_main = if horizontal { bound.min_x } else { bound.min_y };
         let max_main = if horizontal { bound.max_x } else { bound.max_y };
         let current_cross = if horizontal { bound.min_y } else { bound.min_x };
         let delta_main = cursor - min_main;
         let delta_cross = target_cross - current_cross;
         for node_id in &bound.nodes {
+            crate::layout::measurements::checkpoint();
             if let Some(node) = nodes.get_mut(node_id) {
                 if horizontal {
                     node.x += delta_main;

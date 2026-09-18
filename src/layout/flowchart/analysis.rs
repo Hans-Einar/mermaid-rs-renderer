@@ -94,6 +94,7 @@ impl FlowchartRelationshipAnalysis {
         let mut node_to_component: HashMap<String, usize> = HashMap::new();
         let mut cyclic_components: HashSet<usize> = HashSet::new();
         for (component_idx, component) in components.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             let component_is_cycle = component.len() > 1
                 || layout_edges.iter().any(|edge| {
                     edge.from == edge.to && component.iter().any(|id| id == &edge.from)
@@ -102,6 +103,7 @@ impl FlowchartRelationshipAnalysis {
                 cyclic_components.insert(component_idx);
             }
             for node_id in component {
+                crate::layout::measurements::checkpoint();
                 node_to_component.insert(node_id.clone(), component_idx);
             }
         }
@@ -130,6 +132,7 @@ impl FlowchartRelationshipAnalysis {
         let mut boundary_edge_count = 0usize;
 
         for (edge_idx, edge) in layout_edges.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             if !node_set.contains(edge.from.as_str()) || !node_set.contains(edge.to.as_str()) {
                 continue;
             }
@@ -288,11 +291,14 @@ fn edge_weight(
 fn node_subgraph_memberships(graph: &Graph) -> HashMap<&str, Vec<usize>> {
     let mut memberships: HashMap<&str, Vec<usize>> = HashMap::new();
     for (idx, subgraph) in graph.subgraphs.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         for node_id in &subgraph.nodes {
+            crate::layout::measurements::checkpoint();
             memberships.entry(node_id.as_str()).or_default().push(idx);
         }
     }
     for indexes in memberships.values_mut() {
+        crate::layout::measurements::checkpoint();
         indexes.sort_unstable();
         indexes.dedup();
     }
@@ -307,6 +313,7 @@ fn strongly_connected_components(
     let mut adj: HashMap<&str, Vec<&str>> = HashMap::new();
     let mut rev: HashMap<&str, Vec<&str>> = HashMap::new();
     for edge in edges {
+        crate::layout::measurements::checkpoint();
         if !node_set.contains(edge.from.as_str()) || !node_set.contains(edge.to.as_str()) {
             continue;
         }
@@ -321,21 +328,25 @@ fn strongly_connected_components(
     let mut visited: HashSet<&str> = HashSet::new();
     let mut finish_order = Vec::with_capacity(node_ids.len());
     for node_id in node_ids {
+        crate::layout::measurements::checkpoint();
         dfs_finish_order(node_id.as_str(), &adj, &mut visited, &mut finish_order);
     }
 
     let mut assigned: HashSet<&str> = HashSet::new();
     let mut components = Vec::new();
     while let Some(node_id) = finish_order.pop() {
+        crate::layout::measurements::checkpoint();
         if !assigned.insert(node_id) {
             continue;
         }
         let mut component = Vec::new();
         let mut stack = vec![node_id];
         while let Some(current) = stack.pop() {
+            crate::layout::measurements::checkpoint();
             component.push(current.to_string());
             if let Some(prevs) = rev.get(current) {
                 for prev in prevs {
+                    crate::layout::measurements::checkpoint();
                     if assigned.insert(prev) {
                         stack.push(prev);
                     }
@@ -359,6 +370,7 @@ fn dfs_finish_order<'a>(
     }
     if let Some(nexts) = adj.get(node_id) {
         for next in nexts {
+            crate::layout::measurements::checkpoint();
             dfs_finish_order(next, adj, visited, finish_order);
         }
     }

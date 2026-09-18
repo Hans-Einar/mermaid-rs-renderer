@@ -1,0 +1,405 @@
+{
+  "kind": "Flowchart",
+  "direction": "LeftRight",
+  "width": 2797.5547,
+  "height": 290.2471,
+  "nodes": [
+    {
+      "id": "C",
+      "shape": "Rectangle",
+      "x": 8.0,
+      "y": 223.24693,
+      "width": 149.8555,
+      "height": 51.0,
+      "label_width": 89.8555,
+      "label_height": 21.0,
+      "label_lines": [
+        "Composition"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "D",
+      "shape": "Rectangle",
+      "x": 8.0,
+      "y": 48.204823,
+      "width": 190.69891,
+      "height": 51.0,
+      "label_width": 130.69891,
+      "label_height": 21.0,
+      "label_lines": [
+        "Domain contracts"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "P",
+      "shape": "Rectangle",
+      "x": 437.81165,
+      "y": 223.24709,
+      "width": 158.02419,
+      "height": 51.0,
+      "label_width": 98.024185,
+      "label_height": 21.0,
+      "label_lines": [
+        "Presentation"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "Q",
+      "shape": "Rectangle",
+      "x": 2566.3496,
+      "y": 48.1935,
+      "width": 215.20496,
+      "height": 51.0,
+      "label_width": 155.20496,
+      "label_height": 21.0,
+      "label_lines": [
+        "Command coordinator"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "R",
+      "shape": "Rectangle",
+      "x": 1411.7965,
+      "y": 48.20899,
+      "width": 174.36154,
+      "height": 51.0,
+      "label_width": 114.36155,
+      "label_height": 21.0,
+      "label_lines": [
+        "Representation"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "S",
+      "shape": "Rectangle",
+      "x": 1768.485,
+      "y": 48.205524,
+      "width": 207.03629,
+      "height": 51.0,
+      "label_width": 147.03629,
+      "label_height": 21.0,
+      "label_lines": [
+        "Delivery scheduler"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "T",
+      "shape": "Rectangle",
+      "x": 437.81165,
+      "y": 48.207905,
+      "width": 231.54233,
+      "height": 51.0,
+      "label_width": 171.54233,
+      "label_height": 21.0,
+      "label_lines": [
+        "Transport and session"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "U",
+      "shape": "Rectangle",
+      "x": 983.1518,
+      "y": 48.20978,
+      "width": 133.51814,
+      "height": 51.0,
+      "label_width": 73.51814,
+      "label_height": 21.0,
+      "label_lines": [
+        "UI Domain"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    },
+    {
+      "id": "V",
+      "shape": "Rectangle",
+      "x": 2199.8586,
+      "y": 48.2,
+      "width": 125.34946,
+      "height": 51.0,
+      "label_width": 65.34946,
+      "label_height": 21.0,
+      "label_lines": [
+        "Renderer"
+      ],
+      "anchor_subgraph": null,
+      "hidden": false
+    }
+  ],
+  "edges": [
+    {
+      "from": "D",
+      "to": "T",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          198.69891,
+          73.70636
+        ],
+        [
+          437.81165,
+          73.70636
+        ]
+      ]
+    },
+    {
+      "from": "T",
+      "to": "U",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          669.354,
+          73.70885
+        ],
+        [
+          983.1518,
+          73.70885
+        ]
+      ]
+    },
+    {
+      "from": "U",
+      "to": "R",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          1116.6699,
+          76.042725
+        ],
+        [
+          1411.7965,
+          76.042725
+        ]
+      ]
+    },
+    {
+      "from": "C",
+      "to": "R",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          82.92775,
+          223.24693
+        ],
+        [
+          82.92775,
+          161.22836
+        ],
+        [
+          1435.6327,
+          161.22836
+        ],
+        [
+          1435.6327,
+          99.208984
+        ]
+      ],
+      "label_anchor": [
+        759.2802,
+        139.22836
+      ],
+      "label_width": 261.39783,
+      "label_height": 24.0,
+      "label_lines": [
+        "owns lifetime and references"
+      ]
+    },
+    {
+      "from": "C",
+      "to": "P",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          157.8555,
+          248.74701
+        ],
+        [
+          437.81165,
+          248.74701
+        ]
+      ],
+      "label_anchor": [
+        297.83356,
+        214.74701
+      ],
+      "label_width": 186.71274,
+      "label_height": 48.0,
+      "label_lines": [
+        "supplies context and",
+        "bindings"
+      ]
+    },
+    {
+      "from": "P",
+      "to": "S",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          595.8358,
+          248.74709
+        ],
+        [
+          1795.5886,
+          248.74709
+        ],
+        [
+          1795.5886,
+          99.20552
+        ]
+      ],
+      "label_anchor": [
+        1195.7122,
+        226.74709
+      ],
+      "label_width": 242.72656,
+      "label_height": 24.0,
+      "label_lines": [
+        "schema and delivery policy"
+      ]
+    },
+    {
+      "from": "R",
+      "to": "S",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          1586.1581,
+          69.04059
+        ],
+        [
+          1768.485,
+          69.04059
+        ]
+      ],
+      "label_anchor": [
+        1677.3215,
+        91.04059
+      ],
+      "label_width": 121.36328,
+      "label_height": 24.0,
+      "label_lines": [
+        "state changes"
+      ]
+    },
+    {
+      "from": "S",
+      "to": "V",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          1975.5212,
+          71.36943
+        ],
+        [
+          2199.8586,
+          71.36943
+        ]
+      ],
+      "label_anchor": [
+        2087.69,
+        93.36943
+      ],
+      "label_width": 168.04147,
+      "label_height": 24.0,
+      "label_lines": [
+        "schema and patches"
+      ]
+    },
+    {
+      "from": "V",
+      "to": "Q",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          2325.208,
+          81.19513
+        ],
+        [
+          2566.3496,
+          81.19513
+        ]
+      ],
+      "label_anchor": [
+        2445.7788,
+        115.19513
+      ],
+      "label_width": 186.71274,
+      "label_height": 48.0,
+      "label_lines": [
+        "typed intent through",
+        "Presentation binding"
+      ]
+    },
+    {
+      "from": "Q",
+      "to": "D",
+      "directed": true,
+      "arrow_start": false,
+      "arrow_end": true,
+      "points": [
+        [
+          2566.3496,
+          73.19513
+        ],
+        [
+          2445.7788,
+          73.19513
+        ],
+        [
+          2445.7788,
+          44.2
+        ],
+        [
+          173.22903,
+          44.2
+        ],
+        [
+          173.22903,
+          48.204823
+        ]
+      ],
+      "label_anchor": [
+        1309.5039,
+        22.2
+      ],
+      "label_width": 130.69891,
+      "label_height": 24.0,
+      "label_lines": [
+        "domain command"
+      ]
+    }
+  ],
+  "subgraphs": []
+}

@@ -1,0 +1,18 @@
+flowchart TD
+    UC[Use Case] -->|motivates| R[Requirement]
+    F[Feature] -->|addresses| UC
+    F -->|must satisfy| R
+    F -->|has acceptance examples| S[Scenario]
+    S -->|follows| A[Activity / Subflow]
+    A -->|uses| CAP[Capability]
+    FN[Functionality] -->|realizes| CAP
+    A -->|refines to local contributions| FN
+    U[Unit / Container] -->|owns| FN
+    U -->|provides or requires at its boundary| I[Interface]
+    I -->|exposes access to| CAP
+    CH[Channel] -->|connects participant interfaces| I
+    CH -->|is governed by| CT[Contract]
+    S -->|uses boundary interactions| CH
+    FN -->|has source bindings| CODE[Implementation]
+    D[Decision and rationale] -->|governs| U
+    D -->|governs| CH

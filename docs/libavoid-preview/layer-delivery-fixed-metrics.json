@@ -1,0 +1,13 @@
+{
+  "error": "NoSpace(\"ambiguous label on edge 6: own distance 38.0, other Some((9, 13.1624755859375))\")",
+  "legacy": {
+    "bends": 10,
+    "close_parallel_segments": 0,
+    "crossings": 0,
+    "label_collisions": 11,
+    "length": 5000.436592102051,
+    "node_traversals": 0,
+    "parallel_overlaps": 1
+  },
+  "status": "error"
+}

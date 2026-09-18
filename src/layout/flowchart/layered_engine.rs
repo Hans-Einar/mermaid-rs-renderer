@@ -89,6 +89,7 @@ impl LayeredLayoutSnapshot {
             .enumerate()
             .map(|(rank, bucket)| {
                 for (order, id) in bucket.iter().enumerate() {
+                    crate::layout::measurements::checkpoint();
                     position_by_id.insert(id.as_str(), (rank, order));
                 }
                 LayeredRankSnapshot {
@@ -206,7 +207,9 @@ fn compute_metrics(
     let visible = nodes.iter().filter(|node| !node.hidden).collect::<Vec<_>>();
     let mut node_overlaps = 0usize;
     for i in 0..visible.len() {
+        crate::layout::measurements::checkpoint();
         for j in (i + 1)..visible.len() {
+            crate::layout::measurements::checkpoint();
             let a = visible[i];
             let b = visible[j];
             let overlap_x = (a.x + a.width).min(b.x + b.width) - a.x.max(b.x);
@@ -222,6 +225,7 @@ fn compute_metrics(
         .collect::<HashMap<_, _>>();
     let mut by_gap: HashMap<usize, Vec<(&str, &str, usize, usize)>> = HashMap::new();
     for edge in edges {
+        crate::layout::measurements::checkpoint();
         if edge.to_rank != edge.from_rank + 1 {
             continue;
         }
@@ -240,8 +244,11 @@ fn compute_metrics(
     }
     let mut adjacent_rank_crossings = 0usize;
     for gap_edges in by_gap.values() {
+        crate::layout::measurements::checkpoint();
         for i in 0..gap_edges.len() {
+            crate::layout::measurements::checkpoint();
             for j in (i + 1)..gap_edges.len() {
+                crate::layout::measurements::checkpoint();
                 let (a_from, a_to, a0, a1) = gap_edges[i];
                 let (b_from, b_to, b0, b1) = gap_edges[j];
                 if a_from == b_from || a_to == b_to {
@@ -285,7 +292,9 @@ fn compute_metrics(
         .collect::<Vec<_>>();
     let mut straight_line_crossings = 0usize;
     for i in 0..center_segments.len() {
+        crate::layout::measurements::checkpoint();
         for j in (i + 1)..center_segments.len() {
+            crate::layout::measurements::checkpoint();
             let (a_from, a_to, a0, a1) = center_segments[i];
             let (b_from, b_to, b0, b1) = center_segments[j];
             if a_from == b_from || a_from == b_to || a_to == b_from || a_to == b_to {

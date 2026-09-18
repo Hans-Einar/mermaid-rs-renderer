@@ -1,0 +1,10 @@
+flowchart LR
+    SIM[Simulator] <-->|Target v1| MCH[Machine Service]
+    PGW[Gateway] <-->|Target v1| MCH
+    MCH <-->|Machine v1| BKS[Bucking Service]
+    MCH <-->|Machine v1| MLB[Machine Lab]
+    BKS <-->|Bucking v1| BLB[Bucking Lab]
+    MCH <-->|Machine v1| BWEB[Browser adaptation]
+    BKS <-->|Bucking v1| BWEB
+    BWEB <-->|Browser contract| OP[Operator UI context]
+    SIM <-->|Simulator-control| SU[Simulator UI context]

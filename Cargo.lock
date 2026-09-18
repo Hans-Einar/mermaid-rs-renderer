@@ -486,6 +486,7 @@ name = "mermaid-rs-renderer"
 version = "0.3.1"
 dependencies = [
  "anyhow",
+ "cc",
  "clap",
  "criterion",
  "fontdb",

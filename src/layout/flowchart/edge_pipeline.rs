@@ -173,6 +173,7 @@ fn build_flowchart_reserved_channels(
     intervals.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(Ordering::Equal));
     let mut prev_end: Option<f32> = None;
     for (start, end) in intervals {
+        crate::layout::measurements::checkpoint();
         if let Some(prev) = prev_end {
             let gap = start - prev;
             if gap >= min_rank_gap {
@@ -208,6 +209,7 @@ fn build_flowchart_reserved_channels(
 
     let mut degree_by_node: HashMap<&str, usize> = HashMap::new();
     for edge in &graph.edges {
+        crate::layout::measurements::checkpoint();
         *degree_by_node.entry(edge.from.as_str()).or_insert(0) += 1;
         *degree_by_node.entry(edge.to.as_str()).or_insert(0) += 1;
     }
@@ -222,11 +224,13 @@ fn build_flowchart_reserved_channels(
         .collect();
     hubs.sort_by(|a, b| b.1.cmp(&a.1).then_with(|| a.0.id.cmp(&b.0.id)));
     for (node, _degree) in hubs.into_iter().take(8) {
+        crate::layout::measurements::checkpoint();
         let vertical_span_min = node.y - hub_pad;
         let vertical_span_max = node.y + node.height + hub_pad;
         let horizontal_span_min = node.x - hub_pad;
         let horizontal_span_max = node.x + node.width + hub_pad;
         for coord in [node.x - hub_pad, node.x + node.width + hub_pad] {
+            crate::layout::measurements::checkpoint();
             push_reserved_channel(
                 &mut channels,
                 ReservedRoutingChannel {
@@ -238,6 +242,7 @@ fn build_flowchart_reserved_channels(
             );
         }
         for coord in [node.y - hub_pad, node.y + node.height + hub_pad] {
+            crate::layout::measurements::checkpoint();
             push_reserved_channel(
                 &mut channels,
                 ReservedRoutingChannel {
@@ -267,6 +272,7 @@ fn visible_node_bounds(nodes: &BTreeMap<String, NodeLayout>) -> Option<NodeBound
     };
     let mut any = false;
     for node in nodes.values() {
+        crate::layout::measurements::checkpoint();
         if node.hidden || node.anchor_subgraph.is_some() {
             continue;
         }
@@ -290,6 +296,7 @@ fn enforce_flowchart_endpoint_ports(
         .max(6.0)
         .min(config.node_spacing.max(MIN_NODE_SPACING_FLOOR) * 0.35);
     for (idx, edge) in graph.edges.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         let Some(points) = routed_points.get_mut(idx) else {
             continue;
         };
@@ -353,10 +360,12 @@ fn collect_other_flowchart_segments(
 ) -> Vec<Segment> {
     let mut segments = Vec::new();
     for (idx, points) in routed_points.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         if idx == excluded_idx {
             continue;
         }
         for segment in points.windows(2) {
+            crate::layout::measurements::checkpoint();
             segments.push((segment[0], segment[1]));
         }
     }
@@ -442,6 +451,7 @@ fn repair_flowchart_endpoint_reentries_by_rerouting(
         EdgeSide::Bottom,
     ];
     for idx in 0..routed_points.len() {
+        crate::layout::measurements::checkpoint();
         let Some(edge) = ctx.graph.edges.get(idx) else {
             continue;
         };
@@ -477,7 +487,9 @@ fn repair_flowchart_endpoint_reentries_by_rerouting(
         let mut best_port = current_port;
 
         for start_side in SIDES {
+            crate::layout::measurements::checkpoint();
             for end_side in SIDES {
+                crate::layout::measurements::checkpoint();
                 let candidate_port = EdgePortInfo {
                     start_side,
                     end_side,
@@ -1132,6 +1144,7 @@ fn choose_routed_flowchart_sides(
     let mut best = primary;
     let mut best_score = f32::INFINITY;
     for candidate in candidates {
+        crate::layout::measurements::checkpoint();
         let score = routed_side_candidate_score(
             from_id,
             to_id,
@@ -1367,6 +1380,7 @@ fn collect_port_choice_segments(
 ) -> Vec<Segment> {
     let mut segments = Vec::new();
     for (idx, edge) in graph.edges.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         if idx == excluded_idx || edge.from == edge.to {
             continue;
         }
@@ -1401,6 +1415,7 @@ fn port_collision_count(
         .min(28.0);
     let mut collisions = 0usize;
     for (other_idx, other_edge) in graph.edges.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         if other_idx == edge_idx {
             continue;
         }
@@ -1491,6 +1506,7 @@ fn refine_flowchart_ports_with_route_candidates(
         predicted_lane_assignments.effective_offsets(edge_ports, ctx.graph.kind, ctx.config);
     let mut refined_edges = 0usize;
     for (idx, edge) in ctx.graph.edges.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         if edge.from == edge.to {
             continue;
         }
@@ -1607,6 +1623,7 @@ fn refine_flowchart_ports_with_route_candidates(
         let remote_from = node_center(&from);
 
         for (start_side, end_side, _) in side_candidates {
+            crate::layout::measurements::checkpoint();
             let start_current = if start_side == current.start_side {
                 current.start_offset
             } else {
@@ -1645,7 +1662,9 @@ fn refine_flowchart_ports_with_route_candidates(
                 offset_limit,
             );
             for start_offset in &start_offsets {
+                crate::layout::measurements::checkpoint();
                 for end_offset in &end_offsets {
+                    crate::layout::measurements::checkpoint();
                     let candidate_port = EdgePortInfo {
                         start_side,
                         end_side,
@@ -1791,6 +1810,7 @@ fn occupancy_from_other_routes(
     );
     let mut any = false;
     for (idx, points) in routed_points.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         if idx == excluded_idx || points.len() < 2 {
             continue;
         }
@@ -1817,6 +1837,7 @@ fn combined_occupancy_from_other_routes(
         occupancy.merge_from(history);
     }
     for (idx, points) in routed_points.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         if idx == excluded_idx || points.len() < 2 {
             continue;
         }
@@ -1904,8 +1925,10 @@ fn optimize_flowchart_routes_globally(
     }
 
     for _ in 0..passes {
+        crate::layout::measurements::checkpoint();
         let mut changed = false;
         for &idx in &order {
+            crate::layout::measurements::checkpoint();
             let Some(edge) = graph.edges.get(idx) else {
                 continue;
             };
@@ -2089,8 +2112,10 @@ fn negotiate_flowchart_route_congestion(
     );
 
     for _ in 0..passes {
+        crate::layout::measurements::checkpoint();
         let mut changed = false;
         for &idx in &order {
+            crate::layout::measurements::checkpoint();
             let Some(edge) = graph.edges.get(idx) else {
                 continue;
             };
@@ -2289,6 +2314,7 @@ pub(in crate::layout) fn build_routed_edges(ctx: RoutedEdgeBuildContext<'_>) -> 
     let mut node_forward_branch_counts: HashMap<String, usize> = HashMap::new();
     let mut forward_branch_targets: HashSet<(String, String)> = HashSet::new();
     for edge in &graph.edges {
+        crate::layout::measurements::checkpoint();
         *node_degrees.entry(edge.from.clone()).or_insert(0) += 1;
         *node_degrees.entry(edge.to.clone()).or_insert(0) += 1;
         let is_forward_diamond_branch = effective_edge_endpoint_layouts(
@@ -2326,6 +2352,7 @@ pub(in crate::layout) fn build_routed_edges(ctx: RoutedEdgeBuildContext<'_>) -> 
     let mut port_candidates: HashMap<(String, PortTrack), Vec<PortCandidate>> = HashMap::new();
     let mut side_choice_segments: Vec<Segment> = Vec::with_capacity(graph.edges.len());
     for (idx, edge) in graph.edges.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         let Some((from, to)) = effective_edge_endpoint_layouts(graph, nodes, subgraphs, edge)
         else {
             continue;
@@ -2421,11 +2448,13 @@ pub(in crate::layout) fn build_routed_edges(ctx: RoutedEdgeBuildContext<'_>) -> 
     }
     let mut node_side_counts: HashMap<String, [usize; 4]> = HashMap::new();
     for (idx, edge) in graph.edges.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         let (start_side, end_side) = selected_edge_sides[idx];
         bump_side_load(&mut node_side_counts, &edge.from, start_side);
         bump_side_load(&mut node_side_counts, &edge.to, end_side);
     }
     for (idx, edge) in graph.edges.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         let Some((from, to)) = effective_edge_endpoint_layouts(graph, nodes, subgraphs, edge)
         else {
             continue;
@@ -2460,12 +2489,14 @@ pub(in crate::layout) fn build_routed_edges(ctx: RoutedEdgeBuildContext<'_>) -> 
     }
     let routing_cell = routing_cell_size(config);
     for ((node_id, track), candidates) in port_candidates {
+        crate::layout::measurements::checkpoint();
         let Some(node) = nodes.get(&node_id) else {
             continue;
         };
         let mut min_other = f32::MAX;
         let mut max_other = f32::MIN;
         for candidate in &candidates {
+            crate::layout::measurements::checkpoint();
             min_other = min_other.min(candidate.other_pos);
             max_other = max_other.max(candidate.other_pos);
         }
@@ -2544,6 +2575,7 @@ pub(in crate::layout) fn build_routed_edges(ctx: RoutedEdgeBuildContext<'_>) -> 
         let mut assigned = vec![0.0; candidates.len()];
         let mut prev = pad;
         for (order_idx, (cand_idx, pos)) in desired.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             let mut p = *pos;
             if order_idx == 0 {
                 p = p.max(pad);
@@ -2555,6 +2587,7 @@ pub(in crate::layout) fn build_routed_edges(ctx: RoutedEdgeBuildContext<'_>) -> 
         }
         let mut next = pad + usable;
         for (order_idx, (cand_idx, _pos)) in desired.iter().enumerate().rev() {
+            crate::layout::measurements::checkpoint();
             let mut p = assigned[*cand_idx];
             if order_idx + 1 == desired.len() {
                 p = p.min(next);
@@ -2565,6 +2598,7 @@ pub(in crate::layout) fn build_routed_edges(ctx: RoutedEdgeBuildContext<'_>) -> 
             next = p;
         }
         for (rank, &cand_idx) in order.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             let candidate = &candidates[cand_idx];
             let mut offset = assigned[cand_idx] - node_len / 2.0;
             if snap_to_grid {
@@ -2632,6 +2666,7 @@ pub(in crate::layout) fn build_routed_edges(ctx: RoutedEdgeBuildContext<'_>) -> 
         && graph.edges.len() >= 18
         && graph.edges.len() * 2 >= layout_node_count * 3;
     for (idx, edge) in graph.edges.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         let Some((from, to)) = effective_edge_endpoint_layouts(graph, nodes, subgraphs, edge)
         else {
             continue;
@@ -2748,6 +2783,7 @@ pub(in crate::layout) fn build_routed_edges(ctx: RoutedEdgeBuildContext<'_>) -> 
     let mut existing_segments: Vec<Segment> = Vec::new();
     let mut label_anchors: Vec<Option<(f32, f32)>> = vec![None; graph.edges.len()];
     for (_, _, _, idx) in &route_order {
+        crate::layout::measurements::checkpoint();
         let edge = &graph.edges[*idx];
         let key = edge_pair_key(edge);
         let total = *pair_counts.get(&key).unwrap_or(&1) as f32;
@@ -2933,6 +2969,7 @@ pub(in crate::layout) fn build_routed_edges(ctx: RoutedEdgeBuildContext<'_>) -> 
         }
         if points.len() >= 2 {
             for segment in points.windows(2) {
+                crate::layout::measurements::checkpoint();
                 existing_segments.push((segment[0], segment[1]));
             }
         }
@@ -2994,6 +3031,7 @@ pub(in crate::layout) fn build_routed_edges(ctx: RoutedEdgeBuildContext<'_>) -> 
 
     if route_labels_via {
         for idx in 0..routed_points.len() {
+            crate::layout::measurements::checkpoint();
             let mut sync_ctx = route_labels::RouteLabelSyncContext {
                 direction: graph.direction,
                 kind: graph.kind,
@@ -3109,6 +3147,24 @@ pub(in crate::layout) fn build_routed_edges(ctx: RoutedEdgeBuildContext<'_>) -> 
             &mut edge_ports,
             &mut routed_points,
         );
+    }
+    if graph.kind == DiagramKind::Flowchart {
+        // Endpoint repairs can introduce detours. Simplify once more after those
+        // repairs, with the same hard geometry checks and no later route mutation.
+        let before_shortcuts = routed_points.clone();
+        path_cleanup::simplify_flowchart_detour_rectangles(
+            graph,
+            nodes,
+            subgraphs,
+            &mut routed_points,
+        );
+        for (idx, previous) in before_shortcuts.iter().enumerate() {
+            if *previous != routed_points[idx] {
+                // A preferred center belongs to the old route. Let the final
+                // label placer derive a new anchor from the shortened path.
+                label_anchors[idx] = None;
+            }
+        }
     }
     #[cfg(debug_assertions)]
     if graph.kind == DiagramKind::Flowchart {

@@ -21,7 +21,7 @@ pub(in crate::layout) fn apply_edge_path_cleanup(
     if graph.kind == DiagramKind::Flowchart {
         reduce_orthogonal_path_crossings(graph, nodes, routed_points, config);
         deoverlap_flowchart_paths(graph, nodes, routed_points, config);
-        simplify_flowchart_detour_rectangles(graph, nodes, routed_points);
+        simplify_flowchart_detour_rectangles(graph, nodes, subgraphs, routed_points);
         simplify_flowchart_axis_oscillations(routed_points);
         detour_flowchart_paths_around_non_endpoint_nodes(graph, nodes, routed_points, config);
         detour_flowchart_paths_around_foreign_subgraphs(
@@ -64,6 +64,7 @@ pub(in crate::layout) fn build_edge_layouts(
 ) -> Vec<EdgeLayout> {
     let mut edges = Vec::with_capacity(graph.edges.len());
     for (idx, edge) in graph.edges.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         let label = edge_route_labels[idx].clone();
         let start_label = edge_start_labels[idx].clone();
         let end_label = edge_end_labels[idx].clone();
@@ -166,6 +167,7 @@ fn segment_intersects_rect(a: (f32, f32), b: (f32, f32), rect: (f32, f32, f32, f
     let mut u1 = 0.0f32;
     let mut u2 = 1.0f32;
     for (pi, qi) in p.into_iter().zip(q) {
+        crate::layout::measurements::checkpoint();
         if pi.abs() <= f32::EPSILON {
             if qi < 0.0 {
                 return false;

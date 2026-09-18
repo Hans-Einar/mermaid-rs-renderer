@@ -32,6 +32,7 @@ pub(in crate::layout) fn finalize_graph_layout(
         let note_pad_y = theme.font_size * STATE_NOTE_PAD_Y_SCALE;
         let note_gap = (theme.font_size * STATE_NOTE_GAP_SCALE).max(STATE_NOTE_GAP_MIN);
         for note in &graph.state_notes {
+            crate::layout::measurements::checkpoint();
             // Composite state targets keep only a hidden anchor node inside
             // their subgraph, so anchor the note to the subgraph bounds.
             let Some((tx, ty, tw, th)) =
@@ -74,6 +75,7 @@ pub(in crate::layout) fn finalize_graph_layout(
     }
     let (mut max_x, mut max_y) = bounds_with_edges(&nodes, &subgraphs, &edges);
     for note in &state_notes {
+        crate::layout::measurements::checkpoint();
         max_x = max_x.max(note.x + note.width);
         max_y = max_y.max(note.y + note.height);
     }
@@ -121,13 +123,16 @@ fn clear_state_note_x(
 
     // Repeating the stable traversal handles a move that exposes a later obstacle.
     loop {
+        crate::layout::measurements::checkpoint();
         let before = x;
         for (id, node) in nodes {
+            crate::layout::measurements::checkpoint();
             if id != target && !node.hidden {
                 x = clear_rect(x, node.x, node.y, node.width, node.height);
             }
         }
         for subgraph in subgraphs {
+            crate::layout::measurements::checkpoint();
             let is_target = target_subgraph
                 .is_some_and(|sub| subgraph.label == sub.label && subgraph.nodes == sub.nodes);
             if !is_target {
@@ -135,9 +140,11 @@ fn clear_state_note_x(
             }
         }
         for note in notes {
+            crate::layout::measurements::checkpoint();
             x = clear_rect(x, note.x, note.y, note.width, note.height);
         }
         for edge in edges {
+            crate::layout::measurements::checkpoint();
             for (label, anchor) in [
                 (&edge.label, edge.label_anchor),
                 (&edge.start_label, edge.start_label_anchor),
@@ -154,6 +161,7 @@ fn clear_state_note_x(
                 }
             }
             for segment in edge.points.windows(2) {
+                crate::layout::measurements::checkpoint();
                 let stroke_width = edge
                     .override_style
                     .stroke_width

@@ -1,0 +1,218 @@
+{
+  "upstream": "3726ccbffe0e8032361eb9668694b24f77858060",
+  "after": "3fb81308a032d128aef4b54cdc7506bd4bd6342f",
+  "theme": "modern",
+  "layout_config": "default",
+  "metrics": {
+    "traceability": {
+      "before": {
+        "edge_count": 17,
+        "bad_source_exits": 0,
+        "bad_target_entries": 0,
+        "endpoint_node_intrusions": 0,
+        "endpoint_node_reentries": 0,
+        "non_endpoint_node_hits": 0,
+        "crossings": 14,
+        "bends": 76,
+        "path_length": 8506.342,
+        "center_manhattan": 6043.966,
+        "path_to_center_manhattan_ratio": 1.4074106,
+        "quality_score": 1964.2964
+      },
+      "after": {
+        "edge_count": 17,
+        "bad_source_exits": 0,
+        "bad_target_entries": 0,
+        "endpoint_node_intrusions": 0,
+        "endpoint_node_reentries": 0,
+        "non_endpoint_node_hits": 0,
+        "crossings": 6,
+        "bends": 36,
+        "path_length": 5119.454,
+        "center_manhattan": 6043.965,
+        "path_to_center_manhattan_ratio": 0.8470357,
+        "quality_score": 861.8814
+      }
+    },
+    "service-map": {
+      "before": {
+        "edge_count": 9,
+        "bad_source_exits": 0,
+        "bad_target_entries": 0,
+        "endpoint_node_intrusions": 0,
+        "endpoint_node_reentries": 0,
+        "non_endpoint_node_hits": 0,
+        "crossings": 6,
+        "bends": 24,
+        "path_length": 2470.8538,
+        "center_manhattan": 3707.7446,
+        "path_to_center_manhattan_ratio": 0.6664034,
+        "quality_score": 818.6561
+      },
+      "after": {
+        "edge_count": 9,
+        "bad_source_exits": 0,
+        "bad_target_entries": 0,
+        "endpoint_node_intrusions": 0,
+        "endpoint_node_reentries": 0,
+        "non_endpoint_node_hits": 0,
+        "crossings": 0,
+        "bends": 12,
+        "path_length": 1959.8782,
+        "center_manhattan": 3707.7446,
+        "path_to_center_manhattan_ratio": 0.5285904,
+        "quality_score": 57.143616
+      }
+    },
+    "layer-delivery": {
+      "before": {
+        "edge_count": 10,
+        "bad_source_exits": 0,
+        "bad_target_entries": 0,
+        "endpoint_node_intrusions": 0,
+        "endpoint_node_reentries": 0,
+        "non_endpoint_node_hits": 0,
+        "crossings": 0,
+        "bends": 10,
+        "path_length": 5173.918,
+        "center_manhattan": 6690.055,
+        "path_to_center_manhattan_ratio": 0.7733745,
+        "quality_score": 60.934982
+      },
+      "after": {
+        "edge_count": 10,
+        "bad_source_exits": 0,
+        "bad_target_entries": 0,
+        "endpoint_node_intrusions": 0,
+        "endpoint_node_reentries": 0,
+        "non_endpoint_node_hits": 0,
+        "crossings": 2,
+        "bends": 10,
+        "path_length": 4989.9243,
+        "center_manhattan": 6690.055,
+        "path_to_center_manhattan_ratio": 0.7458719,
+        "quality_score": 299.83487
+      }
+    },
+    "complex": {
+      "before": {
+        "edge_count": 19,
+        "bad_source_exits": 0,
+        "bad_target_entries": 0,
+        "endpoint_node_intrusions": 0,
+        "endpoint_node_reentries": 0,
+        "non_endpoint_node_hits": 0,
+        "crossings": 3,
+        "bends": 59,
+        "path_length": 5982.839,
+        "center_manhattan": 5862.561,
+        "path_to_center_manhattan_ratio": 1.0205163,
+        "quality_score": 577.8207
+      },
+      "after": {
+        "edge_count": 19,
+        "bad_source_exits": 0,
+        "bad_target_entries": 0,
+        "endpoint_node_intrusions": 0,
+        "endpoint_node_reentries": 0,
+        "non_endpoint_node_hits": 0,
+        "crossings": 4,
+        "bends": 45,
+        "path_length": 5213.72,
+        "center_manhattan": 5862.561,
+        "path_to_center_manhattan_ratio": 0.88932467,
+        "quality_score": 650.573
+      }
+    },
+    "cycles": {
+      "before": {
+        "edge_count": 9,
+        "bad_source_exits": 0,
+        "bad_target_entries": 0,
+        "endpoint_node_intrusions": 0,
+        "endpoint_node_reentries": 0,
+        "non_endpoint_node_hits": 0,
+        "crossings": 0,
+        "bends": 5,
+        "path_length": 985.2575,
+        "center_manhattan": 1336.8168,
+        "path_to_center_manhattan_ratio": 0.73701763,
+        "quality_score": 44.480705
+      },
+      "after": {
+        "edge_count": 9,
+        "bad_source_exits": 0,
+        "bad_target_entries": 0,
+        "endpoint_node_intrusions": 0,
+        "endpoint_node_reentries": 0,
+        "non_endpoint_node_hits": 0,
+        "crossings": 0,
+        "bends": 6,
+        "path_length": 961.3607,
+        "center_manhattan": 1336.8168,
+        "path_to_center_manhattan_ratio": 0.7191417,
+        "quality_score": 46.76567
+      }
+    },
+    "subgraph_direction": {
+      "before": {
+        "edge_count": 4,
+        "bad_source_exits": 0,
+        "bad_target_entries": 0,
+        "endpoint_node_intrusions": 0,
+        "endpoint_node_reentries": 0,
+        "non_endpoint_node_hits": 0,
+        "crossings": 0,
+        "bends": 2,
+        "path_length": 474.57104,
+        "center_manhattan": 986.08966,
+        "path_to_center_manhattan_ratio": 0.4812656,
+        "quality_score": 25.250624
+      },
+      "after": {
+        "edge_count": 4,
+        "bad_source_exits": 0,
+        "bad_target_entries": 0,
+        "endpoint_node_intrusions": 0,
+        "endpoint_node_reentries": 0,
+        "non_endpoint_node_hits": 0,
+        "crossings": 0,
+        "bends": 2,
+        "path_length": 474.57104,
+        "center_manhattan": 986.08966,
+        "path_to_center_manhattan_ratio": 0.4812656,
+        "quality_score": 25.250624
+      }
+    },
+    "ports_arrow_pathing_regression": {
+      "before": {
+        "edge_count": 10,
+        "bad_source_exits": 0,
+        "bad_target_entries": 0,
+        "endpoint_node_intrusions": 0,
+        "endpoint_node_reentries": 0,
+        "non_endpoint_node_hits": 0,
+        "crossings": 1,
+        "bends": 28,
+        "path_length": 4120.5176,
+        "center_manhattan": 4185.055,
+        "path_to_center_manhattan_ratio": 0.984579,
+        "quality_score": 243.38316
+      },
+      "after": {
+        "edge_count": 10,
+        "bad_source_exits": 0,
+        "bad_target_entries": 0,
+        "endpoint_node_intrusions": 0,
+        "endpoint_node_reentries": 0,
+        "non_endpoint_node_hits": 0,
+        "crossings": 6,
+        "bends": 23,
+        "path_length": 3510.329,
+        "center_manhattan": 4185.055,
+        "path_to_center_manhattan_ratio": 0.83877724,
+        "quality_score": 822.5511
+      }
+    }
+  }
+}

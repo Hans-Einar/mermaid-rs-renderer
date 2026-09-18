@@ -62,6 +62,7 @@ impl SequenceGeometry {
 }
 
 fn measure_sequence_text(text: &str, theme: &Theme, config: &LayoutConfig) -> TextBlock {
+    super::measurements::checkpoint();
     let mut sequence_config = config.clone();
     sequence_config.max_label_width_chars = sequence_config.max_label_width_chars.min(14);
     measure_label_with_font_size(
@@ -180,13 +181,13 @@ pub(super) fn compute_sequence_layout(
         let node = graph.nodes.get(id).expect("participant missing");
         let label = measure_sequence_text(&node.label, theme, config);
         max_label_height = max_label_height.max(label.height);
-        let width = geometry.actor_min_width;
+        let width = geometry.actor_min_width.max(label.width + 24.0);
         participant_widths.insert(id.clone(), width);
         label_blocks.insert(id.clone(), label);
     }
 
     let actor_height =
-        (max_label_height + geometry.actor_pad_y * 2.0).max(geometry.actor_min_height);
+        (max_label_height + geometry.actor_pad_y * 2.0 + 48.0).max(geometry.actor_min_height);
     let lane_centers = compute_sequence_lane_centers(
         &participants,
         &participant_widths,
@@ -250,11 +251,22 @@ pub(super) fn compute_sequence_layout(
     let frame_end_pad = base_spacing * 0.25;
     for frame in &graph.sequence_frames {
         if frame.start_idx < extra_before.len() {
-            extra_before[frame.start_idx] += base_spacing;
+            let header_height = frame
+                .sections
+                .first()
+                .and_then(|s| s.label.as_ref())
+                .map(|s| measure_sequence_text(&format!("[{s}]"), theme, config).height)
+                .unwrap_or(theme.font_size);
+            extra_before[frame.start_idx] += base_spacing + header_height;
         }
         for section in frame.sections.iter().skip(1) {
             if section.start_idx < extra_before.len() {
-                extra_before[section.start_idx] += base_spacing;
+                let header_height = section
+                    .label
+                    .as_ref()
+                    .map(|s| measure_sequence_text(&format!("[{s}]"), theme, config).height)
+                    .unwrap_or(theme.font_size);
+                extra_before[section.start_idx] += base_spacing + header_height;
             }
         }
         if frame.end_idx < extra_before.len() {
@@ -273,6 +285,9 @@ pub(super) fn compute_sequence_layout(
     let mut sequence_notes = Vec::new();
     for idx in 0..=graph.edges.len() {
         if let Some(bucket) = notes_by_index.get(idx) {
+            if !bucket.is_empty() && graph.sequence_frames.iter().any(|f| f.end_idx == idx) {
+                message_cursor += frame_end_pad;
+            }
             for note in bucket {
                 message_cursor += geometry.note_gap_y;
                 let label = measure_sequence_text(&note.label, theme, config);
@@ -436,12 +451,25 @@ pub(super) fn compute_sequence_layout(
             let mut min_y = first_y;
             let mut max_y = last_y;
             for note in &sequence_notes {
-                if note.index >= frame.start_idx && note.index <= frame.end_idx {
+                if note.index >= frame.start_idx && note.index < frame.end_idx {
                     min_y = min_y.min(note.y);
                     max_y = max_y.max(note.y + note.height);
                 }
             }
-            let top_offset = (base_spacing * 1.8).max(theme.font_size * 3.9);
+            let first_message_height = graph
+                .edges
+                .get(frame.start_idx)
+                .and_then(|e| e.label.as_ref())
+                .map(|s| measure_sequence_text(s, theme, config).height)
+                .unwrap_or(0.0);
+            let first_header_height = frame
+                .sections
+                .first()
+                .and_then(|s| s.label.as_ref())
+                .map(|s| measure_sequence_text(&format!("[{s}]"), theme, config).height)
+                .unwrap_or(0.0);
+            let top_offset = (base_spacing * 1.8)
+                .max(first_message_height + first_header_height + theme.font_size * 2.0);
             let bottom_offset = (theme.font_size * 0.85).max(12.0);
             let frame_y = min_y - top_offset;
             let frame_height = (max_y - min_y).max(0.0) + top_offset + bottom_offset;
@@ -485,13 +513,14 @@ pub(super) fn compute_sequence_layout(
                     let display = format!("[{}]", label);
                     let block = measure_sequence_text(&display, theme, config);
                     let label_y = if section_idx == 0 {
-                        frame_y + label_box_h - theme.font_size * 0.15
+                        frame_y + block.height / 2.0 + theme.font_size * 0.5
                     } else {
                         dividers
                             .get(section_idx - 1)
                             .copied()
                             .unwrap_or(frame_y + label_offset)
-                            + theme.font_size * 0.9
+                            + block.height / 2.0
+                            + theme.font_size * 0.5
                     };
                     let side_pad = theme.font_size * 0.45;
                     let frame_center_x = frame_x + frame_width / 2.0;

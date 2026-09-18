@@ -176,6 +176,7 @@ pub(super) fn ray_polygon_intersection(
         return None;
     }
     for i in 0..poly.len() {
+        crate::layout::measurements::checkpoint();
         let (x1, y1) = poly[i];
         let (x2, y2) = poly[(i + 1) % poly.len()];
         let sx = x2 - x1;
@@ -247,6 +248,7 @@ pub(super) fn point_in_polygon_strict(point: (f32, f32), polygon: &[(f32, f32)])
     let (px, py) = point;
     let mut prev = polygon[polygon.len() - 1];
     for &curr in polygon {
+        crate::layout::measurements::checkpoint();
         if (curr.1 > py) != (prev.1 > py) {
             let denom = prev.1 - curr.1;
             if denom.abs() > GEOM_EPS {
@@ -306,6 +308,7 @@ pub(super) fn path_point_at_progress(points: &[(f32, f32)], progress: f32) -> Op
     }
     let mut remain = total * progress.clamp(0.0, 1.0);
     for segment in points.windows(2) {
+        crate::layout::measurements::checkpoint();
         let a = segment[0];
         let b = segment[1];
         let dx = b.0 - a.0;
@@ -329,6 +332,7 @@ pub(super) fn path_bend_count(points: &[(f32, f32)]) -> usize {
     }
     let mut bends = 0usize;
     for idx in 1..points.len() - 1 {
+        crate::layout::measurements::checkpoint();
         let p0 = points[idx - 1];
         let p1 = points[idx];
         let p2 = points[idx + 1];

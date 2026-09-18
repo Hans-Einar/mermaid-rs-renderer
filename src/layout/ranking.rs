@@ -23,6 +23,7 @@ pub(super) fn rank_edges_for_manual_layout(
 
     let mut covered: HashSet<&str> = HashSet::new();
     for edge in &primary {
+        crate::layout::measurements::checkpoint();
         covered.insert(edge.from.as_str());
         covered.insert(edge.to.as_str());
     }
@@ -47,6 +48,7 @@ pub(super) fn order_rank_nodes(
     let mut outgoing: HashMap<String, Vec<String>> = HashMap::new();
 
     for edge in edges {
+        crate::layout::measurements::checkpoint();
         outgoing
             .entry(edge.from.clone())
             .or_default()
@@ -62,7 +64,9 @@ pub(super) fn order_rank_nodes(
                             positions: &mut HashMap<String, usize>| {
         positions.clear();
         for bucket in rank_nodes.iter() {
+            crate::layout::measurements::checkpoint();
             for (idx, node_id) in bucket.iter().enumerate() {
+                crate::layout::measurements::checkpoint();
                 positions.insert(node_id.clone(), idx);
             }
         }
@@ -101,7 +105,9 @@ pub(super) fn order_rank_nodes(
 
     let passes = passes.max(1);
     for _ in 0..passes {
+        crate::layout::measurements::checkpoint();
         for rank in 1..rank_nodes.len() {
+            crate::layout::measurements::checkpoint();
             if rank_nodes[rank].len() <= 1 {
                 continue;
             }
@@ -110,6 +116,7 @@ pub(super) fn order_rank_nodes(
             update_positions(rank_nodes, &mut positions);
         }
         for rank in (0..rank_nodes.len().saturating_sub(1)).rev() {
+            crate::layout::measurements::checkpoint();
             if rank_nodes[rank].len() <= 1 {
                 continue;
             }
@@ -134,6 +141,7 @@ pub(super) fn order_rank_nodes_dagre_style(
     let mut incoming: HashMap<String, Vec<String>> = HashMap::new();
     let mut outgoing: HashMap<String, Vec<String>> = HashMap::new();
     for edge in edges {
+        crate::layout::measurements::checkpoint();
         outgoing
             .entry(edge.from.clone())
             .or_default()
@@ -151,7 +159,9 @@ pub(super) fn order_rank_nodes_dagre_style(
     let update_positions = |layers: &[Vec<String>], positions: &mut HashMap<String, usize>| {
         positions.clear();
         for bucket in layers {
+            crate::layout::measurements::checkpoint();
             for (index, id) in bucket.iter().enumerate() {
+                crate::layout::measurements::checkpoint();
                 positions.insert(id.clone(), index);
             }
         }
@@ -161,6 +171,7 @@ pub(super) fn order_rank_nodes_dagre_style(
     let sweep_count = passes.max(4) * 2;
     let mut since_improvement = 0usize;
     for sweep in 0..sweep_count {
+        crate::layout::measurements::checkpoint();
         let downward = sweep % 2 == 0;
         let bias_right = sweep % 4 >= 2;
         let neighbors = if downward { &incoming } else { &outgoing };
@@ -170,6 +181,7 @@ pub(super) fn order_rank_nodes_dagre_style(
             (0..work.len().saturating_sub(1)).rev().collect()
         };
         for rank in ranks {
+            crate::layout::measurements::checkpoint();
             if work[rank].len() <= 1 {
                 continue;
             }
@@ -229,12 +241,15 @@ pub(super) fn adjacent_rank_crossing_count(
 ) -> usize {
     let mut positions: HashMap<&str, (usize, usize)> = HashMap::new();
     for (rank, bucket) in rank_nodes.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         for (order, id) in bucket.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             positions.insert(id.as_str(), (rank, order));
         }
     }
     let mut by_gap: HashMap<usize, Vec<(&str, &str, usize, usize)>> = HashMap::new();
     for edge in edges {
+        crate::layout::measurements::checkpoint();
         let Some(&(from_rank, from_order)) = positions.get(edge.from.as_str()) else {
             continue;
         };
@@ -253,8 +268,11 @@ pub(super) fn adjacent_rank_crossing_count(
     }
     let mut crossings = 0usize;
     for edges in by_gap.values() {
+        crate::layout::measurements::checkpoint();
         for i in 0..edges.len() {
+            crate::layout::measurements::checkpoint();
             for j in (i + 1)..edges.len() {
+                crate::layout::measurements::checkpoint();
                 let (a_from, a_to, a0, a1) = edges[i];
                 let (b_from, b_to, b0, b1) = edges[j];
                 if a_from == b_from || a_to == b_to {
@@ -295,7 +313,9 @@ fn pair_crossings(
     let mut crossings_ab = 0usize;
     let mut crossings_ba = 0usize;
     for pa in &a_pos {
+        crate::layout::measurements::checkpoint();
         for pb in &b_pos {
+            crate::layout::measurements::checkpoint();
             if pa > pb {
                 crossings_ab += 1;
             } else if pb > pa {
@@ -317,8 +337,10 @@ fn transpose_bucket(
     }
     let mut improved = true;
     while improved {
+        crate::layout::measurements::checkpoint();
         improved = false;
         for i in 0..bucket.len().saturating_sub(1) {
+            crate::layout::measurements::checkpoint();
             let a = bucket[i].as_str();
             let b = bucket[i + 1].as_str();
             let (crossings_ab, crossings_ba) = pair_crossings(a, b, neighbors, positions);
@@ -349,6 +371,7 @@ pub(super) fn median_position(
     };
     let mut values = Vec::new();
     for neighbor in list {
+        crate::layout::measurements::checkpoint();
         if let Some(pos) = positions.get(neighbor) {
             values.push(*pos as f32);
         }
@@ -379,6 +402,7 @@ pub(super) fn compute_ranks_subset(
 
     let mut fallback_order: HashMap<&str, usize> = HashMap::new();
     for (idx, id) in node_ids.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         fallback_order.insert(id.as_str(), idx);
     }
     let order_key = |id: &str| -> usize {
@@ -391,7 +415,9 @@ pub(super) fn compute_ranks_subset(
     let components = strongly_connected_components(node_ids, &subset_edges);
     let mut node_to_component: HashMap<String, usize> = HashMap::new();
     for (comp_idx, component) in components.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         for node_id in component {
+            crate::layout::measurements::checkpoint();
             node_to_component.insert(node_id.clone(), comp_idx);
         }
     }
@@ -399,6 +425,7 @@ pub(super) fn compute_ranks_subset(
     let mut comp_adj: HashMap<usize, Vec<usize>> = HashMap::new();
     let mut comp_rev: HashMap<usize, Vec<usize>> = HashMap::new();
     for edge in &subset_edges {
+        crate::layout::measurements::checkpoint();
         let Some(&from_comp) = node_to_component.get(&edge.from) else {
             continue;
         };
@@ -412,10 +439,12 @@ pub(super) fn compute_ranks_subset(
         comp_rev.entry(to_comp).or_default().push(from_comp);
     }
     for nexts in comp_adj.values_mut() {
+        crate::layout::measurements::checkpoint();
         nexts.sort_unstable();
         nexts.dedup();
     }
     for prevs in comp_rev.values_mut() {
+        crate::layout::measurements::checkpoint();
         prevs.sort_unstable();
         prevs.dedup();
     }
@@ -436,10 +465,12 @@ pub(super) fn compute_ranks_subset(
     let mut local_ranks_by_component: Vec<HashMap<String, usize>> =
         vec![HashMap::new(); components.len()];
     for (comp_idx, component) in components.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         let internal_order = stable_component_node_order(component, &subset_edges, &order_key);
         let component_set: HashSet<&str> = component.iter().map(String::as_str).collect();
         let mut internal_adj: HashMap<String, Vec<String>> = HashMap::new();
         for edge in &subset_edges {
+            crate::layout::measurements::checkpoint();
             if component_set.contains(edge.from.as_str())
                 && component_set.contains(edge.to.as_str())
             {
@@ -455,6 +486,7 @@ pub(super) fn compute_ranks_subset(
 
     let mut weighted_comp_edges: HashMap<usize, Vec<(usize, isize)>> = HashMap::new();
     for edge in &subset_edges {
+        crate::layout::measurements::checkpoint();
         let Some(&from_comp) = node_to_component.get(&edge.from) else {
             continue;
         };
@@ -480,9 +512,11 @@ pub(super) fn compute_ranks_subset(
 
     let mut component_start = vec![0isize; components.len()];
     for comp_idx in &component_order {
+        crate::layout::measurements::checkpoint();
         let start = component_start[*comp_idx];
         if let Some(nexts) = weighted_comp_edges.get(comp_idx) {
             for (next, weight) in nexts {
+                crate::layout::measurements::checkpoint();
                 component_start[*next] = component_start[*next].max(start + *weight);
             }
         }
@@ -490,8 +524,10 @@ pub(super) fn compute_ranks_subset(
 
     let mut ranks: HashMap<String, usize> = HashMap::new();
     for (comp_idx, component) in components.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         let base_rank = component_start[comp_idx].max(0) as usize;
         for node_id in component {
+            crate::layout::measurements::checkpoint();
             let local_rank = local_ranks_by_component[comp_idx]
                 .get(node_id)
                 .copied()
@@ -523,6 +559,7 @@ pub(super) fn compute_ranks_dagre_style(
 
     let mut fallback_order = HashMap::new();
     for (index, id) in node_ids.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         fallback_order.insert(id.as_str(), index);
     }
     let order_key = |id: &str| {
@@ -538,12 +575,14 @@ pub(super) fn compute_ranks_dagre_style(
     let mut left = Vec::with_capacity(node_ids.len());
     let mut right = Vec::new();
     while !active.is_empty() {
+        crate::layout::measurements::checkpoint();
         let mut degrees = active
             .iter()
             .map(|id| {
                 let mut incoming = 0usize;
                 let mut outgoing = 0usize;
                 for edge in &subset_edges {
+                    crate::layout::measurements::checkpoint();
                     if edge.from == **id && edge.to != **id && active.contains(edge.to.as_str()) {
                         outgoing += 1;
                     }
@@ -591,6 +630,7 @@ pub(super) fn compute_ranks_dagre_style(
     let mut feedback_edges = Vec::new();
     let mut oriented_weights: HashMap<(String, String), usize> = HashMap::new();
     for edge in subset_edges {
+        crate::layout::measurements::checkpoint();
         if edge.from == edge.to {
             feedback_edges.push((edge.from.clone(), edge.to.clone()));
             continue;
@@ -611,6 +651,7 @@ pub(super) fn compute_ranks_dagre_style(
     let mut incoming: HashMap<String, Vec<(String, usize)>> = HashMap::new();
     let mut outgoing: HashMap<String, Vec<(String, usize)>> = HashMap::new();
     for ((from, to), weight) in &oriented_weights {
+        crate::layout::measurements::checkpoint();
         outgoing
             .entry(from.clone())
             .or_default()
@@ -623,6 +664,7 @@ pub(super) fn compute_ranks_dagre_style(
 
     let mut ranks = HashMap::new();
     for node in &left {
+        crate::layout::measurements::checkpoint();
         let rank = incoming
             .get(node)
             .into_iter()
@@ -638,12 +680,14 @@ pub(super) fn compute_ranks_dagre_style(
     // predecessor/successor constraints, so the rank assignment remains valid.
     let max_rank = ranks.values().copied().max().unwrap_or(0);
     for pass in 0..8 {
+        crate::layout::measurements::checkpoint();
         let traversal: Box<dyn Iterator<Item = &String>> = if pass % 2 == 0 {
             Box::new(left.iter().rev())
         } else {
             Box::new(left.iter())
         };
         for node in traversal {
+            crate::layout::measurements::checkpoint();
             let lower = incoming
                 .get(node)
                 .into_iter()
@@ -666,6 +710,7 @@ pub(super) fn compute_ranks_dagre_style(
             let mut targets = Vec::new();
             if let Some(preds) = incoming.get(node) {
                 for (pred, weight) in preds {
+                    crate::layout::measurements::checkpoint();
                     if let Some(rank) = ranks.get(pred) {
                         targets.extend(std::iter::repeat_n(rank + 1, *weight));
                     }
@@ -673,6 +718,7 @@ pub(super) fn compute_ranks_dagre_style(
             }
             if let Some(succs) = outgoing.get(node) {
                 for (succ, weight) in succs {
+                    crate::layout::measurements::checkpoint();
                     if let Some(rank) = ranks.get(succ) {
                         targets.extend(std::iter::repeat_n(rank.saturating_sub(1), *weight));
                     }
@@ -690,6 +736,7 @@ pub(super) fn compute_ranks_dagre_style(
     let min_rank = ranks.values().copied().min().unwrap_or(0);
     if min_rank > 0 {
         for rank in ranks.values_mut() {
+            crate::layout::measurements::checkpoint();
             *rank -= min_rank;
         }
     }
@@ -708,11 +755,13 @@ fn layered_ranks_from_order(
 
     let mut ranks: HashMap<String, usize> = HashMap::new();
     for node in order {
+        crate::layout::measurements::checkpoint();
         let rank = *ranks.get(node).unwrap_or(&0);
         ranks.entry(node.clone()).or_insert(rank);
         if let Some(nexts) = adj.get(node) {
             let from_idx = *order_index.get(node.as_str()).unwrap_or(&0);
             for next in nexts {
+                crate::layout::measurements::checkpoint();
                 let to_idx = *order_index.get(next.as_str()).unwrap_or(&from_idx);
                 if to_idx <= from_idx {
                     continue;
@@ -737,6 +786,7 @@ where
     let mut adj: HashMap<String, Vec<String>> = HashMap::new();
     let mut rev: HashMap<String, Vec<String>> = HashMap::new();
     for edge in edges {
+        crate::layout::measurements::checkpoint();
         if component_set.contains(edge.from.as_str()) && component_set.contains(edge.to.as_str()) {
             adj.entry(edge.from.clone())
                 .or_default()
@@ -762,12 +812,14 @@ where
 {
     let mut indeg: HashMap<T, usize> = HashMap::new();
     for item in items {
+        crate::layout::measurements::checkpoint();
         let count = rev.get(item).map(|v| v.len()).unwrap_or(0);
         indeg.insert(item.clone(), count);
     }
 
     let mut ready: BinaryHeap<Reverse<(usize, T)>> = BinaryHeap::new();
     for item in items {
+        crate::layout::measurements::checkpoint();
         if *indeg.get(item).unwrap_or(&0) == 0 {
             ready.push(Reverse((order_key(item), item.clone())));
         }
@@ -777,7 +829,9 @@ where
     let mut ordered = Vec::with_capacity(items.len());
     let mut processed: HashSet<T> = HashSet::new();
     loop {
+        crate::layout::measurements::checkpoint();
         while let Some(Reverse((_key, item))) = ready.pop() {
+            crate::layout::measurements::checkpoint();
             if processed.contains(&item) {
                 continue;
             }
@@ -785,6 +839,7 @@ where
             processed.insert(item.clone());
             if let Some(nexts) = adj.get(&item) {
                 for next in nexts {
+                    crate::layout::measurements::checkpoint();
                     if processed.contains(next) {
                         continue;
                     }
@@ -804,6 +859,7 @@ where
 
         let mut best: Option<(usize, T)> = None;
         for item in &item_set {
+            crate::layout::measurements::checkpoint();
             if !processed.contains(item) {
                 let key = order_key(item);
                 if best.as_ref().is_none_or(|(best_key, _)| key < *best_key) {
@@ -828,6 +884,7 @@ fn strongly_connected_components(
     let mut adj: HashMap<String, Vec<String>> = HashMap::new();
     let mut rev: HashMap<String, Vec<String>> = HashMap::new();
     for edge in edges {
+        crate::layout::measurements::checkpoint();
         adj.entry(edge.from.clone())
             .or_default()
             .push(edge.to.clone());
@@ -839,21 +896,25 @@ fn strongly_connected_components(
     let mut visited: HashSet<String> = HashSet::new();
     let mut finish_order = Vec::with_capacity(node_ids.len());
     for node_id in node_ids {
+        crate::layout::measurements::checkpoint();
         dfs_finish_order(node_id, &adj, &mut visited, &mut finish_order);
     }
 
     let mut assigned: HashSet<String> = HashSet::new();
     let mut components = Vec::new();
     while let Some(node_id) = finish_order.pop() {
+        crate::layout::measurements::checkpoint();
         if !assigned.insert(node_id.clone()) {
             continue;
         }
         let mut component = Vec::new();
         let mut stack = vec![node_id];
         while let Some(current) = stack.pop() {
+            crate::layout::measurements::checkpoint();
             component.push(current.clone());
             if let Some(prevs) = rev.get(&current) {
                 for prev in prevs {
+                    crate::layout::measurements::checkpoint();
                     if assigned.insert(prev.clone()) {
                         stack.push(prev.clone());
                     }
@@ -877,6 +938,7 @@ fn dfs_finish_order(
     }
     if let Some(nexts) = adj.get(node_id) {
         for next in nexts {
+            crate::layout::measurements::checkpoint();
             dfs_finish_order(next, adj, visited, finish_order);
         }
     }
