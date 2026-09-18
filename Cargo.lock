@@ -494,6 +494,7 @@ dependencies = [
  "once_cell",
  "regex",
  "resvg",
+ "roxmltree 0.20.0",
  "serde",
  "serde_json",
  "thiserror",

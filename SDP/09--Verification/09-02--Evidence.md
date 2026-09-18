@@ -87,3 +87,18 @@ command `cargo test --locked --no-default-features --test boxui` passed 3 tests
 covering the shared source/model fixture, duplicate keys/IDs, forbidden/null
 fields, incompatible bindings, unsupported versions, trailing bytes and UTF-8.
 This is parser evidence, not native-host interaction evidence.
+
+R2: typed prepare decoding, snapshot/identity checks, borrowed measured layout,
+two-pass wrapping, SVG/control geometry, static/native-overlay variants and
+inert child composition implemented. The same BoxUI test command now passes
+8 tests. `cargo run --locked --no-default-features --example boxui_demo`
+produces a complete frame with an actual Mermaid state diagram. `rsvg-convert`
+successfully rasterized both SVG variants; the static image was visually
+inspected. The inherited state-diagram renderer places two transition labels
+close together; this is not evidence of polished child-diagram layout.
+
+The XML composition boundary uses explicit `roxmltree 0.20` (already present
+transitively in the lockfile). It rejects DTDs and non-profile elements/attributes,
+rewrites local ID references and isolates child failures. No raw child XML is
+copied unchecked. Inline CSS is a restricted property/value subset; style blocks,
+links, images, filters, animation and foreignObject are unsupported.

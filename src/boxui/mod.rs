@@ -1,15 +1,30 @@
 //! BoxUI 0.1: a bounded UI description, independent of Mermaid's graph AST.
 //! Host integration is described in `SDP/06--Container-Design/06-02--XFMD-Host-Contract.md`.
+mod embedded;
+mod frame;
+mod layout;
 mod model;
 mod parse;
+mod svg;
 mod validate;
+pub use frame::*;
+pub use layout::{
+    BoxUiLayout, LayoutItem, MonospaceMetrics, TextExtent, TextMetrics, layout_boxui,
+};
 pub use model::*;
 pub use parse::{parse_boxui, parse_boxui_bytes};
+pub use svg::{prepare_boxui, prepare_boxui_cancellable};
 pub use validate::validate_boxui;
 
 pub const CONTRACT: &str = "BX-HOST/0.1-draft1";
 pub const MAX_SOURCE_BYTES: usize = 256 * 1024;
 pub const MAX_FRAME_BYTES: usize = 8 * 1024 * 1024;
+/// Host capability identifiers frozen by BX-HOST/0.1-draft1.
+pub const CHILD_PROFILES: [(&str, &str); 3] = [
+    ("flowchart", "XFMD Flowchart 1"),
+    ("sequenceDiagram", "XFMD Sequence 2"),
+    ("stateDiagram-v2", "XFMD State 1"),
+];
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
