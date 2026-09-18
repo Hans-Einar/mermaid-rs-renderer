@@ -382,6 +382,35 @@ mmdr -i diagram.mmd -o out.svg --preferredAspectRatio 16:9
 
 ## Library Usage
 
+### BoxUI 0.1 (fork extension)
+
+This fork also provides `mermaid_rs_renderer::boxui`, a separate bounded UI tree
+with row/column regions, text, values, buttons, string inputs and embedded
+diagrams. Its new source profile is `boxui 0.1` followed by strict JSON; it is
+not Concept1's existing JSX-based UIBox format or a change to Mermaid treemap.
+Use a `boxui` Markdown fence in a compatible host. The ordinary Mermaid
+`render()` API does not dispatch this separate profile.
+
+`parse_boxui` produces a typed model and child-source references. A host prepares
+child diagrams, resolves a complete typed snapshot, and calls `prepare_boxui`
+with its text metrics. One result contains static/preview SVG and matching
+control geometry. Native editing, command execution and frame publication belong
+to the host; the renderer performs none of them.
+
+See the [renderer API and XFMD handoff](SDP/08--Realization/08-03--Renderer-API-and-XFMD-Handoff.md)
+for exact signatures, wire schemas, limitations and reproducible examples.
+
+```sh
+cargo test --locked --no-default-features --test boxui
+cargo run --locked --no-default-features --example boxui_demo
+```
+
+The example writes a complete frame plus both SVG variants to `target/boxui-demo`.
+It uses approximate test metrics and a real Mermaid child; it is not a native
+XFMD interaction test. See [verification evidence](SDP/09--Verification/09-02--Evidence.md).
+
+### Mermaid diagrams
+
 Use mmdr as a Rust library in your project:
 
 ```toml

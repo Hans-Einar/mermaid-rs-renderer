@@ -295,7 +295,7 @@
       "kind": "test",
       "module": "BX-MOD-RENDERER",
       "state": "bound",
-      "reason": "Existing Cargo invocation; toolchain and dependency readiness must be checked at invocation. Not run for this mandate.",
+      "reason": "398 library tests passed in phase 046. Broader corpus/profile outcomes and uncompleted aggregate suites are recorded in SDP-09-02; readiness is checked at invocation.",
       "runner": {
         "root": "repository",
         "argv": [

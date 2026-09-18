@@ -129,3 +129,33 @@ The available toolchain is Rust 1.92.0. `cargo clippy` is unavailable in this
 installation; no Clippy result is claimed. Scoped rustfmt and `git diff --check`
 pass. No independent reviewer, sanitizer, C ABI or native interaction result is
 claimed by this phase.
+
+## Phase 046 delivery checks (R4, renderer subset)
+
+Implementation commits: R1 `ceef523`, R2 `a8a35d8`, R3 `212989c`. The final
+delivery commit only updates navigation, runner metadata and this evidence.
+
+| Command / scope | Observed result |
+|---|---|
+| `cargo test --locked --no-default-features --test boxui` | 18 passed on final implementation. |
+| `cargo test --locked --test boxui` | 18 passed with default CLI/PNG features. |
+| `cargo test --locked --no-default-features --features scene,libavoid --test boxui --test sequence_profile_suite --test semantic_profile_suite --test planning_profile_suite --test scene_suite` | 33 passed: BoxUI 18, sequence 6, semantic 3, planning 3, scene 3. |
+| `cargo test --locked --lib --tests` (aggregate run, deliberately stopped later) | Library 398 passed; aspect 9, chart geometry 3, CLI 9 and full correctness corpus 6 passed. Correctness corpus took 476.62 s. The aggregate was stopped after it advanced to the repeated-corpus determinism suite; **not** a full aggregate pass. |
+| Focused `parse_errors`, `output_shape_suite`, `planning_profile_suite`, `sequence_profile_suite` with default features | 29 + 3 + 3 + 6 passed. The semantic profile is feature-gated; its real 3-test run is listed above with libavoid enabled. |
+| `cargo test --locked --no-default-features --doc` | 5 passed. |
+| `cargo run --locked --no-default-features --example boxui_demo` | Real Mermaid child and 3 controls; static/preview SVG plus frame/request JSON generated. |
+| `cargo build --locked --no-default-features --example boxui_host` then runtime checker | Exact draft1 schema validation and deterministic wire replay passed. |
+| `rsvg-convert target/boxui-demo/static.svg -o target/boxui-demo/static.png` and corresponding preview command | Both rasterized; actual static and preview images visually inspected. Native edit text omitted only from preview. |
+| `python3 SDP/09--Verification/check_design.py` | Current manifest, document metadata, paths, schemas and negative authoring cases passed. |
+| Scoped `rustfmt --check` and `git diff --check` | Passed. |
+
+The aggregate's remaining determinism/layout/quality suites were not completed;
+do not infer their outcome from the library or correctness pass. BoxUI determinism
+is separately tested against exact complete frames. No pre-existing renderer
+algorithm was changed. No Clippy component was installed for this session.
+
+The [API handoff](../08--Realization/08-03--Renderer-API-and-XFMD-Handoff.md)
+records limits discovered during implementation, including values-only simulated
+provenance not being representable in draft1. The native XFMD integration join,
+FFI ownership/sanitizers, interactive focus/IME and PDF publication remain open.
+R4's renderer subset is delivered; the joint R4/X4 acceptance gate is not closed.

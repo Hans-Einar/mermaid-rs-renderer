@@ -14,8 +14,8 @@ They identify existing renderer/BoxUI code and planned host integration componen
 Do not maintain a second authoritative list here.
 
 The existing Rust library test target records `cargo test --locked --lib`
-at repository root. It was not run for this documentation-only delivery;
-toolchain/dependency readiness is checked when execution is requested.
+at repository root. Phase 046 ran the library tests and recorded corpus/profile
+results in SDP-09-02; toolchain/dependency readiness is still checked when invoked.
 
 Phase 046 binds the BoxUI conformance test and standalone render witness. The
 [renderer API handoff](08-03--Renderer-API-and-XFMD-Handoff.md) maps concrete

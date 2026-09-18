@@ -17,6 +17,10 @@ recorded in [the handoff](08-03--Renderer-API-and-XFMD-Handoff.md) and
 separate workstream. The following gate text preserves the original design
 handoff history; it is not a renewed implementation stop instruction.
 
+R1–R3 and the renderer subset of R4 are now delivered on
+`phase/boxui-046-implementation`. Joint R4/X4 remains open until XFMD pins the
+fork commit and supplies real GUI/FFI/PDF integration evidence.
+
 ## Current assignment and milestones
 
 BX-M01: preserve supplied mandate/structure as a traceable baseline (`d1e70c4`).
