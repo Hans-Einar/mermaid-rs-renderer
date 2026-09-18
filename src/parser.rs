@@ -1086,9 +1086,9 @@ fn parse_sequence_participant(
     let keywords = [
         ("participant ", crate::ir::NodeShape::Rectangle),
         ("actor ", crate::ir::NodeShape::ActorBox),
-        ("boundary ", crate::ir::NodeShape::ActorBox),
-        ("control ", crate::ir::NodeShape::ActorBox),
-        ("entity ", crate::ir::NodeShape::ActorBox),
+        ("boundary ", crate::ir::NodeShape::Rectangle),
+        ("control ", crate::ir::NodeShape::Rectangle),
+        ("entity ", crate::ir::NodeShape::Rectangle),
         ("database ", crate::ir::NodeShape::Cylinder),
     ];
     let mut rest = None;
@@ -1192,7 +1192,7 @@ fn ensure_sequence_node(
     if graph.nodes.contains_key(id) {
         graph.ensure_node(id, label, None);
     } else {
-        graph.ensure_node(id, label, Some(crate::ir::NodeShape::ActorBox));
+        graph.ensure_node(id, label, Some(crate::ir::NodeShape::Rectangle));
     }
 }
 
