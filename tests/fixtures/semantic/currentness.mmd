@@ -1,0 +1,10 @@
+stateDiagram-v2
+    direction LR
+    [*] --> Missing
+    Missing --> Current : accepted observation
+    Current --> Stale : freshness window expires
+    Stale --> Stale : late observation in same session
+    Stale --> Current : newer accepted revision
+    Current --> Missing : source session reset
+    Stale --> Missing : source session reset
+    Missing --> [*] : session closed
