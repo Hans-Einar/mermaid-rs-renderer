@@ -33,6 +33,7 @@ pub enum DiagramKind {
     Radar,
     Treemap,
     XYChart,
+    UseCase,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -499,6 +500,8 @@ pub enum NodeShape {
     Subroutine,
     Cylinder,
     ActorBox,
+    UseCaseActor,
+    Ellipse,
     Circle,
     DoubleCircle,
     Diamond,

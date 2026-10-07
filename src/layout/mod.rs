@@ -215,6 +215,7 @@ pub fn compute_layout_with_metrics(
         | crate::ir::DiagramKind::State
         | crate::ir::DiagramKind::Er
         | crate::ir::DiagramKind::Requirement
+        | crate::ir::DiagramKind::UseCase
         | crate::ir::DiagramKind::Flowchart => {
             compute_flowchart_layout(graph, theme, config, Some(&mut stage_metrics), true)
         }
@@ -1579,6 +1580,14 @@ fn shape_size(
     let label_empty = label.lines.len() == 1 && label.lines[0].trim().is_empty();
 
     match shape {
+        crate::ir::NodeShape::UseCaseActor => {
+            width = base_width.max(48.);
+            height = base_height + 60.;
+        }
+        crate::ir::NodeShape::Ellipse => {
+            width = base_width * std::f32::consts::SQRT_2;
+            height = base_height * std::f32::consts::SQRT_2;
+        }
         crate::ir::NodeShape::Diamond => {
             // Mermaid renders diamonds as squares sized off the larger
             // dimension rather than stretching width/height independently.

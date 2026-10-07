@@ -83,6 +83,7 @@ pub fn parse_mermaid(input: &str) -> Result<ParseOutput> {
         DiagramKind::Radar => parse_radar_diagram(input),
         DiagramKind::Treemap => parse_treemap_diagram(input),
         DiagramKind::XYChart => parse_xy_chart_diagram(input),
+        DiagramKind::UseCase => bail!("UseCase currently requires typed graph input"),
         DiagramKind::Flowchart => parse_flowchart(input),
     }
 }
