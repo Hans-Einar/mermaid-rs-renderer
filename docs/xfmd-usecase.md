@@ -10,8 +10,10 @@ existing polygon port/intersection handling. Use-case rendering shares the UML
 open arrow/triangle marker definitions. Boundaries use the existing one-level
 subgraph geometry; nested boundaries are outside the XFMD profile.
 
-compute_semantic_layout preserves the semantic family. Unbounded graphs use its
-existing Libavoid route validation and single spacing retry. Graphs with boundaries
-use the existing native composite layout, explicitly diagnosed; there is no retry
-that switches from a failed backend to another engine. Cooperative deadlines remain.
+compute_semantic_layout preserves the semantic family. Use-case graphs, with or without boundaries, use the existing Libavoid route
+validation and single spacing retry. Only real elements are allowed as endpoints;
+group titles are obstacles and interiors remain traversable. Ports sit on visible
+actor head/arm/leg strokes; caption rectangles are separate obstacles, including
+for incident edges. Empty space in the actor layout box is traversable. There is
+no backend switch or post-routing endpoint repair. Cooperative deadlines remain.
 Native/PDF consumer acceptance is separate from these library-level checks.

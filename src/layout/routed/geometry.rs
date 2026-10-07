@@ -44,11 +44,41 @@ pub(super) fn input(layout: &Layout) -> Result<RoutingInput, RoutingError> {
                 }
             }
         }
+        let mut polygon = rectangle(n.x as f64, n.y as f64, n.width as f64, n.height as f64);
+        if n.shape == crate::ir::NodeShape::UseCaseActor {
+            // Layout reserves the whole caption box, but connections attach to
+            // visible strokes. The caption is a separate obstacle even for edges
+            // whose endpoint owns it, so a departing edge cannot cross its text.
+            let cx = (n.x + n.width / 2.) as f64;
+            let y = n.y as f64;
+            polygon = rectangle(cx - 12., y + 10., 24., 42.);
+            ports.clear();
+            for i in 0..count {
+                let t = i as f64 / (count - 1) as f64;
+                let head_x = -6. + 12. * t;
+                let foot_x = 4. + 8. * t;
+                for (point, directions) in [
+                    ((cx - 12. + 10. * t, y + 31.), LEFT),
+                    ((cx + 12. - 10. * t, y + 31.), RIGHT),
+                    ((cx + head_x, y + 17. - (49. - head_x * head_x).sqrt()), UP),
+                    ((cx - foot_x, y + 40. + foot_x), DOWN),
+                    ((cx + foot_x, y + 40. + foot_x), DOWN),
+                ] {
+                    ports.push(Port { point, directions });
+                }
+            }
+            let (x, y, w, h) = actor_label(n);
+            obstacles.push(Obstacle {
+                id: obstacles.len() as u32 + 1,
+                polygon: rectangle(x, y, w, h),
+                ports: vec![],
+            });
+        }
         let oid = obstacles.len() as u32 + 1;
         ids.insert(id.clone(), oid);
         obstacles.push(Obstacle {
             id: oid,
-            polygon: rectangle(n.x as f64, n.y as f64, n.width as f64, n.height as f64),
+            polygon,
             ports,
         });
     }
@@ -120,9 +150,28 @@ pub(super) fn validate(layout: &Layout) -> Result<(), RoutingError> {
                 if n.hidden {
                     continue;
                 }
-                if interior(pair[0], pair[1], n) {
+                // Actor pins are on visible strokes inside the conservative
+                // body envelope. Incident routes may leave that envelope but
+                // must still avoid the separate caption obstacle.
+                let mut caption;
+                let checked = if n.shape == crate::ir::NodeShape::UseCaseActor
+                    && (*id == e.from || *id == e.to)
+                {
+                    caption = n.clone();
+                    let (x, y, w, h) = actor_label(n);
+                    caption.shape = crate::ir::NodeShape::Rectangle;
+                    caption.x = x as f32;
+                    caption.y = y as f32;
+                    caption.width = w as f32;
+                    caption.height = h as f32;
+                    &caption
+                } else {
+                    n
+                };
+                if interior(pair[0], pair[1], checked) {
                     return Err(RoutingError::Backend(format!(
-                        "edge {idx} traverses node {id}"
+                        "edge {idx} traverses node {id}: {pair:?}; box {},{},{},{}",
+                        n.x, n.y, n.width, n.height
                     )));
                 }
             }
@@ -134,6 +183,23 @@ pub(super) fn validate(layout: &Layout) -> Result<(), RoutingError> {
 /// Analytic segment/interior test. Rounded rectangles use conservative boxes.
 pub(super) fn interior(a: (f32, f32), b: (f32, f32), n: &crate::layout::NodeLayout) -> bool {
     use crate::ir::NodeShape;
+    if n.shape == NodeShape::UseCaseActor {
+        let mut part = n.clone();
+        part.shape = NodeShape::Rectangle;
+        part.x = n.x + n.width / 2. - 12.;
+        part.y = n.y + 10.;
+        part.width = 24.;
+        part.height = 42.;
+        if interior(a, b, &part) {
+            return true;
+        }
+        let (x, y, w, h) = actor_label(n);
+        part.x = x as f32;
+        part.y = y as f32;
+        part.width = w as f32;
+        part.height = h as f32;
+        return interior(a, b, &part);
+    }
     if matches!(n.shape, NodeShape::Circle | NodeShape::DoubleCircle) {
         let cx = (n.x + n.width / 2.) as f64;
         let cy = (n.y + n.height / 2.) as f64;
@@ -186,4 +252,13 @@ pub(super) fn interior(a: (f32, f32), b: (f32, f32), n: &crate::layout::NodeLayo
         }
     }
     hi > lo + 1e-7
+}
+
+fn actor_label(n: &crate::layout::NodeLayout) -> (f64, f64, f64, f64) {
+    (
+        (n.x + n.width / 2. - n.label.width / 2. - 4.) as f64,
+        (n.y + n.height - 12. - n.label.height - 4.) as f64,
+        (n.label.width + 8.) as f64,
+        (n.label.height + 8.) as f64,
+    )
 }

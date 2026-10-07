@@ -62,51 +62,77 @@ fn graph(boundary: bool) -> Graph {
 }
 #[test]
 fn native_usecase_glyphs_relations_and_isolated_elements() {
-    for bounded in [false, true] {
-        let g = graph(bounded);
-        let theme = Theme::modern();
-        let config = LayoutConfig::default();
-        let (layout, _) = compute_semantic_layout(
-            &g,
-            &theme,
-            &config,
-            &RoutingControl {
-                deadline: Instant::now() + Duration::from_secs(5),
-                cancelled: &|| false,
-            },
-        )
-        .unwrap();
-        assert_eq!(
-            layout
-                .nodes
-                .values()
-                .filter(|n| !n.hidden && n.anchor_subgraph.is_none())
-                .count(),
-            4
-        );
-        assert_eq!(layout.edges.len(), 2);
-        let actor = &layout.nodes["Author"];
-        assert!(actor.height > actor.label.height + 50.);
-        let uc = &layout.nodes["Browse"];
-        assert!(uc.width >= uc.label.width * std::f32::consts::SQRT_2);
-        assert_eq!(layout.edges[1].style, EdgeStyle::Dotted);
-        let svg = mermaid_rs_renderer::render_svg(&layout, &theme, &config);
-        assert!(svg.contains("usecase-actor"));
-        assert!(svg.contains("marker-end=\"url(#arrow-usecase-"));
-        assert!(svg.contains("M 1 1 L 11 6 L 1 11\" fill=\"none\""));
-        assert_eq!(svg.matches("usecase-ellipse").count(), 3);
-        for label in ["Author", "Browse", "Independent", "include"] {
-            assert!(svg.contains(label), "{label}");
-        }
-        for rest in svg.split("url(#").skip(1) {
-            let marker = rest.split(')').next().unwrap();
-            assert!(
-                svg.contains(&format!("id=\"{marker}\"")),
-                "undefined marker {marker}"
+    for direction in [
+        Direction::LeftRight,
+        Direction::RightLeft,
+        Direction::TopDown,
+        Direction::BottomTop,
+    ] {
+        for bounded in [false, true] {
+            let mut g = graph(bounded);
+            g.direction = direction;
+            let theme = Theme::modern();
+            let config = LayoutConfig::default();
+            let (layout, _) = compute_semantic_layout(
+                &g,
+                &theme,
+                &config,
+                &RoutingControl {
+                    deadline: Instant::now() + Duration::from_secs(5),
+                    cancelled: &|| false,
+                },
+            )
+            .unwrap_or_else(|e| panic!("bounded={bounded}: {e:?}"));
+            assert_eq!(
+                layout
+                    .nodes
+                    .values()
+                    .filter(|n| !n.hidden && n.anchor_subgraph.is_none())
+                    .count(),
+                4
             );
-        }
-        if bounded {
-            assert!(svg.contains("Viewer"));
+            assert_eq!(layout.edges.len(), 2);
+            let actor = &layout.nodes["Author"];
+            for edge in &layout.edges {
+                let p = if edge.from == "Author" {
+                    edge.points.first()
+                } else if edge.to == "Author" {
+                    edge.points.last()
+                } else {
+                    None
+                };
+                if let Some(&(x, y)) = p {
+                    let dx = x - actor.x - actor.width / 2.;
+                    let dy = y - actor.y;
+                    let head = (dx * dx + (dy - 17.).powi(2) - 49.).abs() < 0.02;
+                    let arms = (dy - 31.).abs() < 0.02 && dx.abs() <= 12.01;
+                    let legs = (dy - 40. - dx.abs()).abs() < 0.02 && dx.abs() <= 12.01;
+                    assert!(head || arms || legs, "actor edge detached: {dx},{dy}");
+                }
+            }
+
+            assert!(actor.height > actor.label.height + 50.);
+            let uc = &layout.nodes["Browse"];
+            assert!(uc.width >= uc.label.width * std::f32::consts::SQRT_2);
+            assert_eq!(layout.edges[1].style, EdgeStyle::Dotted);
+            let svg = mermaid_rs_renderer::render_svg(&layout, &theme, &config);
+            assert!(svg.contains("usecase-actor"));
+            assert!(svg.contains("marker-end=\"url(#arrow-usecase-"));
+            assert!(svg.contains("M 1 1 L 11 6 L 1 11\" fill=\"none\""));
+            assert_eq!(svg.matches("usecase-ellipse").count(), 3);
+            for label in ["Author", "Browse", "Independent", "include"] {
+                assert!(svg.contains(label), "{label}");
+            }
+            for rest in svg.split("url(#").skip(1) {
+                let marker = rest.split(')').next().unwrap();
+                assert!(
+                    svg.contains(&format!("id=\"{marker}\"")),
+                    "undefined marker {marker}"
+                );
+            }
+            if bounded {
+                assert!(svg.contains("Viewer"));
+            }
         }
     }
 }
