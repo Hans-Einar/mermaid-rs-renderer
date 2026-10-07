@@ -398,6 +398,14 @@ fn render_svg_internal(
                 color, color
             ));
         }
+        if layout.kind == crate::ir::DiagramKind::UseCase {
+            svg.push_str(&format!(
+                "<marker id=\"arrow-usecase-{idx}\" viewBox=\"0 0 12 12\" refX=\"11\" refY=\"6\" markerUnits=\"userSpaceOnUse\" markerWidth=\"12\" markerHeight=\"12\" orient=\"auto\"><path d=\"M 1 1 L 11 6 L 1 11\" fill=\"none\" stroke=\"{color}\" stroke-width=\"1.2\"/></marker>"
+            ));
+            svg.push_str(&format!(
+                "<marker id=\"arrow-usecase-start-{idx}\" viewBox=\"0 0 12 12\" refX=\"1\" refY=\"6\" markerUnits=\"userSpaceOnUse\" markerWidth=\"12\" markerHeight=\"12\" orient=\"auto\"><path d=\"M 11 1 L 1 6 L 11 11\" fill=\"none\" stroke=\"{color}\" stroke-width=\"1.2\"/></marker>"
+            ));
+        }
         if is_class {
             svg.push_str(&format!(
                 "<marker id=\"arrow-class-open-{idx}\" viewBox=\"0 0 20 14\" refX=\"18\" refY=\"7\" markerUnits=\"userSpaceOnUse\" markerWidth=\"20\" markerHeight=\"14\" orient=\"auto\"><path d=\"M 18 7 L 1 13 V 1 Z\" fill=\"{}\" stroke=\"{}\" stroke-width=\"1\" stroke-dasharray=\"1,0\"/></marker>",
@@ -1115,7 +1123,11 @@ fn render_svg_internal(
                     crate::ir::DiagramKind::State => {
                         format!("marker-end=\"url(#arrow-state-{marker_id})\"")
                     }
-                    crate::ir::DiagramKind::Class | crate::ir::DiagramKind::UseCase => match edge.arrow_end_kind {
+                    crate::ir::DiagramKind::UseCase => match edge.arrow_end_kind {
+                        Some(crate::ir::EdgeArrowhead::OpenTriangle) => format!("marker-end=\"url(#arrow-class-open-{marker_id})\""),
+                        _ => format!("marker-end=\"url(#arrow-usecase-{marker_id})\""),
+                    },
+                    crate::ir::DiagramKind::Class => match edge.arrow_end_kind {
                         Some(crate::ir::EdgeArrowhead::OpenTriangle) => {
                             format!("marker-end=\"url(#arrow-class-open-{marker_id})\"")
                         }
@@ -1137,7 +1149,11 @@ fn render_svg_internal(
                     crate::ir::DiagramKind::State => {
                         format!("marker-start=\"url(#arrow-state-{marker_id})\"")
                     }
-                    crate::ir::DiagramKind::Class | crate::ir::DiagramKind::UseCase => match edge.arrow_start_kind {
+                    crate::ir::DiagramKind::UseCase => match edge.arrow_start_kind {
+                        Some(crate::ir::EdgeArrowhead::OpenTriangle) => format!("marker-start=\"url(#arrow-class-open-start-{marker_id})\""),
+                        _ => format!("marker-start=\"url(#arrow-usecase-start-{marker_id})\""),
+                    },
+                    crate::ir::DiagramKind::Class => match edge.arrow_start_kind {
                         Some(crate::ir::EdgeArrowhead::OpenTriangle) => {
                             format!("marker-start=\"url(#arrow-class-open-start-{marker_id})\"")
                         }

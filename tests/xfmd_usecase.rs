@@ -92,6 +92,8 @@ fn native_usecase_glyphs_relations_and_isolated_elements() {
         assert_eq!(layout.edges[1].style, EdgeStyle::Dotted);
         let svg = mermaid_rs_renderer::render_svg(&layout, &theme, &config);
         assert!(svg.contains("usecase-actor"));
+        assert!(svg.contains("marker-end=\"url(#arrow-usecase-"));
+        assert!(svg.contains("M 1 1 L 11 6 L 1 11\" fill=\"none\""));
         assert_eq!(svg.matches("usecase-ellipse").count(), 3);
         for label in ["Author", "Browse", "Independent", "include"] {
             assert!(svg.contains(label), "{label}");
