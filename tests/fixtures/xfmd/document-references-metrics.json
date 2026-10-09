@@ -1,0 +1,66 @@
+{
+  "": [
+    0.0,
+    21.791666666666668
+  ],
+  "ApplicationPreferences (functionality)": [
+    278.6666666666667,
+    21.791666666666668
+  ],
+  "DocumentIndex (functionality)": [
+    224.0,
+    21.791666666666668
+  ],
+  "DocumentIndexService (unit)": [
+    216.0,
+    21.791666666666668
+  ],
+  "DocumentReferences (feature)": [
+    230.66666666666666,
+    21.791666666666668
+  ],
+  "NativeShell (unit)": [
+    126.66666666666667,
+    21.791666666666668
+  ],
+  "Navigation (unit)": [
+    122.66666666666667,
+    21.791666666666668
+  ],
+  "NavigationHistory (functionality)": [
+    238.66666666666666,
+    21.791666666666668
+  ],
+  "Preferences (unit)": [
+    133.33333333333334,
+    21.791666666666668
+  ],
+  "SourceAnchorMapping (functionality)": [
+    276.0,
+    21.791666666666668
+  ],
+  "Viewport (unit)": [
+    108.0,
+    21.791666666666668
+  ],
+  "WorkspaceControls (functionality)": [
+    250.66666666666666,
+    21.791666666666668
+  ],
+  "XfmdDesktop (container)": [
+    185.33333333333334,
+    21.791666666666668
+  ],
+  "allocated-to": [
+    88.0,
+    21.791666666666668
+  ],
+  "contributes-to": [
+    104.0,
+    21.791666666666668
+  ],
+  "owns": [
+    38.666666666666664,
+    21.791666666666668
+  ]
+}
