@@ -221,23 +221,46 @@ fn place_order(layout: &mut Layout, variant: usize) -> Result<(), RoutingError> 
     }
     Ok(())
 }
+// A Manhattan-distance exclusion area around the padded caption. Subtract the
+// router's shape buffer so its effective boundary keeps the owner admissible.
+fn ambiguity_polygon(points: &[(f32, f32)], r: Rect, clearance: f64) -> Vec<(f64, f64)> {
+    let pad = (distance_to_rect(points, r) - 3. - clearance).max(0.);
+    let (x, y, right, bottom) = (r.0, r.1, r.0 + r.2, r.1 + r.3);
+    if pad == 0. {
+        return rectangle(r.0, r.1, r.2, r.3);
+    }
+    vec![
+        (x - pad, y),
+        (x, y - pad),
+        (right, y - pad),
+        (right + pad, y),
+        (right + pad, bottom),
+        (right, bottom + pad),
+        (x, bottom + pad),
+        (x - pad, bottom),
+    ]
+}
 pub(super) fn obstacles(layout: &Layout, first: u32, clearance: f64) -> Vec<Obstacle> {
-    layout
-        .edges
-        .iter()
-        .filter_map(|e| Some((e, e.label.as_ref()?, e.label_anchor?)))
-        .enumerate()
-        .map(|(i, (e, l, a))| {
-            let r = rect(a, l.width, l.height);
-            let r =
-                attachment::zone(&e.points, r).map_or(r, |z| attachment::obstacle(r, z, clearance));
-            Obstacle {
-                id: first + i as u32,
-                polygon: rectangle(r.0, r.1, r.2, r.3),
+    let mut obstacles = Vec::new();
+    for e in &layout.edges {
+        let Some((l, a)) = e.label.as_ref().zip(e.label_anchor) else {
+            continue;
+        };
+        let r = rect(a, l.width, l.height);
+        let attached =
+            attachment::zone(&e.points, r).map_or(r, |z| attachment::obstacle(r, z, clearance));
+        for polygon in [
+            rectangle(attached.0, attached.1, attached.2, attached.3),
+            ambiguity_polygon(&e.points, r, clearance),
+        ] {
+            obstacles.push(Obstacle {
+                id: first + obstacles.len() as u32,
+                polygon,
                 ports: vec![],
-            }
-        })
-        .collect()
+            });
+        }
+    }
+    obstacles
 }
 pub(super) fn validate(layout: &Layout) -> Result<(), RoutingError> {
     let mut occupied = node_rects(layout);
@@ -311,4 +334,42 @@ pub(super) fn collisions(layout: &Layout) -> usize {
         }
     }
     count
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    fn contains(polygon: &[(f64, f64)], p: (f64, f64)) -> bool {
+        polygon
+            .iter()
+            .zip(polygon.iter().cycle().skip(1))
+            .all(|(a, b)| (b.0 - a.0) * (p.1 - a.1) - (b.1 - a.1) * (p.0 - a.0) >= -1e-6)
+    }
+    #[test]
+    fn ambiguity_obstacle_protects_opposite_side_without_blocking_owner() {
+        let r = (20., 20., 10., 10.);
+        let owner = [(0., 0.), (0., 100.)];
+        let polygon = ambiguity_polygon(&owner, r, 4.);
+        assert!(contains(&polygon, (40., 25.))); // competing route, opposite side
+        assert!(!contains(&polygon, (0., 25.))); // owner remains admissible
+        assert!(!contains(&polygon, (50., 25.))); // equally distant route
+        assert_eq!(polygon.len(), 8);
+        // Every halo vertex lies at owner distance minus tolerance and buffer.
+        for p in polygon {
+            let distance = distance_to_rect(&[(p.0 as f32, p.1 as f32); 2], r);
+            assert!((distance - 13.).abs() < 1e-6);
+        }
+    }
+    #[test]
+    fn ambiguity_obstacle_keeps_diagonal_owner_outside_and_handles_zero_radius() {
+        let r = (20., 20., 10., 10.);
+        let owner = [(0., 0.), (0., 5.)];
+        let polygon = ambiguity_polygon(&owner, r, 4.);
+        assert!(!contains(&polygon, (0., 5.))); // square dilation would block it
+        assert!(contains(&polygon, (10., 10.)));
+        assert_eq!(
+            ambiguity_polygon(&[(15., 0.), (15., 100.)], r, 4.),
+            rectangle(20., 20., 10., 10.)
+        );
+    }
 }
