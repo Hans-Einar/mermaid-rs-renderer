@@ -32,6 +32,7 @@ pub(in crate::layout) fn apply_initial_config_heuristics(
         if auto.enabled && !auto.buckets.is_empty() {
             let mut scale = auto.buckets[0].scale;
             for bucket in &auto.buckets {
+                crate::layout::measurements::checkpoint();
                 if node_count >= bucket.min_nodes {
                     scale = bucket.scale;
                 }
@@ -116,6 +117,7 @@ fn adaptive_spacing_for_nodes(
     let mut total = 0.0f32;
     let mut count = 0usize;
     for node in nodes.values() {
+        crate::layout::measurements::checkpoint();
         if node.hidden || node.anchor_subgraph.is_some() {
             continue;
         }
@@ -140,6 +142,7 @@ fn flowchart_density_profile(graph: &Graph) -> (usize, f32, f32, f32) {
     };
     let mut degree_by_node: HashMap<&str, usize> = HashMap::new();
     for edge in &graph.edges {
+        crate::layout::measurements::checkpoint();
         *degree_by_node.entry(edge.from.as_str()).or_insert(0) += 1;
         *degree_by_node.entry(edge.to.as_str()).or_insert(0) += 1;
     }
@@ -166,6 +169,7 @@ fn flowchart_label_spacing_floor(
     let mut label_count = 0usize;
     let mut endpoint_labeled_edges = 0usize;
     for edge in &graph.edges {
+        crate::layout::measurements::checkpoint();
         let mut has_endpoint_label = false;
         if let Some(label) = edge.label.as_ref() {
             label_char_total += label.chars().count();
@@ -205,6 +209,7 @@ fn flowchart_label_spacing_floor(
 fn graph_has_directed_cycle(graph: &Graph) -> bool {
     let mut outgoing: HashMap<&str, Vec<&str>> = HashMap::new();
     for edge in &graph.edges {
+        crate::layout::measurements::checkpoint();
         outgoing
             .entry(edge.from.as_str())
             .or_default()
@@ -214,6 +219,7 @@ fn graph_has_directed_cycle(graph: &Graph) -> bool {
     let mut visited: HashSet<&str> = HashSet::new();
     let mut active: HashSet<&str> = HashSet::new();
     for node_id in graph.nodes.keys().map(String::as_str) {
+        crate::layout::measurements::checkpoint();
         if dfs_has_cycle(node_id, &outgoing, &mut visited, &mut active) {
             return true;
         }
@@ -237,6 +243,7 @@ fn dfs_has_cycle<'a>(
     active.insert(node_id);
     if let Some(neighbors) = outgoing.get(node_id) {
         for &next in neighbors {
+            crate::layout::measurements::checkpoint();
             if dfs_has_cycle(next, outgoing, visited, active) {
                 return true;
             }

@@ -80,6 +80,7 @@ pub(in crate::layout) fn compact_large_flowchart_whitespace(
     let mut min_cross = f32::MAX;
     let mut max_cross = f32::MIN;
     for node in nodes.values() {
+        crate::layout::measurements::checkpoint();
         if node.hidden || node.anchor_subgraph.is_some() {
             continue;
         }
@@ -112,6 +113,7 @@ pub(in crate::layout) fn compact_large_flowchart_whitespace(
     let desired_gap = (config.node_spacing * 0.72).max(10.0);
     let mut bands: HashMap<i32, Vec<(String, f32, f32)>> = HashMap::new();
     for node_id in visible_ids {
+        crate::layout::measurements::checkpoint();
         let Some(node) = nodes.get(&node_id) else {
             continue;
         };
@@ -138,6 +140,7 @@ pub(in crate::layout) fn compact_large_flowchart_whitespace(
 
     let mut main_deltas: HashMap<String, f32> = HashMap::new();
     for entries in bands.values_mut() {
+        crate::layout::measurements::checkpoint();
         if entries.len() < 2 {
             continue;
         }
@@ -145,6 +148,7 @@ pub(in crate::layout) fn compact_large_flowchart_whitespace(
         let mut cumulative_shift = 0.0f32;
         let mut prev_end: Option<f32> = None;
         for (node_id, start, end) in entries.iter() {
+            crate::layout::measurements::checkpoint();
             let adjusted_start = *start - cumulative_shift;
             if let Some(prev) = prev_end {
                 let gap = adjusted_start - prev;
@@ -163,6 +167,7 @@ pub(in crate::layout) fn compact_large_flowchart_whitespace(
     }
 
     for (node_id, delta) in main_deltas {
+        crate::layout::measurements::checkpoint();
         if let Some(node) = nodes.get_mut(&node_id) {
             shift_node_main(node, horizontal, delta);
         }
@@ -227,8 +232,10 @@ fn relax_edge_span_constraints(
     let flowchart_groups = collect_flowchart_top_level_groups(graph);
 
     for _ in 0..passes {
+        crate::layout::measurements::checkpoint();
         let mut changed = false;
         for edge in layout_edges {
+            crate::layout::measurements::checkpoint();
             let Some(from_node) = nodes.get(&edge.from) else {
                 continue;
             };
@@ -373,6 +380,7 @@ fn collect_flowchart_top_level_groups(graph: &Graph) -> Option<FlowchartTopLevel
     let mut node_to_group = HashMap::new();
     let mut group_nodes = HashMap::new();
     for idx in top_level_subgraph_indices(graph) {
+        crate::layout::measurements::checkpoint();
         let sub = &graph.subgraphs[idx];
         if is_region_subgraph(sub) {
             continue;
@@ -380,6 +388,7 @@ fn collect_flowchart_top_level_groups(graph: &Graph) -> Option<FlowchartTopLevel
 
         let mut nodes_in_group = Vec::new();
         for node_id in &sub.nodes {
+            crate::layout::measurements::checkpoint();
             if let Some(existing) = node_to_group.insert(node_id.clone(), idx)
                 && existing != idx
             {
@@ -434,6 +443,7 @@ fn shift_cross_subgraph_flowchart_group(
     };
 
     for node_id in group_nodes {
+        crate::layout::measurements::checkpoint();
         if let Some(node) = nodes.get_mut(node_id) {
             shift_node_main(node, horizontal, delta);
         }
@@ -467,6 +477,7 @@ fn shift_overlap_flowchart_group(
         return false;
     };
     for node_id in group_nodes {
+        crate::layout::measurements::checkpoint();
         if let Some(node) = nodes.get_mut(node_id) {
             shift_node_cross(node, horizontal, delta);
         }
@@ -493,9 +504,12 @@ fn resolve_node_overlaps(
     ids.sort_by_key(|id| graph.node_order.get(id).copied().unwrap_or(usize::MAX));
 
     for _ in 0..OVERLAP_RESOLVE_PASSES {
+        crate::layout::measurements::checkpoint();
         let mut moved = false;
         for i in 0..ids.len() {
+            crate::layout::measurements::checkpoint();
             for j in (i + 1)..ids.len() {
+                crate::layout::measurements::checkpoint();
                 let id_a = &ids[i];
                 let id_b = &ids[j];
                 let (ax, ay, aw, ah, bx, by, bw, bh) = {
@@ -558,8 +572,10 @@ fn has_visible_node_overlap(nodes: &BTreeMap<String, NodeLayout>) -> bool {
     }
     visible.sort_by(|a, b| a.x.partial_cmp(&b.x).unwrap_or(Ordering::Equal));
     for i in 0..visible.len() {
+        crate::layout::measurements::checkpoint();
         let a = visible[i];
         for b in visible.iter().skip(i + 1) {
+            crate::layout::measurements::checkpoint();
             if b.x >= a.x + a.width {
                 break;
             }
@@ -645,6 +661,7 @@ fn rebalance_top_level_subgraphs_aspect(
     let mut row_start = 0usize;
     let mut cursor_cross = min_cross;
     for row in 0..row_count {
+        crate::layout::measurements::checkpoint();
         let row_len = base_row_len + usize::from(row < extra_rows);
         if row_len == 0 {
             continue;
@@ -653,9 +670,11 @@ fn rebalance_top_level_subgraphs_aspect(
         let mut cursor_main = min_main;
         let mut row_cross_span = 0.0_f32;
         for group in &mut groups[row_start..row_end] {
+            crate::layout::measurements::checkpoint();
             let delta_main = cursor_main - group.min_main;
             let delta_cross = cursor_cross - group.min_cross;
             for node_id in &group.nodes {
+                crate::layout::measurements::checkpoint();
                 if let Some(node) = nodes.get_mut(node_id) {
                     shift_node_main(node, horizontal, delta_main);
                     shift_node_cross(node, horizontal, delta_cross);
@@ -685,7 +704,9 @@ fn collect_top_level_visual_groups(
 
     let mut seen: HashSet<&str> = HashSet::new();
     for &idx in &top_level {
+        crate::layout::measurements::checkpoint();
         for node_id in &graph.subgraphs[idx].nodes {
+            crate::layout::measurements::checkpoint();
             if !seen.insert(node_id.as_str()) {
                 return Vec::new();
             }
@@ -694,6 +715,7 @@ fn collect_top_level_visual_groups(
 
     let mut groups = Vec::new();
     for &idx in &top_level {
+        crate::layout::measurements::checkpoint();
         let sub = &graph.subgraphs[idx];
         if is_region_subgraph(sub) {
             continue;
@@ -704,6 +726,7 @@ fn collect_top_level_visual_groups(
         let mut min_cross = f32::MAX;
         let mut max_cross = f32::MIN;
         for node_id in &sub.nodes {
+            crate::layout::measurements::checkpoint();
             let Some(node) = nodes.get(node_id) else {
                 continue;
             };
@@ -752,7 +775,9 @@ fn top_level_subgraph_chain_like(graph: &Graph, groups: &[VisualGroup]) -> bool 
     }
     let mut node_to_subgraph: HashMap<&str, usize> = HashMap::new();
     for group in groups {
+        crate::layout::measurements::checkpoint();
         for node_id in &group.nodes {
+            crate::layout::measurements::checkpoint();
             node_to_subgraph.insert(node_id.as_str(), group.sub_idx);
         }
     }
@@ -761,6 +786,7 @@ fn top_level_subgraph_chain_like(graph: &Graph, groups: &[VisualGroup]) -> bool 
     let mut outdegree: HashMap<usize, usize> = HashMap::new();
     let mut cross_edges = 0usize;
     for edge in &graph.edges {
+        crate::layout::measurements::checkpoint();
         let Some(&from_sub) = node_to_subgraph.get(edge.from.as_str()) else {
             continue;
         };
@@ -778,6 +804,7 @@ fn top_level_subgraph_chain_like(graph: &Graph, groups: &[VisualGroup]) -> bool 
         return false;
     }
     for group in groups {
+        crate::layout::measurements::checkpoint();
         if indegree.get(&group.sub_idx).copied().unwrap_or(0) > 1 {
             return false;
         }

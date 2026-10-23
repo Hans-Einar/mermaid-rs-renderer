@@ -214,6 +214,7 @@ pub fn resolve_all_label_positions(
 
 fn move_flowchart_labels_off_own_edges(edges: &mut [EdgeLayout]) {
     for edge in edges {
+        crate::layout::measurements::checkpoint();
         let (Some(label), Some(anchor)) = (&edge.label, edge.label_anchor) else {
             continue;
         };
@@ -295,6 +296,7 @@ fn resolve_center_labels(
     };
     let mut fixed_center_indices: HashSet<usize> = HashSet::new();
     for (idx, edge) in edges.iter_mut().enumerate() {
+        crate::layout::measurements::checkpoint();
         let (Some(label), Some(anchor)) = (&edge.label, edge.label_anchor) else {
             continue;
         };
@@ -375,6 +377,7 @@ fn resolve_center_labels(
     });
 
     for idx in order {
+        crate::layout::measurements::checkpoint();
         let label = match edges[idx].label.clone() {
             Some(l) => l,
             None => continue,
@@ -393,6 +396,7 @@ fn resolve_center_labels(
         if let Some(bundle_fraction) = bundle_fractions.get(idx).and_then(|fraction| *fraction) {
             let side_bias = [0.0, -0.08, 0.08];
             for delta in side_bias {
+                crate::layout::measurements::checkpoint();
                 let frac = (bundle_fraction + delta).clamp(0.05, 0.95);
                 if let Some(candidate) = edge_label_anchor_at_fraction(edge, frac) {
                     push_anchor_unique(&mut anchors, candidate);
@@ -400,15 +404,18 @@ fn resolve_center_labels(
             }
         }
         for frac in LABEL_ANCHOR_FRACTIONS {
+            crate::layout::measurements::checkpoint();
             if let Some(candidate) = edge_label_anchor_at_fraction(edge, frac) {
                 push_anchor_unique(&mut anchors, candidate);
             }
         }
         for candidate in edge_segment_anchors(edge, LABEL_EXTRA_SEGMENT_ANCHORS) {
+            crate::layout::measurements::checkpoint();
             push_anchor_unique(&mut anchors, candidate);
         }
         if kind == DiagramKind::Flowchart {
             for candidate in edge_terminal_segment_anchors(edge, 2) {
+                crate::layout::measurements::checkpoint();
                 push_anchor_unique(&mut anchors, candidate);
             }
         }
@@ -552,9 +559,11 @@ fn resolve_center_labels(
                 ),
             };
             for t in tangent_focus {
+                crate::layout::measurements::checkpoint();
                 let base_x = anchor_x + dir_x * step_t * *t;
                 let base_y = anchor_y + dir_y * step_t * *t;
                 for gap in gap_targets {
+                    crate::layout::measurements::checkpoint();
                     let offset = normal_extent + *gap;
                     let approx_normal = offset / step_n.max(1.0);
                     score_center(
@@ -573,9 +582,11 @@ fn resolve_center_labels(
             }
 
             for t in tangents {
+                crate::layout::measurements::checkpoint();
                 let base_x = anchor_x + dir_x * step_t * *t;
                 let base_y = anchor_y + dir_y * step_t * *t;
                 for n in normals {
+                    crate::layout::measurements::checkpoint();
                     score_center(
                         base_x + normal_x * step_n * *n,
                         base_y + normal_y * step_n * *n,
@@ -588,6 +599,7 @@ fn resolve_center_labels(
         };
         let mut evaluated = false;
         for anchor in &anchors {
+            crate::layout::measurements::checkpoint();
             if evaluate_candidates(
                 *anchor,
                 tangent_steps,
@@ -601,6 +613,7 @@ fn resolve_center_labels(
         }
         if !evaluated && center_max_gap.is_some() {
             for anchor in &anchors {
+                crate::layout::measurements::checkpoint();
                 evaluate_candidates(
                     *anchor,
                     tangent_steps,
@@ -645,6 +658,7 @@ fn resolve_center_labels(
                 };
             let mut evaluated_wide = false;
             for anchor in &anchors {
+                crate::layout::measurements::checkpoint();
                 if evaluate_candidates(
                     *anchor,
                     tangent_steps_wide,
@@ -658,6 +672,7 @@ fn resolve_center_labels(
             }
             if !evaluated_wide && center_max_gap.is_some() {
                 for anchor in &anchors {
+                    crate::layout::measurements::checkpoint();
                     evaluate_candidates(
                         *anchor,
                         tangent_steps_wide,
@@ -781,7 +796,9 @@ fn center_label_overlap_score(
     let mut total = 0.0f32;
     let mut max = 0.0f32;
     for i in 0..rects.len() {
+        crate::layout::measurements::checkpoint();
         for j in (i + 1)..rects.len() {
+            crate::layout::measurements::checkpoint();
             let overlap = overlap_area(&rects[i], &rects[j]);
             if overlap > LABEL_OVERLAP_WIDE_THRESHOLD {
                 count += 1;
@@ -820,6 +837,7 @@ fn nudge_flowchart_labels_clear_of_own_paths(edges: &mut [EdgeLayout], bounds: O
         .collect();
 
     for idx in 0..edges.len() {
+        crate::layout::measurements::checkpoint();
         let Some(label) = edges[idx].label.as_ref() else {
             continue;
         };
@@ -844,7 +862,9 @@ fn nudge_flowchart_labels_clear_of_own_paths(edges: &mut [EdgeLayout], bounds: O
             (0.707, 0.707),
         ];
         for step in [2.0, 4.0, 6.0, 8.0, 12.0, 16.0, 24.0, 32.0] {
+            crate::layout::measurements::checkpoint();
             for (dx, dy) in directions {
+                crate::layout::measurements::checkpoint();
                 let mut candidate = (center.0 + dx * step, center.1 + dy * step);
                 if let Some(bound) = bounds {
                     candidate = clamp_label_center_to_bounds(
@@ -862,6 +882,7 @@ fn nudge_flowchart_labels_clear_of_own_paths(edges: &mut [EdgeLayout], bounds: O
                 }
                 let mut overlap = 0.0f32;
                 for (other_idx, other) in label_rects.iter().enumerate() {
+                    crate::layout::measurements::checkpoint();
                     if other_idx == idx {
                         continue;
                     }
@@ -904,6 +925,7 @@ fn deoverlap_flowchart_center_labels(
     let step_tangent_pad = (theme.font_size * 0.35).max(label_pad_x);
     let mut entries: Vec<FlowchartCenterLabelEntry> = Vec::new();
     for (idx, edge) in edges.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         if locked_indices.contains(&idx) {
             continue;
         }
@@ -973,6 +995,7 @@ fn deoverlap_flowchart_center_labels(
         (theme.font_size * 0.2).max(2.0),
     ));
     for (idx, edge) in edges.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         if !locked_indices.contains(&idx) {
             continue;
         }
@@ -1006,6 +1029,7 @@ fn deoverlap_flowchart_center_labels(
     // Iterative global refinement: resolve the most conflicted labels first and
     // re-score against all other current placements.
     for _ in 0..10 {
+        crate::layout::measurements::checkpoint();
         let current_rects: Vec<Rect> = entries
             .iter()
             .map(|entry| {
@@ -1020,8 +1044,10 @@ fn deoverlap_flowchart_center_labels(
             .collect();
         let mut conflict_order: Vec<(f32, usize)> = Vec::new();
         for (i, rect) in current_rects.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             let mut conflict_score = 0.0;
             for (j, other) in current_rects.iter().enumerate() {
+                crate::layout::measurements::checkpoint();
                 if i == j {
                     continue;
                 }
@@ -1031,6 +1057,7 @@ fn deoverlap_flowchart_center_labels(
                 }
             }
             for obstacle in &fixed_obstacles {
+                crate::layout::measurements::checkpoint();
                 let ov = overlap_area(rect, obstacle);
                 if ov > 0.0 {
                     conflict_score += ov * 1.6 + 1.0;
@@ -1047,6 +1074,7 @@ fn deoverlap_flowchart_center_labels(
 
         let mut moved = false;
         for (_, entry_idx) in conflict_order {
+            crate::layout::measurements::checkpoint();
             let entry_snapshot = entries[entry_idx].clone();
             let others: Vec<Rect> = entries
                 .iter()
@@ -1079,6 +1107,7 @@ fn deoverlap_flowchart_center_labels(
             let mut evaluate = |enforce_gap_limit: bool, enforce_center_band: bool| -> bool {
                 let mut considered = false;
                 for candidate in entry_snapshot.candidates.iter().copied() {
+                    crate::layout::measurements::checkpoint();
                     if (candidate.0 - entry_snapshot.current_center.0).abs() <= 0.2
                         && (candidate.1 - entry_snapshot.current_center.1).abs() <= 0.2
                     {
@@ -1164,6 +1193,7 @@ fn deoverlap_flowchart_center_labels(
         && residual_overlap.count > 0
         && residual_overlap.total >= 10.0;
     for _ in 0..6 {
+        crate::layout::measurements::checkpoint();
         let current_rects: Vec<Rect> = entries
             .iter()
             .map(|entry| {
@@ -1179,12 +1209,14 @@ fn deoverlap_flowchart_center_labels(
         let mut adjusted = false;
         'pair_search: for i in 0..entries.len() {
             for j in (i + 1)..entries.len() {
+                crate::layout::measurements::checkpoint();
                 if overlap_area(&current_rects[i], &current_rects[j])
                     <= LABEL_OVERLAP_WIDE_THRESHOLD
                 {
                     continue;
                 }
                 for &move_idx in &[i, j] {
+                    crate::layout::measurements::checkpoint();
                     let entry_snapshot = entries[move_idx].clone();
                     let blocking_rect = current_rects[if move_idx == i { j } else { i }];
                     let mut candidate_centers = entry_snapshot.candidates.clone();
@@ -1213,6 +1245,7 @@ fn deoverlap_flowchart_center_labels(
                      -> bool {
                         let mut considered = false;
                         for candidate in candidate_centers.iter().copied() {
+                            crate::layout::measurements::checkpoint();
                             if enforce_center_band {
                                 let center_dist =
                                     point_polyline_distance(candidate, &entry_snapshot.edge_points);
@@ -1245,6 +1278,7 @@ fn deoverlap_flowchart_center_labels(
                             let mut overlap_penalty = 0.0f32;
                             let mut has_overlap = false;
                             for other in &others {
+                                crate::layout::measurements::checkpoint();
                                 let ov = overlap_area(&obstacle_rect, other);
                                 if ov > LABEL_OVERLAP_WIDE_THRESHOLD {
                                     has_overlap = true;
@@ -1252,6 +1286,7 @@ fn deoverlap_flowchart_center_labels(
                                 }
                             }
                             for obstacle in &fixed_obstacles {
+                                crate::layout::measurements::checkpoint();
                                 let ov = overlap_area(&obstacle_rect, obstacle);
                                 if ov > LABEL_OVERLAP_WIDE_THRESHOLD {
                                     has_overlap = true;
@@ -1331,6 +1366,7 @@ fn deoverlap_flowchart_center_labels(
     }
 
     for entry in entries {
+        crate::layout::measurements::checkpoint();
         edges[entry.edge_idx].label_anchor = Some(entry.current_center);
     }
 }
@@ -1427,15 +1463,18 @@ fn center_label_tighten_candidates(
         push_anchor_unique(&mut anchors, anchor);
     }
     for frac in LABEL_ANCHOR_FRACTIONS {
+        crate::layout::measurements::checkpoint();
         if let Some(anchor) = edge_label_anchor_at_fraction(edge, frac) {
             push_anchor_unique(&mut anchors, anchor);
         }
     }
     for anchor in edge_segment_anchors(edge, LABEL_EXTRA_SEGMENT_ANCHORS) {
+        crate::layout::measurements::checkpoint();
         push_anchor_unique(&mut anchors, anchor);
     }
     if kind == DiagramKind::Flowchart || kind == DiagramKind::State {
         for anchor in edge_terminal_segment_anchors(edge, 2) {
+            crate::layout::measurements::checkpoint();
             push_anchor_unique(&mut anchors, anchor);
         }
     }
@@ -1467,6 +1506,7 @@ fn center_label_tighten_candidates(
     let local_normal_steps: &[f32] = &[0.0, 0.2, -0.2, 0.45, -0.45];
 
     for (anchor_x, anchor_y, dir_x, dir_y) in anchors {
+        crate::layout::measurements::checkpoint();
         let normal_x = -dir_y;
         let normal_y = dir_x;
         let step_n = if normal_x.abs() > normal_y.abs() {
@@ -1483,18 +1523,22 @@ fn center_label_tighten_candidates(
         let half_h = label_h * 0.5 + label_pad_y;
         let normal_extent = normal_x.abs() * half_w + normal_y.abs() * half_h;
         for t in tangent_steps {
+            crate::layout::measurements::checkpoint();
             let base_x = anchor_x + dir_x * step_t * *t;
             let base_y = anchor_y + dir_y * step_t * *t;
             for gap in gap_targets {
+                crate::layout::measurements::checkpoint();
                 let offset = normal_extent + *gap;
                 push_candidate((base_x + normal_x * offset, base_y + normal_y * offset));
                 push_candidate((base_x - normal_x * offset, base_y - normal_y * offset));
             }
         }
         for t in local_tangent_steps {
+            crate::layout::measurements::checkpoint();
             let base_x = anchor_x + dir_x * step_t * *t;
             let base_y = anchor_y + dir_y * step_t * *t;
             for n in local_normal_steps {
+                crate::layout::measurements::checkpoint();
                 push_candidate((
                     base_x + normal_x * step_n * *n,
                     base_y + normal_y * step_n * *n,
@@ -1553,6 +1597,7 @@ fn tighten_center_label_gaps(
     let edge_grid = ObstacleGrid::new(48.0, &edge_obs_rects);
 
     for _ in 0..iterations {
+        crate::layout::measurements::checkpoint();
         let mut order: Vec<(usize, f32)> = edges
             .iter()
             .enumerate()
@@ -1584,6 +1629,7 @@ fn tighten_center_label_gaps(
 
         let mut moved = false;
         for (idx, _) in order {
+            crate::layout::measurements::checkpoint();
             let (label, current_center, edge_points) = {
                 let edge = &edges[idx];
                 let (Some(label), Some(center)) = (&edge.label, edge.label_anchor) else {
@@ -1597,6 +1643,7 @@ fn tighten_center_label_gaps(
 
             let mut occupied = static_obstacles.clone();
             for (other_idx, other) in edges.iter().enumerate() {
+                crate::layout::measurements::checkpoint();
                 if other_idx == idx {
                     continue;
                 }
@@ -1698,6 +1745,7 @@ fn tighten_center_label_gaps(
             };
 
             for center in candidates.iter().copied() {
+                crate::layout::measurements::checkpoint();
                 evaluate(
                     center,
                     false,
@@ -1710,6 +1758,7 @@ fn tighten_center_label_gaps(
                 && (best_center.1 - current_center.1).abs() <= 0.2
             {
                 for center in candidates {
+                    crate::layout::measurements::checkpoint();
                     evaluate(
                         center,
                         true,
@@ -1788,6 +1837,7 @@ fn enforce_center_label_attachment_caps(
     let nudge_weight = if kind == DiagramKind::Er { 0.04 } else { 0.06 };
 
     for _ in 0..2 {
+        crate::layout::measurements::checkpoint();
         let current_label_rects: Vec<Option<Rect>> = edges
             .iter()
             .map(|edge| {
@@ -1804,6 +1854,7 @@ fn enforce_center_label_attachment_caps(
             .collect();
 
         for (idx, edge) in edges.iter_mut().enumerate() {
+            crate::layout::measurements::checkpoint();
             if locked_indices.contains(&idx) {
                 continue;
             }
@@ -1851,7 +1902,9 @@ fn enforce_center_label_attachment_caps(
 
             let mut candidates: Vec<(f32, f32)> = Vec::new();
             for offset in offsets {
+                crate::layout::measurements::checkpoint();
                 for side in [sign, -sign] {
+                    crate::layout::measurements::checkpoint();
                     let mut cand = (
                         anchor_x + normal_x * offset * side,
                         anchor_y + normal_y * offset * side,
@@ -1877,6 +1930,7 @@ fn enforce_center_label_attachment_caps(
             let mut best = center;
             let mut best_score = f32::INFINITY;
             for cand in candidates {
+                crate::layout::measurements::checkpoint();
                 let rect = (
                     cand.0 - label.width * 0.5 - label_pad_x,
                     cand.1 - label.height * 0.5 - label_pad_y,
@@ -1890,9 +1944,11 @@ fn enforce_center_label_attachment_caps(
                 }
                 let mut overlap = 0.0f32;
                 for obstacle in &static_obstacles {
+                    crate::layout::measurements::checkpoint();
                     overlap += overlap_area(&rect, obstacle);
                 }
                 for (other_idx, other_rect_opt) in current_label_rects.iter().enumerate() {
+                    crate::layout::measurements::checkpoint();
                     if other_idx == idx {
                         continue;
                     }
@@ -1949,6 +2005,7 @@ fn apply_flowchart_component_assignment(
         .collect();
     let components = flowchart_entry_components(entries, label_pad_x, label_pad_y);
     for component in components {
+        crate::layout::measurements::checkpoint();
         if component.is_empty() {
             continue;
         }
@@ -1976,6 +2033,7 @@ fn apply_flowchart_component_assignment(
             continue;
         };
         for (entry_idx, center) in assignment {
+            crate::layout::measurements::checkpoint();
             entries[entry_idx].current_center = center;
         }
     }
@@ -2057,13 +2115,16 @@ fn solve_flowchart_component_assignment(
     }];
 
     for &entry_idx in &order {
+        crate::layout::measurements::checkpoint();
         let candidates = &candidate_table[entry_idx];
         if candidates.is_empty() {
             return None;
         }
         let mut next: Vec<FlowchartBeamState> = Vec::new();
         for state in &beam {
+            crate::layout::measurements::checkpoint();
             for (cand_idx, cand) in candidates.iter().enumerate().take(cand_limit) {
+                crate::layout::measurements::checkpoint();
                 if enforce_no_fixed_overlap && cand.fixed_overlap_count > 0 {
                     continue;
                 }
@@ -2126,6 +2187,7 @@ fn solve_flowchart_component_assignment(
                     primary += cand.fixed_overlap_area * 0.005;
                 }
                 for rect in &state.rects {
+                    crate::layout::measurements::checkpoint();
                     let gap = rect_gap(rect, &cand.rect);
                     if gap < 4.0 {
                         let shortage = 4.0 - gap;
@@ -2194,6 +2256,7 @@ fn build_flowchart_candidate_set(
 
     let mut scored: Vec<FlowchartCenterCandidate> = Vec::new();
     for center in centers {
+        crate::layout::measurements::checkpoint();
         let core_rect = flowchart_center_label_rect(
             center,
             entry.label_w,
@@ -2331,7 +2394,9 @@ fn flowchart_entry_components(
 
     let mut neighbors: Vec<Vec<usize>> = vec![Vec::new(); entries.len()];
     for i in 0..entries.len() {
+        crate::layout::measurements::checkpoint();
         for j in (i + 1)..entries.len() {
+            crate::layout::measurements::checkpoint();
             let overlap = overlap_area(&rects[i], &rects[j]) > LABEL_OVERLAP_WIDE_THRESHOLD;
             let near = rect_gap(&rects[i], &rects[j]) <= 24.0;
             if !overlap && !near {
@@ -2345,6 +2410,7 @@ fn flowchart_entry_components(
     let mut components: Vec<Vec<usize>> = Vec::new();
     let mut seen = vec![false; entries.len()];
     for start in 0..entries.len() {
+        crate::layout::measurements::checkpoint();
         if seen[start] {
             continue;
         }
@@ -2352,7 +2418,9 @@ fn flowchart_entry_components(
         let mut stack = vec![start];
         let mut comp = vec![start];
         while let Some(idx) = stack.pop() {
+            crate::layout::measurements::checkpoint();
             for &next in &neighbors[idx] {
+                crate::layout::measurements::checkpoint();
                 if seen[next] {
                     continue;
                 }
@@ -2374,6 +2442,7 @@ fn edge_relative_pose(points: &[(f32, f32)], center: (f32, f32)) -> Option<(f32,
     let mut seg_lengths = Vec::with_capacity(points.len().saturating_sub(1));
     let mut total_len = 0.0f32;
     for seg in points.windows(2) {
+        crate::layout::measurements::checkpoint();
         let dx = seg[1].0 - seg[0].0;
         let dy = seg[1].1 - seg[0].1;
         let len = (dx * dx + dy * dy).sqrt();
@@ -2393,6 +2462,7 @@ fn edge_relative_pose(points: &[(f32, f32)], center: (f32, f32)) -> Option<(f32,
     let mut best_dy = 0.0f32;
     let mut prefix = 0.0f32;
     for (seg_idx, seg) in points.windows(2).enumerate() {
+        crate::layout::measurements::checkpoint();
         let p1 = seg[0];
         let p2 = seg[1];
         let dx = p2.0 - p1.0;
@@ -2443,6 +2513,7 @@ fn edge_nearest_segment_tangent(points: &[(f32, f32)], center: (f32, f32)) -> Op
     let mut best_dist2 = f32::INFINITY;
     let mut best_tangent: Option<(f32, f32)> = None;
     for seg in points.windows(2) {
+        crate::layout::measurements::checkpoint();
         let p1 = seg[0];
         let p2 = seg[1];
         let dx = p2.0 - p1.0;
@@ -2549,6 +2620,7 @@ fn flowchart_path_span(points: &[(f32, f32)]) -> (f32, f32) {
     let mut max_x = f32::NEG_INFINITY;
     let mut max_y = f32::NEG_INFINITY;
     for &(x, y) in points {
+        crate::layout::measurements::checkpoint();
         min_x = min_x.min(x);
         min_y = min_y.min(y);
         max_x = max_x.max(x);
@@ -2578,7 +2650,9 @@ fn flowchart_entry_label_overlap_score(
     let mut total = 0.0f32;
     let mut max = 0.0f32;
     for i in 0..rects.len() {
+        crate::layout::measurements::checkpoint();
         for j in (i + 1)..rects.len() {
+            crate::layout::measurements::checkpoint();
             let overlap = overlap_area(&rects[i], &rects[j]);
             if overlap > LABEL_OVERLAP_WIDE_THRESHOLD {
                 count += 1;
@@ -2623,10 +2697,12 @@ fn flowchart_pair_separation_candidates(
     };
 
     for y in y_refs {
+        crate::layout::measurements::checkpoint();
         push_candidate((left_x, y));
         push_candidate((right_x, y));
     }
     for x in x_refs {
+        crate::layout::measurements::checkpoint();
         push_candidate((x, above_y));
         push_candidate((x, below_y));
     }
@@ -2666,14 +2742,17 @@ fn flowchart_center_label_candidates(
         push_anchor_unique(&mut anchors, anchor);
     }
     for frac in LABEL_ANCHOR_FRACTIONS {
+        crate::layout::measurements::checkpoint();
         if let Some(anchor) = edge_label_anchor_at_fraction(edge, frac) {
             push_anchor_unique(&mut anchors, anchor);
         }
     }
     for anchor in edge_segment_anchors(edge, LABEL_EXTRA_SEGMENT_ANCHORS) {
+        crate::layout::measurements::checkpoint();
         push_anchor_unique(&mut anchors, anchor);
     }
     for anchor in edge_terminal_segment_anchors(edge, 2) {
+        crate::layout::measurements::checkpoint();
         push_anchor_unique(&mut anchors, anchor);
     }
     if anchors.is_empty() {
@@ -2695,6 +2774,7 @@ fn flowchart_center_label_candidates(
         scored_anchors.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
         let mut filtered = Vec::new();
         for (anchor, s_delta) in scored_anchors {
+            crate::layout::measurements::checkpoint();
             if s_delta <= 0.18 || filtered.len() < 3 {
                 filtered.push(anchor);
             }
@@ -2715,6 +2795,7 @@ fn flowchart_center_label_candidates(
         0.0, 0.22, -0.22, 0.55, -0.55, 1.0, -1.0, 1.6, -1.6, 2.3, -2.3, 2.8, -2.8,
     ];
     for (anchor_x, anchor_y, dir_x, dir_y) in anchors {
+        crate::layout::measurements::checkpoint();
         let normal_x = -dir_y;
         let normal_y = dir_x;
         let step_n = if normal_x.abs() > normal_y.abs() {
@@ -2728,9 +2809,11 @@ fn flowchart_center_label_candidates(
             label_h + label_pad_y + step_tangent_pad
         };
         for t in tangent_steps {
+            crate::layout::measurements::checkpoint();
             let base_x = anchor_x + dir_x * step_t * *t;
             let base_y = anchor_y + dir_y * step_t * *t;
             for n in normal_steps {
+                crate::layout::measurements::checkpoint();
                 let center = (
                     base_x + normal_x * step_n * *n,
                     base_y + normal_y * step_n * *n,
@@ -2772,6 +2855,7 @@ fn flowchart_center_label_refine_cost(
     let mut overlap_count = 0u32;
     let mut near_overlap_gap_sum = 0.0f32;
     for other in others {
+        crate::layout::measurements::checkpoint();
         let ov = overlap_area(&obstacle_rect, other);
         if ov > 0.0 {
             overlap_area_sum += ov;
@@ -2788,6 +2872,7 @@ fn flowchart_center_label_refine_cost(
     let mut fixed_overlap_count = 0u32;
     let mut fixed_near_gap_sum = 0.0f32;
     for obstacle in fixed_obstacles {
+        crate::layout::measurements::checkpoint();
         let ov = overlap_area(&obstacle_rect, obstacle);
         if ov > 0.0 {
             fixed_overlap_area += ov;
@@ -2841,6 +2926,7 @@ fn flowchart_center_label_refine_cost(
     let mut foreign_edge_touch = false;
     let mut foreign_edge_near_gap_sum = 0.0f32;
     for edge_obs_idx in edge_grid.query(&obstacle_rect) {
+        crate::layout::measurements::checkpoint();
         let (obs_edge_idx, obs) = edge_obstacles[edge_obs_idx];
         if obs_edge_idx == entry.edge_idx {
             continue;
@@ -2969,6 +3055,7 @@ fn resolve_endpoint_labels(
     );
     let endpoint_node_obstacle_count = endpoint_occupied.len();
     for edge in edges.iter() {
+        crate::layout::measurements::checkpoint();
         if let (Some(label), Some((ax, ay))) = (&edge.label, edge.label_anchor) {
             let rect = (
                 ax - label.width / 2.0 - center_pad_x,
@@ -3004,6 +3091,7 @@ fn resolve_endpoint_labels(
     let mut endpoint_grid = ObstacleGrid::new(48.0, &endpoint_occupied);
 
     for idx in 0..edges.len() {
+        crate::layout::measurements::checkpoint();
         // Start label
         if let Some(label) = edges[idx].start_label.clone() {
             let label_w = label.width * endpoint_label_scale;
@@ -3095,6 +3183,7 @@ fn resolve_endpoint_labels(
 fn edge_path_length(edge: &EdgeLayout) -> f32 {
     let mut total = 0.0f32;
     for pair in edge.points.windows(2) {
+        crate::layout::measurements::checkpoint();
         let dx = pair[1].0 - pair[0].0;
         let dy = pair[1].1 - pair[0].1;
         total += (dx * dx + dy * dy).sqrt();
@@ -3105,6 +3194,7 @@ fn edge_path_length(edge: &EdgeLayout) -> f32 {
 fn polyline_path_length(points: &[(f32, f32)]) -> f32 {
     let mut total = 0.0f32;
     for pair in points.windows(2) {
+        crate::layout::measurements::checkpoint();
         let dx = pair[1].0 - pair[0].0;
         let dy = pair[1].1 - pair[0].1;
         total += (dx * dx + dy * dy).sqrt();
@@ -3136,6 +3226,7 @@ fn point_polyline_distance(point: (f32, f32), points: &[(f32, f32)]) -> f32 {
     }
     let mut best = f32::INFINITY;
     for seg in points.windows(2) {
+        crate::layout::measurements::checkpoint();
         let dist = point_segment_distance(point, seg[0], seg[1]);
         if dist < best {
             best = dist;
@@ -3236,6 +3327,7 @@ fn segment_rect_distance(a: (f32, f32), b: (f32, f32), rect: &Rect) -> f32 {
     let x1 = rect.0 + rect.2;
     let y1 = rect.1 + rect.3;
     for corner in [(x0, y0), (x1, y0), (x1, y1), (x0, y1)] {
+        crate::layout::measurements::checkpoint();
         best = best.min(point_segment_distance(corner, a, b));
     }
     best
@@ -3247,6 +3339,7 @@ fn polyline_rect_distance(points: &[(f32, f32)], rect: &Rect) -> f32 {
     }
     let mut best = f32::INFINITY;
     for seg in points.windows(2) {
+        crate::layout::measurements::checkpoint();
         let dist = segment_rect_distance(seg[0], seg[1], rect);
         if dist < best {
             best = dist;
@@ -3290,6 +3383,7 @@ fn build_label_obstacles(
 ) -> Vec<Rect> {
     let mut occupied: Vec<Rect> = Vec::new();
     for node in nodes.values() {
+        crate::layout::measurements::checkpoint();
         if node.anchor_subgraph.is_some() || node.hidden {
             continue;
         }
@@ -3301,6 +3395,7 @@ fn build_label_obstacles(
         ));
     }
     for sub in subgraphs {
+        crate::layout::measurements::checkpoint();
         if let Some(rect) = subgraph_label_rect(sub, kind, theme) {
             occupied.push((
                 rect.0 - subgraph_label_pad,
@@ -3316,6 +3411,7 @@ fn build_label_obstacles(
 fn build_node_text_obstacles(nodes: &BTreeMap<String, NodeLayout>, pad: f32) -> Vec<Rect> {
     let mut occupied = Vec::new();
     for node in nodes.values() {
+        crate::layout::measurements::checkpoint();
         if node.anchor_subgraph.is_some() || node.hidden {
             continue;
         }
@@ -3337,7 +3433,9 @@ fn build_node_text_obstacles(nodes: &BTreeMap<String, NodeLayout>, pad: f32) -> 
 fn build_edge_obstacles(edges: &[EdgeLayout], pad: f32) -> Vec<EdgeObstacle> {
     let mut obstacles = Vec::new();
     for (idx, edge) in edges.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         for segment in edge.points.windows(2) {
+            crate::layout::measurements::checkpoint();
             let (a, b) = (segment[0], segment[1]);
             let min_x = a.0.min(b.0) - pad;
             let max_x = a.0.max(b.0) + pad;
@@ -3364,6 +3462,7 @@ fn edge_label_anchor(edge: &EdgeLayout) -> (f32, f32, f32, f32) {
     };
 
     for idx in start_idx..end_idx {
+        crate::layout::measurements::checkpoint();
         let p1 = edge.points[idx];
         let p2 = edge.points[idx + 1];
         let dx = p2.0 - p1.0;
@@ -3377,6 +3476,7 @@ fn edge_label_anchor(edge: &EdgeLayout) -> (f32, f32, f32, f32) {
 
     if best_idx.is_none() {
         for idx in 0..segment_count {
+            crate::layout::measurements::checkpoint();
             let p1 = edge.points[idx];
             let p2 = edge.points[idx + 1];
             let dx = p2.0 - p1.0;
@@ -3415,6 +3515,7 @@ fn edge_label_anchor_at_fraction(edge: &EdgeLayout, t: f32) -> Option<(f32, f32,
 
     let mut total_len = 0.0f32;
     for idx in start_idx..end_idx {
+        crate::layout::measurements::checkpoint();
         let p1 = edge.points[idx];
         let p2 = edge.points[idx + 1];
         let dx = p2.0 - p1.0;
@@ -3428,6 +3529,7 @@ fn edge_label_anchor_at_fraction(edge: &EdgeLayout, t: f32) -> Option<(f32, f32,
 
     let mut remaining = total_len * t.clamp(0.0, 1.0);
     for idx in start_idx..end_idx {
+        crate::layout::measurements::checkpoint();
         let p1 = edge.points[idx];
         let p2 = edge.points[idx + 1];
         let dx = p2.0 - p1.0;
@@ -3462,6 +3564,7 @@ fn edge_label_anchor_from_point(
     let mut best_proj: Option<(f32, f32)> = None;
     let mut best_dir: Option<(f32, f32)> = None;
     for segment in edge.points.windows(2) {
+        crate::layout::measurements::checkpoint();
         let p1 = segment[0];
         let p2 = segment[1];
         let dx = p2.0 - p1.0;
@@ -3504,6 +3607,7 @@ fn edge_segment_anchors(edge: &EdgeLayout, max_count: usize) -> Vec<(f32, f32, f
     }
     let mut scored: Vec<(f32, (f32, f32, f32, f32))> = Vec::new();
     for idx in start_idx..end_idx {
+        crate::layout::measurements::checkpoint();
         let p1 = edge.points[idx];
         let p2 = edge.points[idx + 1];
         let dx = p2.0 - p1.0;
@@ -3534,6 +3638,7 @@ fn edge_terminal_segment_anchors(edge: &EdgeLayout, max_count: usize) -> Vec<(f3
     let mut result: Vec<(f32, f32, f32, f32)> = Vec::new();
     let seg_count = edge.points.len() - 1;
     for seg_idx in [0usize, seg_count.saturating_sub(1)] {
+        crate::layout::measurements::checkpoint();
         if result.len() >= max_count {
             break;
         }
@@ -3579,6 +3684,7 @@ fn push_anchor_unique(anchors: &mut Vec<(f32, f32, f32, f32)>, candidate: (f32, 
 fn edge_label_bundle_fractions(edges: &[EdgeLayout]) -> Vec<Option<f32>> {
     let mut bundle_map: HashMap<(String, String), Vec<usize>> = HashMap::new();
     for (idx, edge) in edges.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         if edge.label.is_none() {
             continue;
         }
@@ -3589,6 +3695,7 @@ fn edge_label_bundle_fractions(edges: &[EdgeLayout]) -> Vec<Option<f32>> {
     }
     let mut preferred = vec![None; edges.len()];
     for indices in bundle_map.values_mut() {
+        crate::layout::measurements::checkpoint();
         if indices.len() <= 1 {
             continue;
         }
@@ -3598,6 +3705,7 @@ fn edge_label_bundle_fractions(edges: &[EdgeLayout]) -> Vec<Option<f32>> {
         let right = 0.84f32;
         let span = (right - left).max(0.0);
         for (rank, edge_idx) in indices.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             let fraction = if count == 2 {
                 if rank == 0 { 0.34 } else { 0.66 }
             } else {
@@ -3623,6 +3731,7 @@ fn overlap_stats(rect: Rect, obstacles: &[Rect], threshold: f32) -> (u32, f32) {
     let mut count = 0u32;
     let mut area = 0.0f32;
     for obstacle in obstacles {
+        crate::layout::measurements::checkpoint();
         let ov = overlap_area(&rect, obstacle);
         if ov > threshold {
             count += 1;
@@ -3727,12 +3836,15 @@ impl ObstacleGrid {
         let cell = cell.max(16.0);
         let mut cells: HashMap<(i32, i32), Vec<usize>> = HashMap::new();
         for (i, rect) in rects.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             let x0 = (rect.0 / cell).floor() as i32;
             let y0 = (rect.1 / cell).floor() as i32;
             let x1 = ((rect.0 + rect.2) / cell).floor() as i32;
             let y1 = ((rect.1 + rect.3) / cell).floor() as i32;
             for ix in x0..=x1 {
+                crate::layout::measurements::checkpoint();
                 for iy in y0..=y1 {
+                    crate::layout::measurements::checkpoint();
                     cells.entry((ix, iy)).or_default().push(i);
                 }
             }
@@ -3747,7 +3859,9 @@ impl ObstacleGrid {
         let x1 = ((rect.0 + rect.2) / self.cell).floor() as i32;
         let y1 = ((rect.1 + rect.3) / self.cell).floor() as i32;
         for ix in x0..=x1 {
+            crate::layout::measurements::checkpoint();
             for iy in y0..=y1 {
+                crate::layout::measurements::checkpoint();
                 self.cells.entry((ix, iy)).or_default().push(idx);
             }
         }
@@ -3861,6 +3975,7 @@ fn label_penalties(
     let mut foreign_edge_overlap = 0.0f32;
     let mut foreign_edge_touch = false;
     for i in ctx.occupied_grid.query(&rect) {
+        crate::layout::measurements::checkpoint();
         let ov = overlap_area(&rect, &ctx.occupied[i]);
         if ov > 0.0 {
             let weight = if i < ctx.node_obstacle_count {
@@ -3876,6 +3991,7 @@ fn label_penalties(
         }
     }
     for i in ctx.edge_grid.query(&rect) {
+        crate::layout::measurements::checkpoint();
         let (idx, ref obs) = ctx.edge_obstacles[i];
         if idx == ctx.edge_idx {
             continue;
@@ -4057,9 +4173,11 @@ fn edge_endpoint_label_position_with_avoid(
         bounds: ctx.bounds,
     };
     for &along in along_steps {
+        crate::layout::measurements::checkpoint();
         let base_x = p0.0 + dir_x * offset * (1.4 + along);
         let base_y = p0.1 + dir_y * offset * (1.4 + along);
         for &step in perp_steps {
+            crate::layout::measurements::checkpoint();
             let x = base_x + perp_x * offset * step;
             let y = base_y + perp_y * offset * step;
             let rect = (

@@ -361,6 +361,7 @@ pub(super) fn edge_sides_balanced(
     let mut best_score = f32::MAX;
     let mut best_tiebreak = f32::MAX;
     for (start_side, end_side, is_backward) in options {
+        crate::layout::measurements::checkpoint();
         let from_load = side_load_for_node(side_loads, from_id, start_side) as f32;
         let to_load = side_load_for_node(side_loads, to_id, end_side) as f32;
         let load_score = from_load * from_load + to_load * to_load + (from_load + to_load) * 0.5;
@@ -668,6 +669,7 @@ impl EdgeOccupancy {
     pub(super) fn score_path(&self, points: &[(f32, f32)]) -> u32 {
         let mut score = 0u32;
         for segment in points.windows(2) {
+            crate::layout::measurements::checkpoint();
             let (x1, y1) = segment[0];
             let (x2, y2) = segment[1];
             let dx = x2 - x1;
@@ -676,6 +678,7 @@ impl EdgeOccupancy {
             let steps = ((len / self.cell).ceil() as usize).max(1);
             let stride = if steps > 32 { (steps / 32).max(1) } else { 1 };
             for i in (0..=steps).step_by(stride) {
+                crate::layout::measurements::checkpoint();
                 let t = i as f32 / steps as f32;
                 let x = x1 + dx * t;
                 let y = y1 + dy * t;
@@ -690,6 +693,7 @@ impl EdgeOccupancy {
     pub(super) fn overlap_count(&self, points: &[(f32, f32)]) -> u32 {
         let mut count = 0u32;
         for segment in points.windows(2) {
+            crate::layout::measurements::checkpoint();
             let (x1, y1) = segment[0];
             let (x2, y2) = segment[1];
             let dx = x2 - x1;
@@ -697,6 +701,7 @@ impl EdgeOccupancy {
             let len = (dx * dx + dy * dy).sqrt();
             let steps = ((len / self.cell).ceil() as usize).max(1);
             for i in 0..=steps {
+                crate::layout::measurements::checkpoint();
                 let t = i as f32 / steps as f32;
                 let x = x1 + dx * t;
                 let y = y1 + dy * t;
@@ -717,6 +722,7 @@ impl EdgeOccupancy {
     pub(super) fn add_path_with_weight(&mut self, points: &[(f32, f32)], multiplier: u16) {
         let multiplier = multiplier.max(1);
         for segment in points.windows(2) {
+            crate::layout::measurements::checkpoint();
             let (x1, y1) = segment[0];
             let (x2, y2) = segment[1];
             let dx = x2 - x1;
@@ -724,12 +730,15 @@ impl EdgeOccupancy {
             let len = (dx * dx + dy * dy).sqrt();
             let steps = ((len / self.cell).ceil() as usize).max(1);
             for i in 0..=steps {
+                crate::layout::measurements::checkpoint();
                 let t = i as f32 / steps as f32;
                 let x = x1 + dx * t;
                 let y = y1 + dy * t;
                 let (ix, iy) = self.cell_index(x, y);
                 for dx_cell in -1i32..=1 {
+                    crate::layout::measurements::checkpoint();
                     for dy_cell in -1i32..=1 {
+                        crate::layout::measurements::checkpoint();
                         let weight = match (dx_cell.abs(), dy_cell.abs()) {
                             (0, 0) => 3u16,
                             (1, 0) | (0, 1) => 2u16,
@@ -747,6 +756,7 @@ impl EdgeOccupancy {
 
     pub(super) fn merge_from(&mut self, other: &EdgeOccupancy) {
         for (cell, weight) in &other.weights {
+            crate::layout::measurements::checkpoint();
             let entry = self.weights.entry(*cell).or_insert(0);
             *entry = entry.saturating_add(*weight);
         }
@@ -785,6 +795,7 @@ impl RoutingGrid {
         let mut max_x = f32::MIN;
         let mut max_y = f32::MIN;
         for obs in obstacles {
+            crate::layout::measurements::checkpoint();
             min_x = min_x.min(obs.x);
             min_y = min_y.min(obs.y);
             max_x = max_x.max(obs.x + obs.width);
@@ -809,6 +820,7 @@ impl RoutingGrid {
         }
         let mut cell_obstacles = vec![Vec::new(); (cols * rows) as usize];
         for (idx, obs) in obstacles.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             let start_x = ((obs.x - min_x) / cell).floor().max(0.0) as i32;
             let end_x = ((obs.x + obs.width - min_x) / cell)
                 .floor()
@@ -818,7 +830,9 @@ impl RoutingGrid {
                 .floor()
                 .min((rows - 1) as f32) as i32;
             for iy in start_y..=end_y {
+                crate::layout::measurements::checkpoint();
                 for ix in start_x..=end_x {
+                    crate::layout::measurements::checkpoint();
                     let cell_idx = (iy * cols + ix) as usize;
                     cell_obstacles[cell_idx].push(idx);
                 }
@@ -1041,6 +1055,7 @@ pub(super) fn cell_blocked(
 ) -> bool {
     let (cx, cy) = grid.cell_center(ix, iy);
     for &obs_idx in grid.cell_obstacle_indices(ix, iy) {
+        crate::layout::measurements::checkpoint();
         let obstacle = &obstacles[obs_idx];
         if obstacle.id == ctx.from_id || obstacle.id == ctx.to_id {
             continue;
@@ -1090,6 +1105,7 @@ pub(super) fn insert_label_via_point(
     let mut best_idx = None;
     let mut best_delta = f32::INFINITY;
     for i in 1..points.len() {
+        crate::layout::measurements::checkpoint();
         let a = points[i - 1];
         let b = points[i];
         let base_len = ((b.0 - a.0).powi(2) + (b.1 - a.1).powi(2)).sqrt();
@@ -1125,6 +1141,7 @@ pub(super) fn compress_path(points: &[(f32, f32)]) -> Vec<(f32, f32)> {
     let mut out: Vec<(f32, f32)> = Vec::with_capacity(points.len());
     out.push(points[0]);
     for idx in 1..points.len() - 1 {
+        crate::layout::measurements::checkpoint();
         let prev = out[out.len() - 1];
         let curr = points[idx];
         if (curr.0 - prev.0).abs() <= 1e-4 && (curr.1 - prev.1).abs() <= 1e-4 {
@@ -1210,6 +1227,7 @@ pub(super) fn route_edge_with_grid(
     let mut heap = BinaryHeap::new();
 
     for dir in 0..4u8 {
+        crate::layout::measurements::checkpoint();
         let idx = ((start_iy * cols + start_ix) as usize) * 4 + dir as usize;
         best_cost[idx] = 0;
         heap.push(GridEntry {
@@ -1227,6 +1245,7 @@ pub(super) fn route_edge_with_grid(
     let mut steps = 0usize;
 
     while let Some(entry) = heap.pop() {
+        super::measurements::checkpoint();
         steps += 1;
         if steps > max_steps {
             break;
@@ -1241,6 +1260,7 @@ pub(super) fn route_edge_with_grid(
             break;
         }
         for (dir_idx, (dx, dy)) in dirs.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             let nx = state.x + dx;
             let ny = state.y + dy;
             if nx < 0 || ny < 0 || nx >= cols || ny >= rows {
@@ -1289,6 +1309,7 @@ pub(super) fn route_edge_with_grid(
     let mut cells: Vec<(i32, i32)> = Vec::new();
     let mut cur = end_state;
     loop {
+        crate::layout::measurements::checkpoint();
         cells.push((cur.x, cur.y));
         let cur_idx = ((cur.y * cols + cur.x) as usize) * 4 + cur.dir as usize;
         if let Some(prev_state) = prev[cur_idx] {
@@ -1313,6 +1334,7 @@ pub(super) fn route_edge_with_grid(
         points.push((cx, cy));
     }
     for &(ix, iy) in cells.iter().skip(1) {
+        crate::layout::measurements::checkpoint();
         points.push(grid.cell_center(ix, iy));
     }
     if let Some((ix, iy)) = cells.last() {
@@ -1333,6 +1355,7 @@ fn push_route_candidate(
     use_existing: bool,
     candidates: &mut Vec<RouteCandidate>,
 ) {
+    super::measurements::checkpoint();
     if points.len() < 2 || !path_coords_reasonable(&points) {
         return;
     }
@@ -1409,6 +1432,7 @@ fn path_endpoint_intrusions(points: &[(f32, f32)], ctx: &RouteContext<'_>) -> us
     // for free, which later forces ugly orbit-shaped endpoint repairs.
     let mut hits = 0usize;
     for segment in points.windows(2) {
+        crate::layout::measurements::checkpoint();
         if segment_hits_node_shape_interior(segment[0], segment[1], ctx.from) {
             hits += 1;
         }
@@ -1486,6 +1510,7 @@ pub(super) fn polyline_point_distance(points: &[(f32, f32)], point: (f32, f32)) 
     }
     let mut best = f32::INFINITY;
     for segment in points.windows(2) {
+        crate::layout::measurements::checkpoint();
         best = best.min(point_segment_distance(segment[0], segment[1], point));
     }
     best
@@ -1532,6 +1557,7 @@ fn push_preferred_label_detour_candidates(
             (right, left)
         };
         for y in [top, bottom] {
+            crate::layout::measurements::checkpoint();
             push_route_candidate(
                 vec![
                     route_start,
@@ -1555,6 +1581,7 @@ fn push_preferred_label_detour_candidates(
             (bottom, top)
         };
         for x in [left, right] {
+            crate::layout::measurements::checkpoint();
             push_route_candidate(
                 vec![
                     route_start,
@@ -1633,6 +1660,7 @@ fn push_reserved_channel_candidates(
     channels.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(Ordering::Equal));
 
     for (_, channel) in channels.into_iter().take(8) {
+        crate::layout::measurements::checkpoint();
         let points = match channel.axis {
             ReservedRoutingChannelAxis::Vertical => {
                 let x = channel.coord;
@@ -1662,6 +1690,7 @@ fn obstacle_bounds_for_exterior_fallback(
     let mut any = false;
 
     for obstacle in ctx.obstacles.iter().chain(ctx.label_obstacles.iter()) {
+        crate::layout::measurements::checkpoint();
         if !obstacle.x.is_finite()
             || !obstacle.y.is_finite()
             || !obstacle.width.is_finite()
@@ -1702,6 +1731,7 @@ fn push_exterior_fallback_candidates(
     let bottom = max_y + pad;
 
     for x in [left, right] {
+        crate::layout::measurements::checkpoint();
         push_route_candidate(
             vec![route_start, (x, route_start.1), (x, route_end.1), route_end],
             ctx,
@@ -1711,6 +1741,7 @@ fn push_exterior_fallback_candidates(
         );
     }
     for y in [top, bottom] {
+        crate::layout::measurements::checkpoint();
         push_route_candidate(
             vec![route_start, (route_start.0, y), (route_end.0, y), route_end],
             ctx,
@@ -1720,7 +1751,9 @@ fn push_exterior_fallback_candidates(
         );
     }
     for x in [left, right] {
+        crate::layout::measurements::checkpoint();
         for y in [top, bottom] {
+            crate::layout::measurements::checkpoint();
             push_route_candidate(
                 vec![
                     route_start,
@@ -1757,6 +1790,7 @@ pub(super) fn route_edge_with_avoidance(
     grid: Option<&RoutingGrid>,
     existing: Option<&[Segment]>,
 ) -> Vec<(f32, f32)> {
+    super::measurements::checkpoint();
     if ctx.from_id == ctx.to_id {
         let existing_segments = existing.unwrap_or(&[]);
         let use_existing = !existing_segments.is_empty();
@@ -1764,6 +1798,7 @@ pub(super) fn route_edge_with_avoidance(
 
         let pad = ctx.config.node_spacing.max(ROUTING_PAD_MIN_SPACING) * ROUTING_PAD_RATIO;
         for points in route_self_loop_candidates(ctx.from, pad) {
+            crate::layout::measurements::checkpoint();
             push_route_candidate(
                 points,
                 ctx,
@@ -1787,6 +1822,7 @@ pub(super) fn route_edge_with_avoidance(
         let mut best_idx = None;
         let mut best_key = None;
         for (idx, candidate) in candidates.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             let occupancy_score = occupancy.map(|grid| grid.score_path(&candidate.points));
             let key = route_candidate_key(candidate, occupancy_score);
             let better = route_candidate_better(ctx, key, best_key);
@@ -1843,6 +1879,7 @@ pub(super) fn route_edge_with_avoidance(
         let mut min_top = f32::MAX;
         let mut max_bottom = 0.0f32;
         for obstacle in ctx.obstacles {
+            crate::layout::measurements::checkpoint();
             if obstacle.id == ctx.from_id || obstacle.id == ctx.to_id {
                 continue;
             }
@@ -2017,6 +2054,7 @@ pub(super) fn route_edge_with_avoidance(
     let step = ctx.config.node_spacing.max(ORTHO_STEP_MIN_SPACING) * ROUTING_PAD_RATIO;
     let mut offsets = vec![ctx.base_offset];
     for i in 1..=6 {
+        crate::layout::measurements::checkpoint();
         let delta = step * i as f32;
         offsets.push(ctx.base_offset + delta);
         offsets.push(ctx.base_offset - delta);
@@ -2033,6 +2071,7 @@ pub(super) fn route_edge_with_avoidance(
         || (ctx.start_side == ctx.end_side && ctx.obstacles.len() > 4);
 
     for (offset_rank, offset) in offsets.iter().copied().enumerate() {
+        crate::layout::measurements::checkpoint();
         if is_horizontal(ctx.direction) {
             let mid_x = (route_start.0 + route_end.0) / 2.0 + offset;
             let points = vec![
@@ -2184,6 +2223,7 @@ pub(super) fn route_edge_with_avoidance(
         let mut best_bends = usize::MAX;
         let mut best_len = f32::MAX;
         for (idx, candidate) in candidates.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             let score = occ.score_path(&candidate.points);
             let bends = candidate.bends;
             let len = candidate.len;
@@ -2219,8 +2259,10 @@ pub(super) fn route_edge_with_avoidance(
 
     if min_hits > 0 || needs_detour {
         for i in 7..=9 {
+            crate::layout::measurements::checkpoint();
             let delta = step * i as f32;
             for sign in [1.0, -1.0] {
+                crate::layout::measurements::checkpoint();
                 let offset = ctx.base_offset + sign * delta;
                 let points = if is_horizontal(ctx.direction) {
                     let mid_x = (route_start.0 + route_end.0) / 2.0 + offset;
@@ -2319,6 +2361,7 @@ pub(super) fn route_edge_with_avoidance(
         let mut best_idx = None;
         let mut best_key = None;
         for (idx, candidate) in candidates.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             let key = route_candidate_key(candidate, Some(grid.score_path(&candidate.points)));
             let better = route_candidate_better(ctx, key, best_key);
             if better {
@@ -2336,6 +2379,7 @@ pub(super) fn route_edge_with_avoidance(
     let mut best_idx = None;
     let mut best_key = None;
     for (idx, candidate) in candidates.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         let key = route_candidate_key(candidate, None);
         let better = route_candidate_better(ctx, key, best_key);
         if better {
@@ -2361,8 +2405,10 @@ pub(super) fn path_obstacle_intersections(
     }
     let mut count = 0usize;
     for segment in points.windows(2) {
+        crate::layout::measurements::checkpoint();
         let (a, b) = (segment[0], segment[1]);
         for obstacle in obstacles {
+            crate::layout::measurements::checkpoint();
             if obstacle.id == from_id || obstacle.id == to_id {
                 continue;
             }
@@ -2389,8 +2435,10 @@ pub(super) fn path_label_intersections(
     }
     let mut count = 0usize;
     for segment in points.windows(2) {
+        crate::layout::measurements::checkpoint();
         let (a, b) = (segment[0], segment[1]);
         for obstacle in label_obstacles {
+            crate::layout::measurements::checkpoint();
             if ignore_label_id.is_some_and(|id| id == obstacle.id) {
                 continue;
             }
@@ -2414,8 +2462,10 @@ fn path_obstacle_near_intersections(
     }
     let mut count = 0usize;
     for segment in points.windows(2) {
+        crate::layout::measurements::checkpoint();
         let (a, b) = (segment[0], segment[1]);
         for obstacle in obstacles {
+            crate::layout::measurements::checkpoint();
             if obstacle.id == from_id || obstacle.id == to_id {
                 continue;
             }
@@ -2454,8 +2504,10 @@ fn path_label_near_intersections(
     }
     let mut count = 0usize;
     for segment in points.windows(2) {
+        crate::layout::measurements::checkpoint();
         let (a, b) = (segment[0], segment[1]);
         for obstacle in label_obstacles {
+            crate::layout::measurements::checkpoint();
             if ignore_label_id.is_some_and(|id| id == obstacle.id) {
                 continue;
             }
@@ -2504,9 +2556,11 @@ fn path_existing_proximity_penalty(
     }
     let mut penalty = 0.0f32;
     for segment in points.windows(2) {
+        crate::layout::measurements::checkpoint();
         let a1 = segment[0];
         let a2 = segment[1];
         for &(b1, b2) in existing_segments {
+            crate::layout::measurements::checkpoint();
             let dist = segment_to_segment_distance(a1, a2, b1, b2);
             if dist < clearance {
                 penalty += (clearance - dist) / clearance;
@@ -2609,6 +2663,7 @@ pub(super) fn build_obstacles(
     let mut obstacles = Vec::new();
     let pad = (config.node_spacing * OBSTACLE_PAD_RATIO).max(OBSTACLE_PAD_MIN);
     for node in nodes.values() {
+        crate::layout::measurements::checkpoint();
         if node.hidden {
             continue;
         }
@@ -2626,6 +2681,7 @@ pub(super) fn build_obstacles(
     }
 
     for (idx, sub) in subgraphs.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         let invisible_region = sub.label.trim().is_empty()
             && sub.style.stroke.as_deref() == Some("none")
             && sub.style.fill.as_deref() == Some("none");
@@ -2634,6 +2690,7 @@ pub(super) fn build_obstacles(
         }
         let mut members: HashSet<String> = sub.nodes.iter().cloned().collect();
         for node in nodes.values() {
+            crate::layout::measurements::checkpoint();
             if node.anchor_subgraph == Some(idx) {
                 members.insert(node.id.clone());
             }
@@ -2658,6 +2715,7 @@ pub(super) fn build_label_obstacles_for_routing(
 
     let node_pad = LABEL_OBSTACLE_NODE_PAD;
     for node in nodes.values() {
+        crate::layout::measurements::checkpoint();
         if node.hidden || node.anchor_subgraph.is_some() {
             continue;
         }
@@ -2681,6 +2739,7 @@ pub(super) fn build_label_obstacles_for_routing(
 
     let sub_pad = LABEL_OBSTACLE_SUB_PAD;
     for sub in subgraphs {
+        crate::layout::measurements::checkpoint();
         if sub.label.trim().is_empty()
             || sub.label_block.width <= 0.0
             || sub.label_block.height <= 0.0
@@ -2716,6 +2775,7 @@ pub(super) fn build_edge_pair_counts(
 ) -> HashMap<(String, String), usize> {
     let mut counts: HashMap<(String, String), usize> = HashMap::new();
     for edge in edges {
+        crate::layout::measurements::checkpoint();
         let key = edge_pair_key(edge);
         *counts.entry(key).or_insert(0) += 1;
     }
@@ -2764,9 +2824,11 @@ pub(super) fn edge_crossings_with_existing(
     let mut crossings = 0usize;
     let mut overlap = 0.0f32;
     for segment in points.windows(2) {
+        crate::layout::measurements::checkpoint();
         let a1 = segment[0];
         let a2 = segment[1];
         for &(b1, b2) in existing {
+            crate::layout::measurements::checkpoint();
             if (a1.0 - b1.0).abs() < 1e-6 && (a1.1 - b1.1).abs() < 1e-6
                 || (a1.0 - b2.0).abs() < 1e-6 && (a1.1 - b2.1).abs() < 1e-6
                 || (a2.0 - b1.0).abs() < 1e-6 && (a2.1 - b1.1).abs() < 1e-6

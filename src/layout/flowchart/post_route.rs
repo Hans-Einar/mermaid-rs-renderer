@@ -64,6 +64,7 @@ pub(in crate::layout) fn build_edge_layouts(
 ) -> Vec<EdgeLayout> {
     let mut edges = Vec::with_capacity(graph.edges.len());
     for (idx, edge) in graph.edges.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         let label = edge_route_labels[idx].clone();
         let start_label = edge_start_labels[idx].clone();
         let end_label = edge_end_labels[idx].clone();
@@ -166,6 +167,7 @@ fn segment_intersects_rect(a: (f32, f32), b: (f32, f32), rect: (f32, f32, f32, f
     let mut u1 = 0.0f32;
     let mut u2 = 1.0f32;
     for (pi, qi) in p.into_iter().zip(q) {
+        crate::layout::measurements::checkpoint();
         if pi.abs() <= f32::EPSILON {
             if qi < 0.0 {
                 return false;

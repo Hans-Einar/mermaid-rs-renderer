@@ -48,6 +48,7 @@ fn weighted_median_center(values: &mut [(f32, f32)]) -> Option<f32> {
     let threshold = total_weight * 0.5;
     let mut cumulative = 0.0;
     for idx in 0..values.len() {
+        crate::layout::measurements::checkpoint();
         let (center, weight) = values[idx];
         cumulative += weight.max(0.0);
         if (cumulative - threshold).abs() <= f32::EPSILON {
@@ -110,6 +111,7 @@ fn flowchart_label_main_gap_budgets(
     let mut label_counts: HashMap<usize, usize> = HashMap::new();
 
     for (idx, edge) in layout_edges.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         let Some(label) = edge_labels.get(idx).and_then(|label| label.as_ref()) else {
             continue;
         };
@@ -169,6 +171,7 @@ fn build_ordering_edges(
     let mut ordering_edges: Vec<crate::ir::Edge> = Vec::new();
 
     for (edge_idx, edge) in layout_edges.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         let Some(&from_rank) = shifted_ranks.get(&edge.from) else {
             continue;
         };
@@ -187,6 +190,7 @@ fn build_ordering_edges(
         let label_dummy_info = label_dummy_at_rank.get(&edge_idx);
         let mut prev = edge.from.clone();
         for step in 1..span {
+            crate::layout::measurements::checkpoint();
             let current_rank = from_rank + step;
             let dummy_id = if let Some((lr, lid)) = label_dummy_info {
                 if current_rank == *lr {
@@ -265,7 +269,9 @@ fn balance_rank_cross_offsets(
     }
     let mut rank_by_id = HashMap::new();
     for (rank, bucket) in rank_nodes.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         for id in bucket {
+            crate::layout::measurements::checkpoint();
             rank_by_id.insert(id.as_str(), rank);
         }
     }
@@ -278,14 +284,17 @@ fn balance_rank_cross_offsets(
     };
     let max_shift = (node_spacing * 1.5).max(12.0);
     for pass in 0..passes.max(2) {
+        crate::layout::measurements::checkpoint();
         let ranks: Vec<usize> = if pass % 2 == 0 {
             (1..rank_nodes.len()).collect()
         } else {
             (1..rank_nodes.len()).rev().collect()
         };
         for rank in ranks {
+            crate::layout::measurements::checkpoint();
             let mut deltas = Vec::new();
             for edge in ordering_edges {
+                crate::layout::measurements::checkpoint();
                 let Some(&from_rank) = rank_by_id.get(edge.from.as_str()) else {
                     continue;
                 };
@@ -313,6 +322,7 @@ fn balance_rank_cross_offsets(
                 continue;
             }
             for id in &rank_nodes[rank] {
+                crate::layout::measurements::checkpoint();
                 if let Some(node) = nodes.get_mut(id) {
                     if is_horizontal(direction) {
                         node.y += shift;
@@ -383,6 +393,7 @@ pub(in crate::layout) fn assign_positions_manual(
     if graph.kind == DiagramKind::Class {
         let mut hierarchy_nodes: HashSet<String> = HashSet::new();
         for edge in &layout_edges {
+            crate::layout::measurements::checkpoint();
             let has_open_triangle = matches!(
                 edge.arrow_start_kind,
                 Some(crate::ir::EdgeArrowhead::OpenTriangle)
@@ -403,12 +414,14 @@ pub(in crate::layout) fn assign_positions_manual(
                 .unwrap_or(0);
             let mut pending_updates: Vec<(String, usize)> = Vec::new();
             for node_id in layout_node_ids {
+                crate::layout::measurements::checkpoint();
                 if hierarchy_nodes.contains(node_id) {
                     continue;
                 }
                 let mut sum = 0.0f32;
                 let mut count = 0usize;
                 for edge in &layout_edges {
+                    crate::layout::measurements::checkpoint();
                     if edge.from == *node_id {
                         if let Some(rank) = ranks.get(&edge.to) {
                             sum += *rank as f32;
@@ -432,16 +445,19 @@ pub(in crate::layout) fn assign_positions_manual(
                 }
             }
             for (node_id, rank) in pending_updates {
+                crate::layout::measurements::checkpoint();
                 ranks.insert(node_id, rank);
             }
         }
     }
     let mut max_rank = 0usize;
     for rank in ranks.values() {
+        crate::layout::measurements::checkpoint();
         max_rank = max_rank.max(*rank);
     }
     let mut rank_nodes: Vec<Vec<String>> = vec![Vec::new(); max_rank + 1];
     for node_id in layout_node_ids {
+        crate::layout::measurements::checkpoint();
         let rank = *ranks.get(node_id).unwrap_or(&0);
         if let Some(bucket) = rank_nodes.get_mut(rank) {
             bucket.push(node_id.clone());
@@ -459,6 +475,7 @@ pub(in crate::layout) fn assign_positions_manual(
     let gaps_needing_label_rank: Vec<usize> = if use_label_dummies {
         let mut gap_set: HashSet<usize> = HashSet::new();
         for (idx, edge) in layout_edges.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             if edge_labels[idx].is_none() {
                 continue;
             }
@@ -482,6 +499,7 @@ pub(in crate::layout) fn assign_positions_manual(
     {
         let mut cumulative = 0;
         for r in 0..=max_rank {
+            crate::layout::measurements::checkpoint();
             rank_shift[r] = cumulative;
             if gaps_needing_label_rank.contains(&r) {
                 cumulative += 1;
@@ -499,6 +517,7 @@ pub(in crate::layout) fn assign_positions_manual(
         let new_max_rank = max_rank + total_new_ranks;
         let mut new_rank_nodes: Vec<Vec<String>> = vec![Vec::new(); new_max_rank + 1];
         for (old_rank, bucket) in rank_nodes.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             let new_rank = old_rank + rank_shift[old_rank];
             new_rank_nodes[new_rank] = bucket.clone();
         }
@@ -511,6 +530,7 @@ pub(in crate::layout) fn assign_positions_manual(
 
     if use_label_dummies {
         for (idx, edge) in layout_edges.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             let Some(label) = &edge_labels[idx] else {
                 continue;
             };
@@ -587,6 +607,7 @@ pub(in crate::layout) fn assign_positions_manual(
 
     let mut label_dummy_at_rank: HashMap<usize, (usize, String)> = HashMap::new();
     for (idx, edge) in layout_edges.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         if edge_labels[idx].is_none() {
             continue;
         }
@@ -628,6 +649,7 @@ pub(in crate::layout) fn assign_positions_manual(
     );
 
     for bucket in &mut rank_nodes {
+        crate::layout::measurements::checkpoint();
         bucket.sort_by_key(|id| order_map.get(id).copied().unwrap_or(usize::MAX));
     }
     match config.flowchart.engine {
@@ -647,9 +669,11 @@ pub(in crate::layout) fn assign_positions_manual(
 
     let mut main_cursor = 0.0;
     for (rank_idx, bucket) in rank_nodes.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         let mut max_main: f32 = 0.0;
         let is_label_rank = label_dummy_ranks.contains(&rank_idx);
         for node_id in bucket {
+            crate::layout::measurements::checkpoint();
             if let Some(node_layout) = nodes.get_mut(node_id) {
                 if is_horizontal(graph.direction) {
                     node_layout.x = main_cursor;
@@ -678,6 +702,7 @@ pub(in crate::layout) fn assign_positions_manual(
     let mut incoming_weighted: HashMap<String, Vec<(String, f32)>> = HashMap::new();
     let mut outgoing_weighted: HashMap<String, Vec<(String, f32)>> = HashMap::new();
     for edge in &ordering_edges {
+        crate::layout::measurements::checkpoint();
         incoming
             .entry(edge.to.clone())
             .or_default()
@@ -702,7 +727,9 @@ pub(in crate::layout) fn assign_positions_manual(
 
     let mut cross_pos: HashMap<String, f32> = HashMap::new();
     for bucket in &rank_nodes {
+        crate::layout::measurements::checkpoint();
         for (idx, node_id) in bucket.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             if let Some(node) = nodes.get(node_id) {
                 let center = if is_horizontal(graph.direction) {
                     node.y + node.height / 2.0
@@ -731,6 +758,7 @@ pub(in crate::layout) fn assign_positions_manual(
         };
         let mut entries: Vec<(String, f32, f32, usize)> = Vec::new();
         for (idx, node_id) in bucket.iter().enumerate() {
+            crate::layout::measurements::checkpoint();
             let Some(node) = nodes.get(node_id) else {
                 continue;
             };
@@ -738,6 +766,7 @@ pub(in crate::layout) fn assign_positions_manual(
             let mut weighted_neighbor_centers: Vec<(f32, f32)> = Vec::new();
             if let Some(list) = neighbors.get(node_id) {
                 for neighbor_id in list {
+                    crate::layout::measurements::checkpoint();
                     if let Some(center) = cross_pos.get(neighbor_id) {
                         neighbor_centers.push(*center);
                     }
@@ -745,6 +774,7 @@ pub(in crate::layout) fn assign_positions_manual(
             }
             if let Some(list) = weighted_neighbors.get(node_id) {
                 for (neighbor_id, weight) in list {
+                    crate::layout::measurements::checkpoint();
                     if let Some(center) = cross_pos.get(neighbor_id) {
                         weighted_neighbor_centers.push((*center, *weight));
                     }
@@ -789,6 +819,7 @@ pub(in crate::layout) fn assign_positions_manual(
         let mut prev_center: Option<f32> = None;
         let mut prev_half = 0.0;
         for (node_id, desired, half, _idx) in entries {
+            crate::layout::measurements::checkpoint();
             let center = if let Some(prev) = prev_center {
                 let min_center = prev + prev_half + half + config.node_spacing;
                 if desired < min_center {
@@ -806,6 +837,7 @@ pub(in crate::layout) fn assign_positions_manual(
         let actual_mean = assigned.iter().map(|(_, c, _)| *c).sum::<f32>() / assigned.len() as f32;
         let delta = desired_mean - actual_mean;
         for (node_id, center, _half) in assigned {
+            crate::layout::measurements::checkpoint();
             let center = center + delta;
             if let Some(node) = nodes.get_mut(&node_id) {
                 if is_horizontal(graph.direction) {
@@ -819,10 +851,13 @@ pub(in crate::layout) fn assign_positions_manual(
     };
 
     for _ in 0..config.flowchart.order_passes.max(1) {
+        crate::layout::measurements::checkpoint();
         for rank_idx in 0..rank_nodes.len() {
+            crate::layout::measurements::checkpoint();
             place_rank(rank_idx, true, nodes);
         }
         for rank_idx in (0..rank_nodes.len()).rev() {
+            crate::layout::measurements::checkpoint();
             place_rank(rank_idx, false, nodes);
         }
     }
@@ -841,7 +876,9 @@ pub(in crate::layout) fn assign_positions_manual(
     }
     let mut rank_by_id: HashMap<&str, usize> = HashMap::new();
     for (rank, bucket) in rank_nodes.iter().enumerate() {
+        crate::layout::measurements::checkpoint();
         for id in bucket {
+            crate::layout::measurements::checkpoint();
             rank_by_id.insert(id.as_str(), rank);
         }
     }
