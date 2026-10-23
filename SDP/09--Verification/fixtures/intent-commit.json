@@ -1,0 +1,23 @@
+{
+  "contract": "BX-HOST/0.1-draft1",
+  "key": {
+    "session": "test-session",
+    "epoch": "1",
+    "blockId": "activity-demo",
+    "incarnation": "1",
+    "sourceRevision": "1",
+    "bindingRevision": "1",
+    "stateRevision": "1",
+    "viewportRevision": "1",
+    "themeRevision": "1",
+    "frameSequence": "1"
+  },
+  "widgetId": "context-input",
+  "bindingId": "set-context",
+  "contextRevision": "ctx-1",
+  "eventId": "event-2",
+  "commandId": "command-2",
+  "action": "commit",
+  "value": "C2",
+  "expectedValueRevision": "1"
+}

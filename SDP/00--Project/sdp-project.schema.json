@@ -1,0 +1,662 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SDP System Development pilot project manifest 0.1",
+  "description": "Pilot shape contract. Identity resolution, path confinement, file existence and readiness dependencies require semantic checks.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schemaVersion": {
+      "const": "0.1"
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "const": "sdp-system-development-pilot"
+        },
+        "version": {
+          "const": "0.1"
+        },
+        "status": {
+          "const": "pilot"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "status"
+      ]
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "branchAtCapture": {
+          "type": "string",
+          "minLength": 1
+        },
+        "headAtCapture": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "repository",
+        "branchAtCapture",
+        "headAtCapture"
+      ]
+    },
+    "generatedRoot": {
+      "type": "string",
+      "pattern": "^(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+$",
+      "not": {
+        "pattern": "(^|/)\\.\\.(/|$)"
+      }
+    },
+    "documents": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/document"
+      }
+    },
+    "modules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/module"
+      }
+    },
+    "sourceSets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/sourceSet"
+      }
+    },
+    "targets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/target"
+      }
+    },
+    "blueprints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+$",
+            "not": {
+              "pattern": "(^|/)\\.\\.(/|$)"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "path"
+        ]
+      }
+    },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "from": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "enum": [
+              "motivates",
+              "explains",
+              "plans-verification-for",
+              "records-authoring-evidence-for",
+              "extends",
+              "projects"
+            ]
+          },
+          "to": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "declared",
+              "planned"
+            ]
+          }
+        },
+        "required": [
+          "from",
+          "type",
+          "to",
+          "status"
+        ]
+      }
+    }
+  },
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "profile",
+    "project",
+    "generatedRoot",
+    "documents",
+    "modules",
+    "sourceSets",
+    "targets",
+    "blueprints",
+    "relations"
+  ],
+  "$defs": {
+    "document": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^SDP-[0-9]{2}-[0-9]{2}$"
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+$",
+          "not": {
+            "pattern": "(^|/)\\.\\.(/|$)"
+          }
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "authorized-direction",
+            "pilot",
+            "draft",
+            "inventory",
+            "planned",
+            "evidence"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "path",
+        "title",
+        "status"
+      ]
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "root": {
+          "const": "repository"
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+$",
+          "not": {
+            "pattern": "(^|/)\\.\\.(/|$)"
+          }
+        },
+        "symbol": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "root",
+        "path"
+      ]
+    },
+    "module": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "library",
+            "library-extension",
+            "adapter",
+            "test-support",
+            "external-tool"
+          ]
+        },
+        "implementation": {
+          "enum": [
+            "existing",
+            "planned"
+          ]
+        },
+        "document": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bindings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/binding"
+          }
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "kind",
+        "implementation",
+        "document",
+        "bindings",
+        "evidence"
+      ]
+    },
+    "sourceSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "language": {
+          "type": "string",
+          "minLength": 1
+        },
+        "profile": {
+          "type": "string",
+          "minLength": 1
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+$",
+            "not": {
+              "pattern": "(^|/)\\.\\.(/|$)"
+            }
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "entryPoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "path": {
+                "type": "string",
+                "pattern": "^(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+$",
+                "not": {
+                  "pattern": "(^|/)\\.\\.(/|$)"
+                }
+              },
+              "system": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "path",
+              "system"
+            ]
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "id",
+        "language",
+        "profile",
+        "members",
+        "entryPoints"
+      ]
+    },
+    "runner": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "root": {
+          "enum": [
+            "repository",
+            "sdp"
+          ]
+        },
+        "argv": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "root",
+        "argv"
+      ]
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "parse",
+            "compile",
+            "run",
+            "test",
+            "generate",
+            "blueprint"
+          ]
+        },
+        "module": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "enum": [
+            "bound",
+            "blocked"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "runner": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/runner"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "requires": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+$",
+            "not": {
+              "pattern": "(^|/)\\.\\.(/|$)"
+            }
+          }
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "kind",
+        "module",
+        "state",
+        "reason",
+        "runner",
+        "requires",
+        "outputs",
+        "evidence"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "blocked"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "runner": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "runner": {
+                "$ref": "#/$defs/runner"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "blueprint": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schemaVersion": {
+          "const": "0.1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "document": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "abstractionLevel": {
+              "enum": [
+                "need",
+                "functional-intent",
+                "system-architecture",
+                "container-design",
+                "detailed-design",
+                "behavior",
+                "realization"
+              ]
+            },
+            "rootModule": {
+              "type": "string",
+              "minLength": 1
+            },
+            "requirements": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "required": [
+            "abstractionLevel",
+            "rootModule",
+            "requirements"
+          ]
+        },
+        "sources": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "documents": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "sourceSets": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "required": [
+            "documents",
+            "sourceSets"
+          ]
+        },
+        "projection": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "format": {
+              "enum": [
+                "mermaid",
+                "boxui-source"
+              ]
+            },
+            "diagramFamily": {
+              "type": "string",
+              "minLength": 1
+            },
+            "profile": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rulesDocument": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "format",
+            "diagramFamily",
+            "profile",
+            "rulesDocument"
+          ]
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "output": {
+          "type": "string",
+          "pattern": "^(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+$",
+          "not": {
+            "pattern": "(^|/)\\.\\.(/|$)"
+          }
+        },
+        "state": {
+          "enum": [
+            "bound",
+            "blocked"
+          ]
+        },
+        "blockers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "provenanceRequired": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "$schema",
+        "schemaVersion",
+        "id",
+        "title",
+        "document",
+        "scope",
+        "sources",
+        "projection",
+        "target",
+        "output",
+        "state",
+        "blockers",
+        "provenanceRequired"
+      ]
+    }
+  }
+}
+
