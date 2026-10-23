@@ -62,10 +62,15 @@ pub(super) fn routes(input: &RoutingInput, routes: &[Route]) -> Result<(), Routi
             .windows(2)
             .any(|s| (s[0].0 - s[1].0).abs() > 0.01 && (s[0].1 - s[1].1).abs() > 0.01)
         {
-            return Err(RoutingError::Backend(format!(
-                "non-orthogonal edge {} {:?}",
-                r.id, r.points
-            )));
+            let message = format!("non-orthogonal edge {} {:?}", r.id, r.points);
+            // Libavoid emits a direct endpoint-to-endpoint path when no route
+            // exists. It is still invalid geometry: frozen-position callers
+            // fail, while fresh placement may use its one bounded space retry.
+            return Err(if r.points.len() == 2 {
+                RoutingError::NoSpace(message)
+            } else {
+                RoutingError::Backend(message)
+            });
         }
         let e = input.connections.iter().find(|e| e.id == r.id).unwrap();
         let source = input.obstacles.iter().find(|o| o.id == e.source).unwrap();

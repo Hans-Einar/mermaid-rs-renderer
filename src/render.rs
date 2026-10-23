@@ -259,7 +259,7 @@ fn render_svg_internal(
     };
     let is_sequence = seq_data.is_some();
     let is_state = layout.kind == crate::ir::DiagramKind::State;
-    let is_class = layout.kind == crate::ir::DiagramKind::Class;
+    let is_class = matches!(layout.kind, crate::ir::DiagramKind::Class | crate::ir::DiagramKind::UseCase);
     let is_c4 = matches!(layout.diagram, DiagramData::C4(_));
     let has_links = is_c4
         || layout.nodes.values().any(|node| node.link.is_some())
@@ -396,6 +396,14 @@ fn render_svg_internal(
             svg.push_str(&format!(
                 "<marker id=\"arrow-state-{idx}\" viewBox=\"0 0 20 14\" refX=\"19\" refY=\"7\" markerUnits=\"userSpaceOnUse\" markerWidth=\"20\" markerHeight=\"14\" orient=\"auto\"><path d=\"M 19 7 L 9 13 L 14 7 L 9 1 Z\" fill=\"{}\" stroke=\"{}\" stroke-width=\"1\" stroke-dasharray=\"1,0\"/></marker>",
                 color, color
+            ));
+        }
+        if layout.kind == crate::ir::DiagramKind::UseCase {
+            svg.push_str(&format!(
+                "<marker id=\"arrow-usecase-{idx}\" viewBox=\"0 0 12 12\" refX=\"11\" refY=\"6\" markerUnits=\"userSpaceOnUse\" markerWidth=\"12\" markerHeight=\"12\" orient=\"auto\"><path d=\"M 1 1 L 11 6 L 1 11\" fill=\"none\" stroke=\"{color}\" stroke-width=\"1.2\"/></marker>"
+            ));
+            svg.push_str(&format!(
+                "<marker id=\"arrow-usecase-start-{idx}\" viewBox=\"0 0 12 12\" refX=\"1\" refY=\"6\" markerUnits=\"userSpaceOnUse\" markerWidth=\"12\" markerHeight=\"12\" orient=\"auto\"><path d=\"M 11 1 L 1 6 L 11 11\" fill=\"none\" stroke=\"{color}\" stroke-width=\"1.2\"/></marker>"
             ));
         }
         if is_class {
@@ -1115,6 +1123,10 @@ fn render_svg_internal(
                     crate::ir::DiagramKind::State => {
                         format!("marker-end=\"url(#arrow-state-{marker_id})\"")
                     }
+                    crate::ir::DiagramKind::UseCase => match edge.arrow_end_kind {
+                        Some(crate::ir::EdgeArrowhead::OpenTriangle) => format!("marker-end=\"url(#arrow-class-open-{marker_id})\""),
+                        _ => format!("marker-end=\"url(#arrow-usecase-{marker_id})\""),
+                    },
                     crate::ir::DiagramKind::Class => match edge.arrow_end_kind {
                         Some(crate::ir::EdgeArrowhead::OpenTriangle) => {
                             format!("marker-end=\"url(#arrow-class-open-{marker_id})\"")
@@ -1137,6 +1149,10 @@ fn render_svg_internal(
                     crate::ir::DiagramKind::State => {
                         format!("marker-start=\"url(#arrow-state-{marker_id})\"")
                     }
+                    crate::ir::DiagramKind::UseCase => match edge.arrow_start_kind {
+                        Some(crate::ir::EdgeArrowhead::OpenTriangle) => format!("marker-start=\"url(#arrow-class-open-start-{marker_id})\""),
+                        _ => format!("marker-start=\"url(#arrow-usecase-start-{marker_id})\""),
+                    },
                     crate::ir::DiagramKind::Class => match edge.arrow_start_kind {
                         Some(crate::ir::EdgeArrowhead::OpenTriangle) => {
                             format!("marker-start=\"url(#arrow-class-open-start-{marker_id})\"")
@@ -1478,7 +1494,9 @@ fn render_svg_internal(
                 svg.push_str(&divider_lines_svg(node, theme, divider_line_height));
             }
             let center_x = node.x + node.width / 2.0;
-            let center_y = node.y + node.height / 2.0;
+            let center_y = if node.shape == crate::ir::NodeShape::UseCaseActor {
+                node.y + node.height - 12. - node.label.height / 2.
+            } else { node.y + node.height / 2.0 };
             let hide_label = node.label.lines.iter().all(|line| line.trim().is_empty())
                 || node.id.starts_with("__start_")
                 || node.id.starts_with("__end_");
@@ -6265,6 +6283,11 @@ fn shape_svg(node: &crate::layout::NodeLayout, theme: &Theme, config: &LayoutCon
             fill,
             stroke,
             node.style.stroke_width.unwrap_or(1.0)
+        ),
+        crate::ir::NodeShape::UseCaseActor => sequence_actor_svg(node, theme).replace("sequence-actor", "usecase-actor"),
+        crate::ir::NodeShape::Ellipse => format!(
+            "<ellipse class=\"usecase-ellipse\" cx=\"{}\" cy=\"{}\" rx=\"{}\" ry=\"{}\" fill=\"{fill}\" stroke=\"{stroke}\" stroke-width=\"1\"/>",
+            x + w / 2., y + h / 2., w / 2., h / 2.
         ),
         crate::ir::NodeShape::ActorBox => format!(
             "<rect x=\"{:.2}\" y=\"{:.2}\" width=\"{:.2}\" height=\"{:.2}\" rx=\"3\" ry=\"3\" fill=\"{}\" stroke=\"{}\" stroke-width=\"{}\"{dash}{join}/>",

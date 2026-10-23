@@ -88,6 +88,7 @@ pub(super) fn shape_polygon_points(node: &NodeLayout) -> Option<Vec<(f32, f32)>>
         | NodeShape::ForkJoin
         | NodeShape::RoundRect
         | NodeShape::ActorBox
+        | NodeShape::UseCaseActor
         | NodeShape::Stadium
         | NodeShape::Subroutine
         | NodeShape::Text
@@ -158,6 +159,10 @@ pub(super) fn shape_polygon_points(node: &NodeLayout) -> Option<Vec<(f32, f32)>>
                 (x, y + h),
             ])
         }
+        NodeShape::Ellipse => Some((0..64).map(|i| {
+            let angle = i as f32 * std::f32::consts::TAU / 64.;
+            (x + w * (1. + angle.cos()) / 2., y + h * (1. + angle.sin()) / 2.)
+        }).collect()),
         NodeShape::Circle | NodeShape::DoubleCircle | NodeShape::Cylinder => None,
     }
 }

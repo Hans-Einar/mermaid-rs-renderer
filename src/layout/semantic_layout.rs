@@ -12,7 +12,11 @@ pub fn compute_semantic_layout(
     use crate::ir::DiagramKind;
     if !matches!(
         graph.kind,
-        DiagramKind::Class | DiagramKind::State | DiagramKind::Er | DiagramKind::Requirement
+        DiagramKind::Class
+            | DiagramKind::State
+            | DiagramKind::Er
+            | DiagramKind::Requirement
+            | DiagramKind::UseCase
     ) {
         return Err(crate::routing_backend::RoutingError::InvalidInput(
             "not a semantic graph family".into(),
@@ -23,10 +27,11 @@ pub fn compute_semantic_layout(
     selected.flowchart.auto_spacing.enabled = false;
     for attempt in 0..2 {
         let mut native = compute_layout(graph, theme, &selected);
-        if !graph.subgraphs.is_empty() {
+        control.check()?;
+        if !graph.subgraphs.is_empty() && graph.kind != DiagramKind::UseCase {
             return Ok((
                 native,
-                vec!["native composite state routing (group endpoints)".into()],
+                vec!["native composite semantic routing (group endpoints)".into()],
             ));
         }
         if graph.kind == DiagramKind::State {

@@ -26,7 +26,10 @@ pub(in crate::layout) fn apply_flowchart_node_layout_cleanup(
     theme: &Theme,
     config: &LayoutConfig,
 ) {
-    if graph.kind != crate::ir::DiagramKind::Flowchart {
+    if !matches!(
+        graph.kind,
+        crate::ir::DiagramKind::Flowchart | crate::ir::DiagramKind::UseCase
+    ) {
         return;
     }
 
@@ -55,7 +58,11 @@ pub(in crate::layout) fn evict_non_member_nodes_from_subgraphs(
     theme: &Theme,
     config: &LayoutConfig,
 ) {
-    if graph.kind != crate::ir::DiagramKind::Flowchart || graph.subgraphs.is_empty() {
+    if !matches!(
+        graph.kind,
+        crate::ir::DiagramKind::Flowchart | crate::ir::DiagramKind::UseCase
+    ) || graph.subgraphs.is_empty()
+    {
         return;
     }
 
@@ -172,7 +179,10 @@ pub(in crate::layout) fn debug_assert_flowchart_node_layout_invariants(
     graph: &Graph,
     nodes: &BTreeMap<String, NodeLayout>,
 ) {
-    if graph.kind != crate::ir::DiagramKind::Flowchart {
+    if !matches!(
+        graph.kind,
+        crate::ir::DiagramKind::Flowchart | crate::ir::DiagramKind::UseCase
+    ) {
         return;
     }
 
@@ -278,7 +288,11 @@ pub(in crate::layout) fn compress_linear_subgraphs(
     nodes: &mut BTreeMap<String, NodeLayout>,
     config: &LayoutConfig,
 ) {
-    if graph.kind != crate::ir::DiagramKind::Flowchart || graph.subgraphs.is_empty() {
+    if !matches!(
+        graph.kind,
+        crate::ir::DiagramKind::Flowchart | crate::ir::DiagramKind::UseCase
+    ) || graph.subgraphs.is_empty()
+    {
         return;
     }
     let gap = config.flowchart.auto_spacing.min_spacing;
@@ -377,7 +391,11 @@ pub(in crate::layout) fn enforce_top_level_subgraph_gap(
     theme: &Theme,
     config: &LayoutConfig,
 ) {
-    if graph.kind != crate::ir::DiagramKind::Flowchart || graph.subgraphs.len() < 2 {
+    if !matches!(
+        graph.kind,
+        crate::ir::DiagramKind::Flowchart | crate::ir::DiagramKind::UseCase
+    ) || graph.subgraphs.len() < 2
+    {
         return;
     }
 
@@ -683,7 +701,11 @@ pub(in crate::layout) fn align_disconnected_top_level_subgraphs(
     graph: &Graph,
     nodes: &mut BTreeMap<String, NodeLayout>,
 ) {
-    if graph.kind != crate::ir::DiagramKind::Flowchart || graph.subgraphs.len() < 2 {
+    if !matches!(
+        graph.kind,
+        crate::ir::DiagramKind::Flowchart | crate::ir::DiagramKind::UseCase
+    ) || graph.subgraphs.len() < 2
+    {
         return;
     }
 
@@ -853,7 +875,11 @@ pub(in crate::layout) fn align_single_entry_top_level_subgraphs(
     nodes: &mut BTreeMap<String, NodeLayout>,
     config: &LayoutConfig,
 ) {
-    if graph.kind != crate::ir::DiagramKind::Flowchart || graph.subgraphs.is_empty() {
+    if !matches!(
+        graph.kind,
+        crate::ir::DiagramKind::Flowchart | crate::ir::DiagramKind::UseCase
+    ) || graph.subgraphs.is_empty()
+    {
         return;
     }
 
@@ -964,7 +990,11 @@ pub(in crate::layout) fn align_disconnected_components(
     nodes: &mut BTreeMap<String, NodeLayout>,
     config: &LayoutConfig,
 ) {
-    if graph.kind != crate::ir::DiagramKind::Flowchart || !graph.subgraphs.is_empty() {
+    if !matches!(
+        graph.kind,
+        crate::ir::DiagramKind::Flowchart | crate::ir::DiagramKind::UseCase
+    ) || !graph.subgraphs.is_empty()
+    {
         return;
     }
 

@@ -65,6 +65,22 @@ pub fn compute(
             expanded.flowchart.auto_spacing.enabled = false;
             expanded.node_spacing = config.node_spacing.max(50.) * 2. + 24.;
             expanded.rank_spacing = config.rank_spacing.max(50.) * 2. + 24.;
+            // Leave room for opposed captions in the one fresh-placement retry.
+            // Fixed spacing alone can keep long measured labels trapped between
+            // parallel connections even after the geometry has been expanded.
+            let horizontal = matches!(
+                graph.direction,
+                crate::Direction::LeftRight | crate::Direction::RightLeft
+            );
+            for label in layout.edges.iter().filter_map(|e| e.label.as_ref()) {
+                let (along, across) = if horizontal {
+                    (label.width, label.height)
+                } else {
+                    (label.height, label.width)
+                };
+                expanded.rank_spacing = expanded.rank_spacing.max(2. * (along + 8.) + 24.);
+                expanded.node_spacing = expanded.node_spacing.max(2. * (across + 8.) + 24.);
+            }
             let layout = super::compute_flowchart_layout(&graph, theme, &expanded, None, false);
             control.check()?;
             let mut r = route_positioned(&layout, control)?;
